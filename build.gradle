@@ -1,0 +1,19 @@
+// apply plugin: 'artifactory'
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+group = 'com.ullink'
+version = '1.0'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile 'net.java.dev.jna:jna:3.5.0'
+    compile 'net.java.dev.jna:platform:3.5.0'
+    compile gradleApi()
+    groovy localGroovy()
+    testCompile 'junit:junit:4.8.2'
+}
