@@ -1,8 +1,7 @@
-// apply plugin: 'artifactory'
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
-group = 'com.ullink'
+group = 'com.ullink.gradle'
 version = '1.0'
 
 repositories {
