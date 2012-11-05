@@ -18,12 +18,18 @@ OutputPath (e.g. bin/Debug) & Intermediary (e.g. obj/Debug) are set as output di
 
 Sample usage:
 
-    apply plugin:'msbuild'
-
-    repositories {
-      mavenCentral()
+    buildscript {
+        repositories {
+          mavenCentral()
+        }
+    
+        dependencies {
+            classpath "com.ullink.gradle:gradle-msbuild-plugin:1.1"
+        }
     }
     
+    apply plugin:'msbuild'
+
     msbuild {
       // mandatory
       projectFile = 'my-project.csproj'
