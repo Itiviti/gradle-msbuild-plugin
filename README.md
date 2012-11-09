@@ -1,4 +1,4 @@
-# Gradle MsBuild Plugin
+# Gradle MsBuild Plugin [![Build Status](https://buildhive.cloudbees.com/job/gluck/job/gradle-msbuild-plugin/badge/icon)](https://buildhive.cloudbees.com/job/gluck/job/gradle-msbuild-plugin/)
 
 This plugin allows to compile an MsBuild project.
 It also supports project file parsing, and some basic up-to-date checks to skip the build.
@@ -63,4 +63,4 @@ Sample usage:
 
 # License
 
-All these plugins are licensed under the [Creative Commons — CC0 1.0 Universal](http://creativecommons.org/publicdomain/zero/1.0/) license with no warranty (expressed or implied) for any purpose.
+All these plugins are licensed under the [Creative Commons ï¿½ CC0 1.0 Universal](http://creativecommons.org/publicdomain/zero/1.0/) license with no warranty (expressed or implied) for any purpose.
