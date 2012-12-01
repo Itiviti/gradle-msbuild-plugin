@@ -150,7 +150,7 @@ class Msbuild extends ConventionTask {
         }
     }
 
-    private Map getInitProperties() {
+    Map getInitProperties() {
         def cmdParameters = new HashMap<String, String>()
         if (parameters != null) {
             cmdParameters.putAll(parameters)
