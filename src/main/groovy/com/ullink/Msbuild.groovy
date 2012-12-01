@@ -28,9 +28,11 @@ class Msbuild extends ConventionTask {
     ProjectFileParser parser
     List<String> targets
     String verbosity
-    Map<String,String> parameters = new HashMap<String, String>()
+    Map<String,String> parameters = [:]
+	Map<String, ProjectFileParser> projects = [:]
     
     Msbuild() {
+		description = 'Executes MSBuild on the specified project/solution'
         (version == null ? ["4.0", "3.5","2.0"] : [version]).find { x ->
             trySetMsbuild(MSBUILD_WOW6432_PREFIX + x) || trySetMsbuild(MSBUILD_WOW6432_PREFIX + x)
         }
@@ -53,12 +55,21 @@ class Msbuild extends ConventionTask {
                 parser.gatherInputs()
             }
         }
+		outputs.upToDateWhen {
+			resolveProject()
+		}
         outputs.dir {
             if (resolveProject()) {
                 parser.getOutputDirs()
             }
         }
     }
+	
+	ProjectFileParser getMainProject() {
+        if (resolveProject()) {
+            parser
+        }
+	}
     
     boolean trySetMsbuild(String key) {
         def v = Registry.getValue(Registry.HKEY_LOCAL_MACHINE, key, MSBUILD_TOOLS_PATH)
@@ -70,11 +81,16 @@ class Msbuild extends ConventionTask {
     }
     
     boolean resolveProject() {
-        if (parser == null && getProjectFile() != null) {
-            parser = new ProjectFileParser(project: project, projectFile: getProjectFile())
-            parser.properties.putAll getProperties()
-            parser.readProjectFile()
-            if (logger.debugEnabled) {
+        if (parser == null) {
+			if (getProjectFile() != null) {
+	            parser = new ProjectFileParser(msbuild: this, projectFile: getProjectFile(), initProperties: { getInitProperties() })
+	            parser.readProjectFile()
+			} else if (getSolutionFile() != null) {
+			    def solParser = new SolutionFileParser(msbuild: this, solutionFile: getSolutionFile(), properties: getInitProperties())
+				solParser.readSolutionFile()
+	            parser = solParser.initProjectParser
+			}
+			if (parser != null && logger.debugEnabled) {
                 logger.debug "Resolved Msbuild properties:"
                 parser.properties.sort({ a,b->a.key <=> b.key }).each({ logger.debug it.toString() })
                 logger.debug "Resolved Msbuild items:"
@@ -121,7 +137,7 @@ class Msbuild extends ConventionTask {
             commandLineArgs += '/v:'+verb
         }
 
-        def cmdParameters = getProperties()
+        def cmdParameters = getInitProperties()
         
         cmdParameters.each {
             if (it.value) {
@@ -134,7 +150,7 @@ class Msbuild extends ConventionTask {
         }
     }
 
-    private HashMap getProperties() {
+    private Map getInitProperties() {
         def cmdParameters = new HashMap<String, String>()
         if (parameters != null) {
             cmdParameters.putAll(parameters)

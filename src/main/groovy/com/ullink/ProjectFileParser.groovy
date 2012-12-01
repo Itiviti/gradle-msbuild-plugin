@@ -6,16 +6,30 @@ import org.gradle.api.logging.Logger
 
 // http://msdn.microsoft.com/en-us/library/5dy88c2e.aspx
 class ProjectFileParser {
-    Project project
+	Msbuild msbuild
     String projectFile
     String version
     Map<String, Object> properties = new HashMap<String, Object>()
     Map<String, List<Map>> items = new HashMap<String, List<Map>>()
+	Closure initProperties
     
     void readProjectFile() {
         def file = findImportFile(project.projectDir, projectFile)
+		if (initProperties) {
+			def ret = initProperties(file)
+			if (ret) {
+				properties.putAll ret
+			}
+		}
+		def name = getFileNameWithoutExtension(file)
+		logger.info("Reading project ${name} with properties: ${properties}")
+		msbuild.projects[name] = this
         importProjectFile(file)
     }
+	
+	Project getProject() {
+		msbuild.project
+	}
     
     File findProjectFile(String str) {
         findImportFile(properties.MSBuildProjectFullPath.parentFile, str)
@@ -25,16 +39,23 @@ class ProjectFileParser {
         project.logger
     }
     
-    Collection<File> getOutputDirs() {
-        ['IntermediateOutputPath', 'OutputPath'].findResults {
-            if (properties[it]) {
-                findProjectFile(properties[it])
-            }
+    File getProjectPropertyPath(String path) {
+        if (properties[path]) {
+            findProjectFile(properties[path])
         }
+    }
+	
+	String getFileNameWithoutExtension(def file) {
+		String s = file instanceof File ? file.name : new File(file.toString()).name
+		s.replaceFirst(~/(?<=.)\.[^\.]+$/, '')
+	}
+    
+    Collection<File> getOutputDirs() {
+        ['IntermediateOutputPath', 'OutputPath'].findResults { getProjectPropertyPath(it) }
     }
     
     Collection<File> gatherInputs() {
-        Set<File> ret = []
+        Set<File> ret = [findImportFile(project.projectDir, projectFile)]
         ['Compile','EmbeddedResource','None','Content'].each {
             items[it].each {
                 // TODO: support wildcards
@@ -42,8 +63,15 @@ class ProjectFileParser {
             }
         }
         items.ProjectReference.each {
-            def parser = new ProjectFileParser(project: project, projectFile: findProjectFile(it.Include).canonicalPath)
-            parser.readProjectFile()
+			def file = findProjectFile(it.Include).canonicalPath
+			def name = getFileNameWithoutExtension(file)
+			def parser
+			if (msbuild.projects[name]) {
+				parser = msbuild.projects[name]
+			} else {
+            	parser = new ProjectFileParser(msbuild: msbuild, projectFile: file, initProperties: initProperties)
+            	parser.readProjectFile()
+			}
             ret.addAll parser.gatherInputs()
         }
         items.Reference.each {
@@ -54,7 +82,7 @@ class ProjectFileParser {
         ret
     }
     
-    File findImportFile(File baseDir, String s) {
+    static File findImportFile(File baseDir, String s) {
         def file = new File(s)
         if (!file.isAbsolute()) {
             file = new File(baseDir, s)
@@ -68,7 +96,7 @@ class ProjectFileParser {
         properties.MSBuildThisFile = file.name
         properties.MSBuildThisFileDirectory = file.parentFile
         properties.MSBuildThisFileDirectoryNoRoot = file.parentFile.canonicalPath.substring(3)
-        properties.MSBuildThisFileName = file.name.replaceFirst(~/(?<=.)\.[^\.]+$/, '')
+        properties.MSBuildThisFileName = getFileNameWithoutExtension(file)
         properties.MSBuildThisFileExtension = file.name.replaceFirst(~/^.+(?=\.)/, '')
         def xml = new XmlSlurper().parse(file)
         if (version == null) {
@@ -174,6 +202,7 @@ class ProjectFileParser {
     boolean parsePropertiesAndItems(GPathResult node) {
         if (node.name() == "PropertyGroup") {
             eachFilterCondition node.children(), {
+				logger.debug("[${properties.MSBuildProjectFile}] Set property ${it.name()} = ${eval(it)}")
                 properties[it.name()] = eval(it)
             }
             return true
