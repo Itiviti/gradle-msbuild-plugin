@@ -1,94 +1,13 @@
-apply plugin: 'groovy'
-apply plugin: 'maven'
-apply plugin: 'signing'
+ext.ullinkGradleScripts = 'https://raw.github.com/gluck/gradle-scripts/master'
+apply from: "${ext.ullinkGradleScripts}/task-rules.gradle"
+apply from: "${ext.ullinkGradleScripts}/functions.gradle"
+apply from: "${ext.ullinkGradleScripts}/ullink-gradle-plugin-base.gradle"
 
-group = 'com.ullink.gradle'
-version = '1.1'
-
-def customizePom(pom) {
-    pom.project {
-        name project.name
-        description 'gradle-msbuild-plugin is a Gradle plugin for MSBuild project build'
-        url 'http://github.com/gluck/gradle-msbuild-plugin'
-     
-        scm {
-            url 'scm:git@github.com:gluck/gradle-msbuild-plugin.git'
-            connection 'scm:git@github.com:gluck/gradle-msbuild-plugin.git'
-            developerConnection 'scm:git@github.com:gluck/gradle-msbuild-plugin.git'
-        }
-    
-        licenses {
-            license {
-                name 'Creative Commons — CC0 1.0 Universal'
-                url 'http://creativecommons.org/publicdomain/zero/1.0/'
-                distribution 'repo'
-            }
-        }
-    
-        developers {
-            developer {
-                id 'fvaldy'
-                name 'Francois Valdy'
-            }
-        }
-    }
-}
-
-def setupUploadArchives(sonatypeRepositoryUrl) {
-    signing {
-        sign configurations.archives
-    }
-    
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-                repository(url: sonatypeRepositoryUrl) {
-                  authentication(userName: sonatypeUsername, password: sonatypePassword)
-                }
-                customizePom pom
-            }
-        }
-    }
-}
-
-if (hasProperty("release")) {
-    setupUploadArchives("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-} else {
-    version += "-SNAPSHOT"
-    if (hasProperty("snapshot")) {
-        setupUploadArchives("https://oss.sonatype.org/content/repositories/snapshots/")
-    }
-}
-
-customizePom install.repositories.mavenInstaller.pom
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
+version = '1.2'
+description 'gradle-msbuild-plugin is a Gradle plugin for MSBuild project build'
 
 dependencies {
+	testCompile 'junit:junit:4.8.2'
     compile 'net.java.dev.jna:jna:3.5.0'
     compile 'net.java.dev.jna:platform:3.5.0'
-    compile gradleApi()
-    groovy localGroovy()
-    testCompile 'junit:junit:4.8.2'
 }
-
-task groovydocJar(type: Jar, dependsOn: groovydoc) {
-    classifier = 'javadoc'
-    from 'build/docs/groovydoc'
-}
-
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
-}
-
-artifacts {
-    archives jar
-    archives groovydocJar
-    archives sourcesJar
-}
-
