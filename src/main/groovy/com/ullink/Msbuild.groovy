@@ -44,9 +44,9 @@ class Msbuild extends ConventionTask {
         conventionMapping.map "projectFile", { project.file(project.name + ".csproj").exists() ? project.name + ".csproj" : null }
         conventionMapping.map "projectName", { project.name }
         inputs.files {
-            if (getSolutionFile() != null) {
+            if (isSolution()) {
                 project.file(getSolutionFile())
-            } else if (getProjectFile() != null) {
+            } else if (isProject()) {
                 project.file(getProjectFile())
             }
         }
@@ -65,6 +65,14 @@ class Msbuild extends ConventionTask {
         }
     }
 	
+	boolean isSolution() {
+		projectFile == null && getSolutionFile() != null
+	}
+	
+	boolean isProject() {
+		solutionFile == null && getProjectFile() != null
+	}
+	
 	ProjectFileParser getMainProject() {
         if (resolveProject()) {
             parser
@@ -82,13 +90,13 @@ class Msbuild extends ConventionTask {
     
     boolean resolveProject() {
         if (parser == null) {
-			if (getProjectFile() != null) {
-	            parser = new ProjectFileParser(msbuild: this, projectFile: getProjectFile(), initProperties: { getInitProperties() })
-	            parser.readProjectFile()
-			} else if (getSolutionFile() != null) {
+			if (isSolution()) {
 			    def solParser = new SolutionFileParser(msbuild: this, solutionFile: getSolutionFile(), properties: getInitProperties())
 				solParser.readSolutionFile()
 	            parser = solParser.initProjectParser
+			} else if (isProject()) {
+	            parser = new ProjectFileParser(msbuild: this, projectFile: getProjectFile(), initProperties: { getInitProperties() })
+	            parser.readProjectFile()
 			}
 			if (parser != null && logger.debugEnabled) {
                 logger.debug "Resolved Msbuild properties:"
