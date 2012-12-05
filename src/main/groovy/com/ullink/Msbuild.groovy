@@ -3,6 +3,7 @@ package com.ullink
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.StopActionException
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskOutputs
 
 class Msbuild extends ConventionTask {
     static final String MSBUILD_TOOLS_PATH = 'MSBuildToolsPath'
@@ -44,9 +45,9 @@ class Msbuild extends ConventionTask {
         conventionMapping.map "projectFile", { project.file(project.name + ".csproj").exists() ? project.name + ".csproj" : null }
         conventionMapping.map "projectName", { project.name }
         inputs.files {
-            if (isSolution()) {
+            if (isSolutionBuild()) {
                 project.file(getSolutionFile())
-            } else if (isProject()) {
+            } else if (isProjectBuild()) {
                 project.file(getProjectFile())
             }
         }
@@ -58,18 +59,21 @@ class Msbuild extends ConventionTask {
 		outputs.upToDateWhen {
 			resolveProject()
 		}
-        outputs.dir {
+        TaskOutputs output = outputs.dir {
             if (resolveProject()) {
-                parser.getOutputDirs()
+                parser.getOutputDirs().collect {
+					project.fileTree(dir: it, excludes: ['*.vshost.exe', '*.vshost.exe.*'] )
+				}
             }
         }
+		output
     }
 	
-	boolean isSolution() {
+	boolean isSolutionBuild() {
 		projectFile == null && getSolutionFile() != null
 	}
 	
-	boolean isProject() {
+	boolean isProjectBuild() {
 		solutionFile == null && getProjectFile() != null
 	}
 	
@@ -90,11 +94,11 @@ class Msbuild extends ConventionTask {
     
     boolean resolveProject() {
         if (parser == null) {
-			if (isSolution()) {
+			if (isSolutionBuild()) {
 			    def solParser = new SolutionFileParser(msbuild: this, solutionFile: getSolutionFile(), properties: getInitProperties())
 				solParser.readSolutionFile()
 	            parser = solParser.initProjectParser
-			} else if (isProject()) {
+			} else if (isProjectBuild()) {
 	            parser = new ProjectFileParser(msbuild: this, projectFile: getProjectFile(), initProperties: { getInitProperties() })
 	            parser.readProjectFile()
 			}
