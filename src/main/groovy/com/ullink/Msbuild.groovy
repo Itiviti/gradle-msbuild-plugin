@@ -33,9 +33,10 @@ class Msbuild extends ConventionTask {
 	Map<String, ProjectFileParser> projects = [:]
     
     Msbuild() {
-		description = 'Executes MSBuild on the specified project/solution'
+        description = 'Executes MSBuild on the specified project/solution'
         (version == null ? ["4.0", "3.5","2.0"] : [version]).find { x ->
-            trySetMsbuild(MSBUILD_WOW6432_PREFIX + x) || trySetMsbuild(MSBUILD_WOW6432_PREFIX + x)
+            trySetMsbuild(MSBUILD_WOW6432_PREFIX + x) ||
+            trySetMsbuild(MSBUILD_PREFIX + x)
         }
 
         if (msbuildDir == null) {

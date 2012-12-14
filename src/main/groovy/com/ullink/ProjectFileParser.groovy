@@ -188,7 +188,7 @@ class ProjectFileParser {
                 File folder = findImportFile(file.parentFile, str.substring(0, str.length()-2))
                 if (folder.isDirectory()) {
                     folder.eachFile {
-                        importProjectFile(findImportFile(file.parentFile, it))
+                        importProjectFile(it)
                     }
                 }
             } else {
