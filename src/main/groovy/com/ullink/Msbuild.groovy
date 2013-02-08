@@ -30,7 +30,7 @@ class Msbuild extends ConventionTask {
     ProjectFileParser parser
     List<String> targets
     String verbosity
-    Map<String,String> parameters = [:]
+    Map<String, Object> parameters = [:]
     Map<String, ProjectFileParser> projects = [:]
     
     Msbuild() {
@@ -165,7 +165,7 @@ class Msbuild extends ConventionTask {
     }
 
     Map getInitProperties() {
-        def cmdParameters = new HashMap<String, String>()
+        def cmdParameters = new HashMap<String, Object>()
         if (parameters != null) {
             cmdParameters.putAll(parameters)
         }
@@ -183,8 +183,13 @@ class Msbuild extends ConventionTask {
         }
         def iter = cmdParameters.iterator()
         while (iter.hasNext()) {
-            if (iter.next().value == null) {
+            Map.Entry<String, Object> entry = iter.next()
+            if (entry.value == null) {
                 iter.remove()
+            } else if (entry.value instanceof File) {
+                entry.value = entry.value.path
+            } else if (!entry.value instanceof String) {
+                entry.value = entry.value.toString()
             }
         }
         ['OutDir', 'OutputPath', 'BaseIntermediateOutputPath', 'IntermediateOutputPath', 'PublishDir'].each {
