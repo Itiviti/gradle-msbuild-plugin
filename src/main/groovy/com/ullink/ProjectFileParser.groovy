@@ -6,33 +6,38 @@ import org.gradle.api.logging.Logger
 
 // http://msdn.microsoft.com/en-us/library/5dy88c2e.aspx
 class ProjectFileParser {
-	Msbuild msbuild
+    Msbuild msbuild
     String projectFile
     String version
+    Map<String, Object> globalProperties = new HashMap<String, Object>()
     Map<String, Object> properties = new HashMap<String, Object>()
     Map<String, List<Map>> items = new HashMap<String, List<Map>>()
-	Closure initProperties
+    Closure initProperties
     
     void readProjectFile() {
         def file = findImportFile(project.projectDir, projectFile)
-		if (initProperties) {
-			def ret = initProperties(file)
-			if (ret) {
-				properties.putAll ret
-			}
-		}
-		def name = getFileNameWithoutExtension(file)
-		logger.info("Reading project ${name} with properties: ${properties}")
-		msbuild.projects[name] = this
+        if (initProperties) {
+            globalProperties = initProperties(file)
+        }
+        def name = getFileNameWithoutExtension(file)
+        logger.info("Reading project ${name} with properties: ${globalProperties}")
+        msbuild.projects[name] = this
         importProjectFile(file)
     }
-	
-	Project getProject() {
-		msbuild.project
-	}
+    
+    Object getProp(String key) {
+        if (globalProperties[key]) {
+            return globalProperties[key];
+        }
+        return properties[key];
+    }
+    
+    Project getProject() {
+        msbuild.project
+    }
     
     File findProjectFile(String str) {
-        findImportFile(properties.MSBuildProjectFullPath.parentFile, str)
+        findImportFile(getProp('MSBuildProjectFullPath').parentFile, str)
     }
     
     Logger getLogger() {
@@ -40,15 +45,15 @@ class ProjectFileParser {
     }
     
     File getProjectPropertyPath(String path) {
-        if (properties[path]) {
-            findProjectFile(properties[path])
+        if (getProp(path)) {
+            findProjectFile(getProp(path))
         }
     }
-	
-	String getFileNameWithoutExtension(def file) {
-		String s = file instanceof File ? file.name : new File(file.toString()).name
-		s.replaceFirst(~/(?<=.)\.[^\.]+$/, '')
-	}
+    
+    String getFileNameWithoutExtension(def file) {
+        String s = file instanceof File ? file.name : new File(file.toString()).name
+        s.replaceFirst(~/(?<=.)\.[^\.]+$/, '')
+    }
     
     Collection<File> getOutputDirs() {
         ['IntermediateOutputPath', 'OutputPath'].findResults { getProjectPropertyPath(it) }
@@ -63,15 +68,15 @@ class ProjectFileParser {
             }
         }
         items.ProjectReference.each {
-			def file = findProjectFile(it.Include).canonicalPath
-			def name = getFileNameWithoutExtension(file)
-			def parser
-			if (msbuild.projects[name]) {
-				parser = msbuild.projects[name]
-			} else {
-            	parser = new ProjectFileParser(msbuild: msbuild, projectFile: file, initProperties: initProperties)
-            	parser.readProjectFile()
-			}
+            def file = findProjectFile(it.Include).canonicalPath
+            def name = getFileNameWithoutExtension(file)
+            def parser
+            if (msbuild.projects[name]) {
+                parser = msbuild.projects[name]
+            } else {
+                parser = new ProjectFileParser(msbuild: msbuild, projectFile: file, initProperties: initProperties)
+                parser.readProjectFile()
+            }
             ret.addAll parser.gatherInputs()
         }
         items.Reference.each {
@@ -91,37 +96,37 @@ class ProjectFileParser {
     }
     
     void importProjectFile(File file) {
-        def prevFile = properties.MSBuildThisFileFullPath
-        properties.MSBuildThisFileFullPath = file
-        properties.MSBuildThisFile = file.name
-        properties.MSBuildThisFileDirectory = file.parentFile
-        properties.MSBuildThisFileDirectoryNoRoot = file.parentFile.canonicalPath.substring(3)
-        properties.MSBuildThisFileName = getFileNameWithoutExtension(file)
-        properties.MSBuildThisFileExtension = file.name.replaceFirst(~/^.+(?=\.)/, '')
+        def prevFile = globalProperties.MSBuildThisFileFullPath
+        globalProperties.MSBuildThisFileFullPath = file
+        globalProperties.MSBuildThisFile = file.name
+        globalProperties.MSBuildThisFileDirectory = file.parentFile
+        globalProperties.MSBuildThisFileDirectoryNoRoot = file.parentFile.canonicalPath.substring(3)
+        globalProperties.MSBuildThisFileName = getFileNameWithoutExtension(file)
+        globalProperties.MSBuildThisFileExtension = file.name.replaceFirst(~/^.+(?=\.)/, '')
         def xml = new XmlSlurper().parse(file)
         if (version == null) {
             version = !xml.@ToolsVersion.isEmpty() ? xml.@ToolsVersion.toString() : "4.0"
         }
-        if (properties.MSBuildToolsVersion == null) {
-            properties.BuildingInsideVisualStudio = ''
-            properties.MSBuildToolsVersion = version
-            properties.MSBuildToolsPath = properties.MSBuildBinPath = Registry.getValue(Registry.HKEY_LOCAL_MACHINE, Msbuild.MSBUILD_PREFIX+version, Msbuild.MSBUILD_TOOLS_PATH)
+        if (globalProperties.MSBuildToolsVersion == null) {
+            globalProperties.BuildingInsideVisualStudio = ''
+            globalProperties.MSBuildToolsVersion = version
+            globalProperties.MSBuildToolsPath = globalProperties.MSBuildBinPath = Registry.getValue(Registry.HKEY_LOCAL_MACHINE, Msbuild.MSBUILD_PREFIX+version, Msbuild.MSBUILD_TOOLS_PATH)
             if (System.getenv()['ProgramFiles(x86)']) {
-                properties.MSBuildExtensionsPath32 = System.getenv()['ProgramFiles(x86)']+/\MSBuild/
-                properties.MSBuildExtensionsPath64 = System.getenv()['ProgramFiles']+/\MSBuild/
-                properties.MSBuildExtensionsPath = System.getenv()['ProgramFiles']+/\MSBuild/
-                properties.MSBuildProgramFiles32 = System.getenv()['ProgramFiles(x86)']
+                globalProperties.MSBuildExtensionsPath32 = System.getenv()['ProgramFiles(x86)']+/\MSBuild/
+                globalProperties.MSBuildExtensionsPath64 = System.getenv()['ProgramFiles']+/\MSBuild/
+                globalProperties.MSBuildExtensionsPath = System.getenv()['ProgramFiles']+/\MSBuild/
+                globalProperties.MSBuildProgramFiles32 = System.getenv()['ProgramFiles(x86)']
             } else {
-                properties.MSBuildExtensionsPath32 = System.getenv()['ProgramFiles']+/\MSBuild/
-                properties.MSBuildExtensionsPath = System.getenv()['ProgramFiles']+/\MSBuild/
-                properties.MSBuildProgramFiles32 = System.getenv()['ProgramFiles']
+                globalProperties.MSBuildExtensionsPath32 = System.getenv()['ProgramFiles']+/\MSBuild/
+                globalProperties.MSBuildExtensionsPath = System.getenv()['ProgramFiles']+/\MSBuild/
+                globalProperties.MSBuildProgramFiles32 = System.getenv()['ProgramFiles']
             }
-            properties.MSBuildProjectFullPath = file
-            properties.MSBuildProjectFile = file.name
-            properties.MSBuildProjectDirectory = properties.MSBuildThisFileDirectory
-            properties.MSBuildProjectDirectoryNoRoot = properties.MSBuildThisFileDirectoryNoRoot
-            properties.MSBuildProjectName = properties.MSBuildThisFileName
-            properties.MSBuildProjectExtension = properties.MSBuildThisFileExtension
+            globalProperties.MSBuildProjectFullPath = file
+            globalProperties.MSBuildProjectFile = file.name
+            globalProperties.MSBuildProjectDirectory = globalProperties.MSBuildThisFileDirectory
+            globalProperties.MSBuildProjectDirectoryNoRoot = globalProperties.MSBuildThisFileDirectoryNoRoot
+            globalProperties.MSBuildProjectName = globalProperties.MSBuildThisFileName
+            globalProperties.MSBuildProjectExtension = globalProperties.MSBuildThisFileExtension
             // TODO
             // MSBuildStartupDirectory
             // MSBuildProjectDefaultTargets
@@ -172,12 +177,12 @@ class ProjectFileParser {
             }
         }
         if (prevFile) {
-            properties.MSBuildThisFileFullPath = prevFile
-            properties.MSBuildThisFile = prevFile.name
-            properties.MSBuildThisFileDirectory = prevFile.parentFile
-            properties.MSBuildThisFileDirectoryNoRoot = prevFile.parentFile.canonicalPath.substring(3)
-            properties.MSBuildThisFileName = prevFile.name.replaceFirst(~/(?<=.)\.[^\.]+$/, '')
-            properties.MSBuildThisFileExtension = prevFile.name.replaceFirst(~/^.+(?=\.)/, '')
+            globalProperties.MSBuildThisFileFullPath = prevFile
+            globalProperties.MSBuildThisFile = prevFile.name
+            globalProperties.MSBuildThisFileDirectory = prevFile.parentFile
+            globalProperties.MSBuildThisFileDirectoryNoRoot = prevFile.parentFile.canonicalPath.substring(3)
+            globalProperties.MSBuildThisFileName = prevFile.name.replaceFirst(~/(?<=.)\.[^\.]+$/, '')
+            globalProperties.MSBuildThisFileExtension = prevFile.name.replaceFirst(~/^.+(?=\.)/, '')
         }
     }
     
@@ -202,8 +207,12 @@ class ProjectFileParser {
     boolean parsePropertiesAndItems(GPathResult node) {
         if (node.name() == "PropertyGroup") {
             eachFilterCondition node.children(), {
-				logger.debug("[${properties.MSBuildProjectFile}] Set property ${it.name()} = ${eval(it)}")
-                properties[it.name()] = eval(it)
+                // see http://blogs.msdn.com/b/msbuild/archive/2006/10/05/_2f00_p-property-values-are-immutable-_2d00_-_2800_sort-of_2900__2e00__2e00__2e00__2e00_.aspx
+                // Global properties are immutable
+                if (!globalProperties[it.name()]) {
+                    logger.debug("[${globalProperties.MSBuildProjectFile}] Set property ${it.name()} = ${eval(it)}")
+                    properties[it.name()] = eval(it)
+                }
             }
             return true
         } else if (node.name() == "ItemGroup") {
@@ -242,7 +251,7 @@ class ProjectFileParser {
     // https://github.com/mono/mono/tree/master/mcs/class/Microsoft.Build.Engine/Microsoft.Build.BuildEngine
     
     String getPropertyValue(String str, String contextName = null) {
-        def repl = properties[str]
+        def repl = getProp(str)
         if (repl != null) {
             return repl
         }

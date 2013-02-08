@@ -1,5 +1,6 @@
 package com.ullink
 
+import org.gradle.api.Project;
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.StopActionException
 import org.gradle.api.tasks.TaskAction
@@ -30,7 +31,7 @@ class Msbuild extends ConventionTask {
     List<String> targets
     String verbosity
     Map<String,String> parameters = [:]
-	Map<String, ProjectFileParser> projects = [:]
+    Map<String, ProjectFileParser> projects = [:]
     
     Msbuild() {
         description = 'Executes MSBuild on the specified project/solution'
@@ -57,32 +58,32 @@ class Msbuild extends ConventionTask {
                 parser.gatherInputs()
             }
         }
-		outputs.upToDateWhen {
-			resolveProject()
-		}
+        outputs.upToDateWhen {
+            resolveProject()
+        }
         TaskOutputs output = outputs.dir {
             if (resolveProject()) {
                 parser.getOutputDirs().collect {
-					project.fileTree(dir: it, excludes: ['*.vshost.exe', '*.vshost.exe.*'] )
-				}
+                    project.fileTree(dir: it, excludes: ['*.vshost.exe', '*.vshost.exe.*'] )
+                }
             }
         }
-		output
+        output
     }
-	
-	boolean isSolutionBuild() {
-		projectFile == null && getSolutionFile() != null
-	}
-	
-	boolean isProjectBuild() {
-		solutionFile == null && getProjectFile() != null
-	}
-	
-	ProjectFileParser getMainProject() {
+    
+    boolean isSolutionBuild() {
+        projectFile == null && getSolutionFile() != null
+    }
+    
+    boolean isProjectBuild() {
+        solutionFile == null && getProjectFile() != null
+    }
+    
+    ProjectFileParser getMainProject() {
         if (resolveProject()) {
             parser
         }
-	}
+    }
     
     boolean trySetMsbuild(String key) {
         def v = Registry.getValue(Registry.HKEY_LOCAL_MACHINE, key, MSBUILD_TOOLS_PATH)
@@ -95,15 +96,15 @@ class Msbuild extends ConventionTask {
     
     boolean resolveProject() {
         if (parser == null) {
-			if (isSolutionBuild()) {
-			    def solParser = new SolutionFileParser(msbuild: this, solutionFile: getSolutionFile(), properties: getInitProperties())
-				solParser.readSolutionFile()
-	            parser = solParser.initProjectParser
-			} else if (isProjectBuild()) {
-	            parser = new ProjectFileParser(msbuild: this, projectFile: getProjectFile(), initProperties: { getInitProperties() })
-	            parser.readProjectFile()
-			}
-			if (parser != null && logger.debugEnabled) {
+            if (isSolutionBuild()) {
+                def solParser = new SolutionFileParser(msbuild: this, solutionFile: getSolutionFile(), properties: getInitProperties())
+                solParser.readSolutionFile()
+                parser = solParser.initProjectParser
+            } else if (isProjectBuild()) {
+                parser = new ProjectFileParser(msbuild: this, projectFile: getProjectFile(), initProperties: { getInitProperties() })
+                parser.readProjectFile()
+            }
+            if (parser != null && logger.debugEnabled) {
                 logger.debug "Resolved Msbuild properties:"
                 parser.properties.sort({ a,b->a.key <=> b.key }).each({ logger.debug it.toString() })
                 logger.debug "Resolved Msbuild items:"
@@ -179,6 +180,17 @@ class Msbuild extends ConventionTask {
         cmdParameters.Platform = platform
         if (defineConstants != null && !defineConstants.isEmpty()) {
             cmdParameters.DefineConstants = defineConstants.join(';')
+        }
+        def iter = cmdParameters.iterator()
+        while (iter.hasNext()) {
+            if (iter.next().value == null) {
+                iter.remove()
+            }
+        }
+        ['OutDir', 'OutputPath', 'BaseIntermediateOutputPath', 'IntermediateOutputPath', 'PublishDir'].each {
+            if (cmdParameters[it] && !cmdParameters[it].endsWith('\\')) {
+                cmdParameters[it] += '\\'
+            }
         }
         return cmdParameters
     }
