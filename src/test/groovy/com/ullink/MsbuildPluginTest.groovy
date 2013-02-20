@@ -1,5 +1,8 @@
 package com.ullink
 
+import org.gradle.internal.os.OperatingSystem
+import org.junit.Before
+
 import static org.junit.Assert.*
 import groovy.xml.MarkupBuilder
 import org.gradle.api.Project
@@ -8,7 +11,12 @@ import org.junit.Test
 
 
 class MsbuildPluginTest {
-    
+
+    @Before
+    public void beforeMethod() {
+        org.junit.Assume.assumeTrue OperatingSystem.current().windows
+    }
+
     @Test
     public void msbuildPluginAddsMsbuildTaskToProject() {
         Project project = ProjectBuilder.builder().build()
