@@ -23,6 +23,7 @@ class ProjectFileParser {
         def name = getFileNameWithoutExtension(file)
         logger.info("Reading project ${name} with properties: ${globalProperties}")
         msbuild.projects[name] = this
+        logger.info("Loading file $file")
         importProjectFile(file)
     }
     

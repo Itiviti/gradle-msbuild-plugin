@@ -42,7 +42,13 @@ class SolutionFileParser {
 		project.logger.info "Solution projects: ${projects.collect { it.name }}"
 		initProject = projects.find { getProjectConfigurationProperty(it, 'Build.0') }
 		project.logger.info "Init project for solution will be: ${initProject.name}"
-		initProjectParser = new ProjectFileParser(msbuild: msbuild, initProperties: { getInitProperties(it) }, projectFile: ProjectFileParser.findImportFile(project.file(solutionFile).parentFile, initProject.path).canonicalPath)
+        def projectFile = ProjectFileParser.findImportFile(project.file(solutionFile).parentFile, initProject.path)
+        def projectFilePath = projectFile.canonicalPath.replaceAll("\\\\|/", "\\" + System.getProperty("file.separator"))
+        project.logger.info("Finalized project path is : $projectFilePath")
+        initProjectParser = new ProjectFileParser(
+            msbuild: msbuild,
+            initProperties: { getInitProperties(it) },
+            projectFile: projectFilePath)
 		initProjectParser.readProjectFile()
 	}
 	

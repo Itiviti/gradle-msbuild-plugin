@@ -1,6 +1,5 @@
 package com.ullink
 
-import org.gradle.api.Project;
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.StopActionException
 import org.gradle.api.tasks.TaskAction
@@ -40,7 +39,7 @@ class Msbuild extends ConventionTask {
         resolver.setupExecutable(this)
 
         if (msbuildDir == null) {
-            throw new StopActionException("Msbuild.exe not found")
+            throw new StopActionException("$executable not found")
         }
         conventionMapping.map "solutionFile", { project.file(project.name + ".sln").exists() ? project.name + ".sln" : null }
         conventionMapping.map "projectFile", { project.file(project.name + ".csproj").exists() ? project.name + ".csproj" : null }
