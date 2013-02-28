@@ -1,4 +1,5 @@
 package com.ullink
+
 import org.gradle.internal.os.OperatingSystem
 import org.junit.Before
 import org.junit.Test

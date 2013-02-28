@@ -1,21 +1,13 @@
 package com.ullink
-
-import org.gradle.internal.os.OperatingSystem
-import org.junit.Before
-
-import static org.junit.Assert.*
 import groovy.xml.MarkupBuilder
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 
+import static org.junit.Assert.assertTrue
+
 
 class MsbuildPluginTest {
-
-    @Before
-    public void beforeMethod() {
-        org.junit.Assume.assumeTrue OperatingSystem.current().windows
-    }
 
     @Test
     public void msbuildPluginAddsMsbuildTaskToProject() {

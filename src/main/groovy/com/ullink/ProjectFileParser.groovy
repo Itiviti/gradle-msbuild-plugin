@@ -3,6 +3,7 @@ package com.ullink
 import groovy.util.slurpersupport.GPathResult
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
+import org.gradle.internal.os.OperatingSystem
 
 // http://msdn.microsoft.com/en-us/library/5dy88c2e.aspx
 class ProjectFileParser {
@@ -110,7 +111,8 @@ class ProjectFileParser {
         if (globalProperties.MSBuildToolsVersion == null) {
             globalProperties.BuildingInsideVisualStudio = ''
             globalProperties.MSBuildToolsVersion = version
-            globalProperties.MSBuildToolsPath = globalProperties.MSBuildBinPath = Registry.getValue(Registry.HKEY_LOCAL_MACHINE, Msbuild.MSBUILD_PREFIX+version, Msbuild.MSBUILD_TOOLS_PATH)
+            if (OperatingSystem.current().windows)
+                globalProperties.MSBuildToolsPath = globalProperties.MSBuildBinPath = Registry.getValue(Registry.HKEY_LOCAL_MACHINE, MsbuildResolver.MSBUILD_PREFIX+version, MsbuildResolver.MSBUILD_TOOLS_PATH)
             if (System.getenv()['ProgramFiles(x86)']) {
                 globalProperties.MSBuildExtensionsPath32 = System.getenv()['ProgramFiles(x86)']+/\MSBuild/
                 globalProperties.MSBuildExtensionsPath64 = System.getenv()['ProgramFiles']+/\MSBuild/

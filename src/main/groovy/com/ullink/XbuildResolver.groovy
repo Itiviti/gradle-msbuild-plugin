@@ -1,11 +1,18 @@
 package com.ullink
 
-import org.gradle.api.GradleException
+import org.gradle.api.tasks.StopActionException
 
 class XbuildResolver implements IExecutableResolver {
 
+    XbuildResolver(){
+        def execute = "mono --version".execute()
+        execute.waitFor()
+        if (execute.in.text == null)
+            throw new StopActionException("Mono must be on PATH.")
+    }
+
     void setupExecutable(Msbuild msbuild) {
-        msbuild.executable = 'xbuild'
+        msbuild.executable = 'xbuild.exe'
         msbuild.msbuildDir = getXBuildDir(msbuild.version)
     }
 
@@ -14,7 +21,7 @@ class XbuildResolver implements IExecutableResolver {
         which.waitFor()
         def monoRoot = which.in.text
         if (monoRoot == null || monoRoot.isEmpty())
-            throw new GradleException("Can't get mono location. Mono default installation prefix is usually /usr/lib/")
+            throw new StopActionException("Can't get mono location. Mono default installation prefix is usually /usr/lib/")
         monoRoot = monoRoot - "/bin/mono\n"
 
         def versions = version == null ?
@@ -28,6 +35,6 @@ class XbuildResolver implements IExecutableResolver {
             }
         }
 
-        throw new GradleException("Can't find xbuild binary. Is Mono-Devel package is installed?")
+        throw new StopActionException("Can't find xbuild binary. Is Mono-Devel package is installed?")
     }
 }
