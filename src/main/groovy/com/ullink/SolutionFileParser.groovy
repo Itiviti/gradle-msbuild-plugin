@@ -43,17 +43,20 @@ class SolutionFileParser {
 		initProject = projects.find { getProjectConfigurationProperty(it, 'Build.0') }
 		project.logger.info "Init project for solution will be: ${initProject.name}"
         def projectFile = ProjectFileParser.findImportFile(project.file(solutionFile).parentFile, initProject.path)
-        def projectFilePath = projectFile.canonicalPath.replaceAll("\\\\|/", "\\" + System.getProperty("file.separator"))
-        project.logger.info("Finalized project path is : $projectFilePath")
         initProjectParser = new ProjectFileParser(
             msbuild: msbuild,
             initProperties: { getInitProperties(it) },
-            projectFile: projectFilePath)
+            projectFile: projectFile.canonicalPath)
 		initProjectParser.readProjectFile()
 	}
 	
 	def getInitProperties(File file) {
-		MSBuildProject proj = projects.find { file.canonicalPath == ProjectFileParser.findImportFile(project.file(solutionFile).parentFile, it.path).canonicalPath }
+		MSBuildProject proj = projects.find {
+            file.canonicalPath == ProjectFileParser.findImportFile(
+                project.file(solutionFile).parentFile,
+                it.path)
+                .canonicalPath
+        }
 		def ret = properties.clone()
 		if (proj) {
 			String activeCfg = getProjectConfigurationProperty(proj, 'ActiveCfg')

@@ -1,8 +1,5 @@
 package com.ullink
 
-import org.gradle.api.GradleException
-
-
 class MsbuildResolver implements IExecutableResolver {
     static final String MSBUILD_TOOLS_PATH = 'MSBuildToolsPath'
     static final String MSBUILD_PREFIX = "SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\"

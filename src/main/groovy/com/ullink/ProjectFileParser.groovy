@@ -19,6 +19,7 @@ class ProjectFileParser {
         def file = findImportFile(project.projectDir, projectFile)
         if (initProperties) {
             globalProperties = initProperties(file)
+            globalProperties.MSBuildToolsPath = msbuild.msbuildDir
         }
         def name = getFileNameWithoutExtension(file)
         logger.info("Reading project ${name} with properties: ${globalProperties}")
@@ -88,11 +89,16 @@ class ProjectFileParser {
         }
         ret
     }
+
+    static String ospath(String path) {
+        path.replaceAll("\\\\|/", "\\" + System.getProperty("file.separator"))
+    }
     
     static File findImportFile(File baseDir, String s) {
-        def file = new File(s)
+        def path = ospath(s)
+        def file = new File(path)
         if (!file.isAbsolute()) {
-            file = new File(baseDir, s)
+            file = new File(baseDir, path)
         }
         file.canonicalFile
     }
@@ -262,9 +268,14 @@ class ProjectFileParser {
         if (repl != null) {
             return repl
         }
-        def matcher = str =~ /Registry:(.*?)\\(.*)@(.*)/
-        if (matcher.matches()) {
-            repl = Registry.getValue(Registry.getHkey(matcher.group(1)), matcher.group(2), matcher.group(3))
+        if (OperatingSystem.current().windows){
+            def matcher = str =~ /Registry:(.*?)\\(.*)@(.*)/
+            if (matcher.matches()) {
+                repl = Registry.getValue(
+                    Registry.getHkey(matcher.group(1)),
+                    matcher.group(2),
+                    matcher.group(3))
+            }
         }
         if (repl) {
             return repl
@@ -352,6 +363,4 @@ class ProjectFileParser {
         // TODO
         str
     }
-    
-
 }
