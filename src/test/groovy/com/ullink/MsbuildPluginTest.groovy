@@ -29,11 +29,11 @@ class MsbuildPluginTest {
             write writer.toString()
         }
         
-        Project project = ProjectBuilder.builder().build()
-        project.apply plugin: 'msbuild'
-        project.msbuild {
+        Project p = ProjectBuilder.builder().build()
+        p.apply plugin: 'msbuild'
+        p.msbuild {
             projectFile = file
         }
-        project.tasks.msbuild.execute()
+        p.tasks.msbuild.execute()
     }
 }

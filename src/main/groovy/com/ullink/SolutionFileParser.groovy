@@ -1,6 +1,8 @@
 package com.ullink
 
-import org.gradle.api.Project;
+import org.gradle.api.InvalidUserDataException
+import org.gradle.api.Project
+import org.gradle.tooling.BuildException;
 
 class SolutionFileParser {
 	
@@ -40,10 +42,23 @@ class SolutionFileParser {
 		read(project.file(solutionFile).newReader("UTF-8"));
 		projects = root.children.findAll { it.name == 'Project' } .collect { it.toMSBuildProject() }
 		project.logger.info "Solution projects: ${projects.collect { it.name }}"
-		initProject = projects.find { getProjectConfigurationProperty(it, 'Build.0') }
-		project.logger.info "Init project for solution will be: ${initProject.name}"
-		initProjectParser = new ProjectFileParser(msbuild: msbuild, initProperties: { getInitProperties(it) }, projectFile: ProjectFileParser.findImportFile(project.file(solutionFile).parentFile, initProject.path).canonicalPath)
-		initProjectParser.readProjectFile()
+
+        def buildableProjects = projects.findAll { getProjectConfigurationProperty(it, 'Build.0') }
+        if (buildableProjects.empty)
+            throw new InvalidUserDataException("No project found in solution for Configuration|Platform = ${properties.Configuration}|${properties.Platform}");
+        initProject = msbuild.getProjectName() ? buildableProjects.find { it.name == msbuild.getProjectName()} : buildableProjects.first()
+        if (!initProject)
+            throw new InvalidUserDataException("Selected init project '${msbuild.getProjectName()}' isn't part of specified Configuration|Platform = ${properties.Configuration}|${properties.Platform}");
+
+        project.logger.info "Solution buildable projects for ${properties.Configuration}|${properties.Platform}: ${buildableProjects.collect { it.name }}"
+        project.logger.info "Init project will be: ${initProject.name}"
+        buildableProjects.each {
+            if (!msbuild.allProjects[it.name]) {
+                def projectParser = new ProjectFileParser(msbuild: msbuild, initProperties: { getInitProperties(it) }, projectFile: ProjectFileParser.findImportFile(project.file(solutionFile).parentFile, it.path).canonicalPath)
+                projectParser.readProjectFile()
+            }
+        }
+        initProjectParser = msbuild.allProjects[initProject.name]
 	}
 	
 	def getInitProperties(File file) {

@@ -31,7 +31,7 @@ class Msbuild extends ConventionTask {
     List<String> targets
     String verbosity
     Map<String, Object> parameters = [:]
-    Map<String, ProjectFileParser> projects = [:]
+    Map<String, ProjectFileParser> allProjects = [:]
     
     Msbuild() {
         description = 'Executes MSBuild on the specified project/solution'
@@ -77,6 +77,12 @@ class Msbuild extends ConventionTask {
     
     boolean isProjectBuild() {
         solutionFile == null && getProjectFile() != null
+    }
+
+    Map<String, ProjectFileParser> getProjects() {
+        if (resolveProject()) {
+            allProjects
+        }
     }
     
     ProjectFileParser getMainProject() {
@@ -125,9 +131,9 @@ class Msbuild extends ConventionTask {
 
         commandLineArgs += '/nologo'
 
-        if (getSolutionFile()) {
+        if (isSolutionBuild()) {
             commandLineArgs += project.file(getSolutionFile())
-        } else if (getProjectFile()) {
+        } else if (isProjectBuild()) {
             commandLineArgs += project.file(getProjectFile())
         }
         

@@ -21,7 +21,7 @@ class ProjectFileParser {
         }
         def name = getFileNameWithoutExtension(file)
         logger.info("Reading project ${name} with properties: ${globalProperties}")
-        msbuild.projects[name] = this
+        msbuild.allProjects[name] = this
         importProjectFile(file)
     }
     
@@ -71,8 +71,8 @@ class ProjectFileParser {
             def file = findProjectFile(it.Include).canonicalPath
             def name = getFileNameWithoutExtension(file)
             def parser
-            if (msbuild.projects[name]) {
-                parser = msbuild.projects[name]
+            if (msbuild.allProjects[name]) {
+                parser = msbuild.allProjects[name]
             } else {
                 parser = new ProjectFileParser(msbuild: msbuild, projectFile: file, initProperties: initProperties)
                 parser.readProjectFile()
@@ -317,9 +317,8 @@ class ProjectFileParser {
             str = str.replaceAll(~/\s*(?i)\(\s*(false|true)\s*\)\s*/, ' $1 ')
             str = str.replaceAll(~/\s*(?i)!\s*false\s*/, TRUE)
             str = str.replaceAll(~/\s*(?i)!\s*true\s*/, FALSE)
-            if (str == init) {
-                break;
-            }
+            if (str == init)
+                break
         }
         if (str ==~ /^(?i)\s*false\s*$/) {
             return false
@@ -339,13 +338,70 @@ class ProjectFileParser {
         // $([MSBuild]::Escape($([System.IO.Path]::GetFullPath(`$([System.IO.Path]::Combine(`$(MSBuildProjectDirectory)`, `$(OutDir)`))`))))
         // $([System.IO.Path]::Combine('$([System.IO.Path]::GetTempPath())','$(TargetFrameworkMoniker).AssemblyAttributes$(DefaultLanguageSourceExtension)'))
         // !Exists('@(_DebugSymbolsIntermediatePath)')
+        // $(Project.Replace(%27,'').Replace(...).Replace(...))
+        // $(ProjectNameCleaned.Contains('test'))
+        // @(_OutputPathItem->'%(FullPath)')
+        // <_MSBuildProjectReferenceExistent Include="@(_MSBuildProjectReference)" Condition="Exists('%(Identity)')"/>
         
         
         String str = input instanceof String ? input.toString() : input
-        str = str.replaceAll(~/\s*\r?\n\s*/,'')
-        str = str.replaceAll(~/\$\((.*?)\)/, {
-            getPropertyValue(it[1], contextName)
-        })
+        while (true) {
+            def init = str
+            str = str.replaceAll(~/\s*\r?\n\s*/,'')
+            str = str.replaceAll(~/\$\(([^\(\)\[\]]*?)\)/, {
+                getPropertyValue(it[1], contextName)
+            })
+            str = str.replace('$([System.IO.Path]::GetTempPath())', System.getProperty('java.io.tmpdir'))
+            str = str.replaceAll(~/\$\(\[System\.IO\.Path\]::Combine\(\s*([`'])(.*?)\1\s*,\s*([`'])(.*?)\3\s*\)\s*\)/, {
+                def ret = new File(it[2], it[4]).path
+                return it[4].endsWith(File.separator) ? ret+File.separator : ret
+            })
+            str = str.replaceAll(~/\$\(\[System\.IO\.Path\]::GetFullPath\(\s*([`'])(.*?)\1\s*\)\s*\)/, {
+                def ret = new File(it[2]).canonicalPath
+                return it[2].endsWith(File.separator) ? ret+File.separator : ret
+            })
+            /*
+            str = str.replaceAll(~/\$\(([^\(\)\[\]]*?)\.Replace\(\s*([`'])(.*?)\2\s*,\s*([`'])(.*?)\4\s*\)\s*\)/, {
+                def ret = getPropertyValue(it[1], contextName)
+                ret.replace(it[3],it[5])
+            })
+            str = str.replaceAll(~/\$\(([^\(\)\[\]]*?)\.Contains\(\s*([`'])(.*?)\2\s*\)\s*\)/, {
+                def ret = getPropertyValue(it[1], contextName)
+                ret.contains(it[3]) ? TRUE : FALSE
+            })
+            str = str.replaceAll(~/\@\(([^\(\)\[\]]*?)->([`'])(.*?)\2\s*\)/, {
+                String ret = ''
+                String content = it[3]
+                items[it[1]].each {
+                    String cur = content
+                    cur = cur.replace('%(RelativeDir)','')
+                    cur = cur.replace('%(FullPath)','')
+                    cur = cur.replace('%(OutputResource)','')
+                    cur = cur.replace('%(WithCulture)','')
+                    cur = cur.replace('%(Version)','')
+                    cur = cur.replace('%(Identity)','')
+                    cur = cur.replace('%(Filename)','')
+                    cur = cur.replace('%(Extension)','')
+                    if (ret)
+                        ret += ';'
+                    ret += cur
+                }
+            })
+            */
+            str = str.replaceAll(~/\$\(\[MSBuild\]::Escape\(\s*(.*?)\s*\)\s*\)/, {
+                String toEscape = it[1]
+                char[] charArrayToEscape = [ '%', '*', '?', '@', '$', '(', ')', ';', '\'' ]
+                String charsToEscape  = '%*?@$();\''
+                //if (toEscape.any(charsToEscape.indexOf(it) != -1))
+                charArrayToEscape.each {
+                    toEscape = toEscape.replace(it.toString(), '%'+Integer.toHexString((int)it) )
+                }
+                toEscape
+            })
+
+            if (str == init)
+                break
+        }
         // TODO
         str
     }
