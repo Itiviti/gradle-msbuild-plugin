@@ -197,7 +197,13 @@ class ProjectFileParser {
                     }
                 }
             } else {
-                importProjectFile(findImportFile(file.parentFile, str))
+                    try{
+    					importProjectFile(findImportFile(file.parentFile, str))
+					}
+					catch(Exception e){
+						String s = str.replace('Program Files','Program Files (x86)')
+						importProjectFile(findImportFile(file.parentFile, s))
+					}
             }
             return true
         }
