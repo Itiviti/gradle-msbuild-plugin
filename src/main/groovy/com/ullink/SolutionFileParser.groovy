@@ -5,7 +5,7 @@ import org.gradle.api.Project
 import org.gradle.tooling.BuildException;
 
 class SolutionFileParser {
-	
+
 	static interface KnownProjectTypeGuid
 	{
 		String VisualBasic = "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}";
@@ -17,21 +17,21 @@ class SolutionFileParser {
 		String Setup = "{54435603-DBB4-11D2-8724-00A0C9A8B90C}";
 		String WebProject = "{E24C65DC-7377-472B-9ABA-BC803B73C61A}";
 	}
-	
+
 	Msbuild msbuild
 	String solutionFile
 	String version
 	Map<String, String> properties = [:]
-	
+
 	final Section root = new Section()
 	Collection<MSBuildProject> projects
 	MSBuildProject initProject
 	ProjectFileParser initProjectParser
-	
+
 	Project getProject() {
 		msbuild.project
 	}
-    
+
 	void readSolutionFile() {
 		if (!properties.Configuration) {
 			properties.Configuration = 'Debug' // or the first configuration defined in solution ?
@@ -60,7 +60,7 @@ class SolutionFileParser {
         }
         initProjectParser = msbuild.allProjects[initProject.name]
 	}
-	
+
 	def getInitProperties(File file) {
 		MSBuildProject proj = projects.find { file.canonicalPath == ProjectFileParser.findImportFile(project.file(solutionFile).parentFile, it.path).canonicalPath }
 		def ret = properties.clone()
@@ -79,17 +79,23 @@ class SolutionFileParser {
 		}
 		ret
 	}
-	
+
 	String getProjectConfigurationProperty(MSBuildProject proj, String prop) {
 		projectConfigurationPlatforms[proj.guid + '.' + properties.Configuration + '|' + properties.Platform + '.' + prop]
 	}
-	
+
+    def getSolutionConfigurationPlatforms() {
+		def ret = new HashMap()
+		root.children.findAll { it.name == 'Global' } .collectMany { it.children.findAll { it.name == 'GlobalSection' && it.arg == 'SolutionConfigurationPlatforms' } } .each { ret.putAll(it.properties) }
+		ret
+	}
+
 	def getProjectConfigurationPlatforms() {
 		def ret = new HashMap()
 		root.children.findAll { it.name == 'Global' } .collectMany { it.children.findAll { it.name == 'GlobalSection' && it.arg == 'ProjectConfigurationPlatforms' } } .each { ret.putAll(it.properties) }
 		ret
 	}
-	
+
 	void read(BufferedReader reader, Closure closure) {
 		String line;
 		while ((line = reader.readLine()) != null) {
@@ -100,7 +106,7 @@ class SolutionFileParser {
 			closure(line)
 		}
 	}
-	
+
 	boolean read(BufferedReader reader) {
 		Section section = root
 		try {
@@ -126,7 +132,7 @@ class SolutionFileParser {
 			reader.close()
 		}
 	}
-	
+
 	static class Section {
 		Section parent
 		String name, arg, others
@@ -138,18 +144,18 @@ class SolutionFileParser {
 			children.add child
 			child
 		}
-		
+
 		MSBuildProject toMSBuildProject() {
 			String[] o = split(others)
 			assert o.length == 3
 			new MSBuildProject(name: unQuote(o[0]), guid: unQuote(o[2]), path: unQuote(o[1]), typeGuid: unQuote(arg))
 		}
 	}
-	
+
 	static class MSBuildProject {
 		String name, guid, path, typeGuid
 	}
-	
+
 	static String unQuote(String input) {
 		if (input.startsWith('"') && input.endsWith('"')) {
 			return input.substring(1, input.length()-1)

@@ -27,6 +27,7 @@ class Msbuild extends ConventionTask {
     String projectName
     String configuration
     List<String> defineConstants
+    SolutionFileParser solutionParser
     ProjectFileParser parser
     List<String> targets
     String verbosity
@@ -103,9 +104,9 @@ class Msbuild extends ConventionTask {
     boolean resolveProject() {
         if (parser == null) {
             if (isSolutionBuild()) {
-                def solParser = new SolutionFileParser(msbuild: this, solutionFile: getSolutionFile(), properties: getInitProperties())
-                solParser.readSolutionFile()
-                parser = solParser.initProjectParser
+                solutionParser = new SolutionFileParser(msbuild: this, solutionFile: getSolutionFile(), properties: getInitProperties())
+                solutionParser.readSolutionFile()
+                parser = solutionParser.initProjectParser
             } else if (isProjectBuild()) {
                 parser = new ProjectFileParser(msbuild: this, projectFile: getProjectFile(), initProperties: { getInitProperties() })
                 parser.readProjectFile()
