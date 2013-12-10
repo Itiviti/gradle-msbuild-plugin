@@ -196,13 +196,35 @@ class ProjectFileParser {
                         importProjectFile(it)
                     }
                 }
-            } else {
-                importProjectFile(findImportFile(file.parentFile, str))
+			} else {
+				def projFile = new File(str);
+					parseImportWithWildcard(projFile.isAbsolute() ? projFile : new File(file.parentFile, str))
+			
             }
             return true
         }
         false
     }
+	
+	
+	void parseImportWithWildcard(File file) {
+
+		def parent = file.getParent()
+		def fileName = file.getName()
+		def ant = new AntBuilder();
+
+		def scanner = ant.fileScanner {
+			fileset(dir:parent, casesensitive:false) {
+				include(name:fileName)
+				type(type:'file')
+			}
+		}
+		
+		scanner.each{
+			importProjectFile(findImportFile(new File(parent), it.getName()))
+		}
+
+	}
     
     boolean parsePropertiesAndItems(GPathResult node) {
         if (node.name() == "PropertyGroup") {
