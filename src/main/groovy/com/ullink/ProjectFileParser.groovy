@@ -1,6 +1,7 @@
 package com.ullink
 
 import groovy.util.slurpersupport.GPathResult
+import org.codehaus.groovy.ant.FileScanner
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 
@@ -189,43 +190,38 @@ class ProjectFileParser {
     boolean parseImport(File file, GPathResult node) {
         if (node.name() == "Import") {
             String str = eval(node.@Project)
-            if (str.endsWith('\\*')) {
-                File folder = findImportFile(file.parentFile, str.substring(0, str.length()-2))
-                if (folder.isDirectory()) {
-                    folder.eachFile {
-                        importProjectFile(it)
-                    }
-                }
-			} else {
-				def projFile = new File(str);
-					parseImportWithWildcard(projFile.isAbsolute() ? projFile : new File(file.parentFile, str))
-			
+            globFilePattern(file.parentFile, str).each {
+                importProjectFile(it)
             }
             return true
         }
         false
     }
-	
-	
-	void parseImportWithWildcard(File file) {
 
-		def parent = file.getParent()
-		def fileName = file.getName()
-		def ant = new AntBuilder();
+    Collection<File> globFilePattern(File parent, String pattern) {
+        int i = pattern.indexOf('*')
+        if (i < 0) {
+            return Collections.singletonList(findImportFile(parent, pattern))
+        }
+        int j = pattern.lastIndexOf('\\', i) // only supports Windows paths
+        if (j < 0) throw IllegalArgumentException()
 
-		def scanner = ant.fileScanner {
-			fileset(dir:parent, casesensitive:false) {
-				include(name:fileName)
-				type(type:'file')
-			}
-		}
-		
-		scanner.each{
-			importProjectFile(findImportFile(new File(parent), it.getName()))
-		}
+        def parentDir = pattern.substring(0, j)
+        def filePattern = pattern.substring(j+1)
+        def parentFolder = findImportFile(parent, parentDir)
+        if (!parentFolder.isDirectory()) {
+            return Collections.emptyList()
+        }
 
-	}
-    
+        FileScanner scanner = new AntBuilder().fileScanner {
+            fileset(dir:parentFolder, casesensitive:false) {
+                include(name:filePattern)
+                type(type:'file')
+            }
+        }
+        return scanner.collect()
+    }
+
     boolean parsePropertiesAndItems(GPathResult node) {
         if (node.name() == "PropertyGroup") {
             eachFilterCondition node.children(), {
