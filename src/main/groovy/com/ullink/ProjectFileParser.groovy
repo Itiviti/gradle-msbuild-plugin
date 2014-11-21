@@ -4,6 +4,7 @@ import groovy.util.slurpersupport.GPathResult
 import org.codehaus.groovy.ant.FileScanner
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 
 // http://msdn.microsoft.com/en-us/library/5dy88c2e.aspx
 class ProjectFileParser {
@@ -34,7 +35,7 @@ class ProjectFileParser {
     }
     
     Project getProject() {
-        msbuild.project
+        msbuild?.project
     }
     
     File findProjectFile(String str) {
@@ -42,7 +43,7 @@ class ProjectFileParser {
     }
     
     Logger getLogger() {
-        project.logger
+        project?.logger ?: Logging.getLogger(getClass())
     }
     
     File getProjectPropertyPath(String path) {
@@ -304,13 +305,13 @@ class ProjectFileParser {
             it[2].equalsIgnoreCase(getPropertyValue(it[1], contextName)) ? TRUE : FALSE
         })
         str = str.replaceAll(~/\s*'([^']*)'\s*==\s*\$\((.*?)\)\s*/, {
-            it[2].equalsIgnoreCase(getPropertyValue(it[1], contextName)) ? TRUE : FALSE
+            it[1].equalsIgnoreCase(getPropertyValue(it[2], contextName)) ? TRUE : FALSE
         })
         str = str.replaceAll(~/\s*\$\((.*?)\)\s*!=\s*'([^']*)'\s*/, {
             it[2].equalsIgnoreCase(getPropertyValue(it[1], contextName)) ? FALSE : TRUE
         })
         str = str.replaceAll(~/\s*'([^']*)'\s*!=\s*\$\((.*?)\)\s*/, {
-            it[2].equalsIgnoreCase(getPropertyValue(it[1], contextName)) ? FALSE : TRUE
+            it[1].equalsIgnoreCase(getPropertyValue(it[2], contextName)) ? FALSE : TRUE
         })
         str = eval(str, contextName)
         str = str.replaceAll(~/\s*(?i)Exists\s*\(\s*'([^']*)'\s*\)\s*/, {
@@ -322,6 +323,18 @@ class ProjectFileParser {
         def init = str
         while (true) {
             init = str
+            str = str.replaceAll(~/\s*'([0-9.]+)'\s*>\s*'([0-9.]+)'\s*/, {
+                Double.parseDouble(it[1]) > Double.parseDouble(it[2]) ? TRUE : FALSE
+            })
+            str = str.replaceAll(~/\s*'([0-9.]+)'\s*>=\s*'([0-9.]+)'\s*/, {
+                Double.parseDouble(it[1]) >= Double.parseDouble(it[2]) ? TRUE : FALSE
+            })
+            str = str.replaceAll(~/\s*'([0-9.]+)'\s*<\s*'([0-9.]+)'\s*/, {
+                Double.parseDouble(it[1]) < Double.parseDouble(it[2]) ? TRUE : FALSE
+            })
+            str = str.replaceAll(~/\s*'([0-9.]+)'\s*<=\s*'([0-9.]+)'\s*/, {
+                Double.parseDouble(it[1]) <= Double.parseDouble(it[2]) ? TRUE : FALSE
+            })
             str = str.replaceAll(~/\s*(?i)'([^']*)'\s*==\s*'\1'\s*/, TRUE)
             str = str.replaceAll(~/\s*'[^']*'\s*==\s*'[^']*'\s*/, FALSE)
             str = str.replaceAll(~/\s*(?i)'([^']*)'\s*!=\s*'\1'\s*/, FALSE)
@@ -332,6 +345,14 @@ class ProjectFileParser {
             str = str.replaceAll(~/\s*(?i)true\s+or\s+(false|true)\s*/, TRUE)
             str = str.replaceAll(~/\s*(?i)false\s+or\s+true\s*/, TRUE)
             str = str.replaceAll(~/\s*(?i)false\s+or\s+false\s*/, FALSE)
+            str = str.replaceAll(~/\s*(?i)false\s+==\s+true\s*/, FALSE)
+            str = str.replaceAll(~/\s*(?i)false\s+==\s+false\s*/, TRUE)
+            str = str.replaceAll(~/\s*(?i)true\s+==\s+false\s*/, FALSE)
+            str = str.replaceAll(~/\s*(?i)true\s+==\s+true\s*/, TRUE)
+            str = str.replaceAll(~/\s*(?i)false\s+!=\s+true\s*/, TRUE)
+            str = str.replaceAll(~/\s*(?i)false\s+!=\s+false\s*/, FALSE)
+            str = str.replaceAll(~/\s*(?i)true\s+!=\s+false\s*/, TRUE)
+            str = str.replaceAll(~/\s*(?i)true\s+!=\s+true\s*/, FALSE)
             str = str.replaceAll(~/\s*(?i)\(\s*(false|true)\s*\)\s*/, ' $1 ')
             str = str.replaceAll(~/\s*(?i)!\s*false\s*/, TRUE)
             str = str.replaceAll(~/\s*(?i)!\s*true\s*/, FALSE)
