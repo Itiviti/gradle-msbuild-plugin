@@ -62,7 +62,12 @@ class SolutionFileParser {
 	}
 
 	def getInitProperties(File file) {
-		MSBuildProject proj = projects.find { file.canonicalPath == ProjectFileParser.findImportFile(project.file(solutionFile).parentFile, it.path).canonicalPath }
+		MSBuildProject proj = projects.find {
+            file.canonicalPath == ProjectFileParser.findImportFile(
+                project.file(solutionFile).parentFile,
+                it.path)
+                .canonicalPath
+        }
 		def ret = properties.clone()
 		if (proj) {
 			String activeCfg = getProjectConfigurationProperty(proj, 'ActiveCfg')

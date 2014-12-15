@@ -5,6 +5,7 @@ import org.codehaus.groovy.ant.FileScanner
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+import org.gradle.internal.os.OperatingSystem
 
 // http://msdn.microsoft.com/en-us/library/5dy88c2e.aspx
 class ProjectFileParser {
@@ -20,10 +21,12 @@ class ProjectFileParser {
         def file = findImportFile(project.projectDir, projectFile)
         if (initProperties) {
             globalProperties = initProperties(file)
+            globalProperties.MSBuildToolsPath = msbuild.msbuildDir
         }
         def name = getFileNameWithoutExtension(file)
         logger.info("Reading project ${name} with properties: ${globalProperties}")
         msbuild.allProjects[name] = this
+        logger.info("Loading file $file")
         importProjectFile(file)
     }
     
@@ -88,11 +91,16 @@ class ProjectFileParser {
         }
         ret
     }
+
+    static String ospath(String path) {
+        path.replaceAll("\\\\|/", "\\" + System.getProperty("file.separator"))
+    }
     
     static File findImportFile(File baseDir, String s) {
-        def file = new File(s)
+        def path = ospath(s)
+        def file = new File(path)
         if (!file.isAbsolute()) {
-            file = new File(baseDir, s)
+            file = new File(baseDir, path)
         }
         file.canonicalFile
     }
@@ -112,7 +120,8 @@ class ProjectFileParser {
         if (globalProperties.MSBuildToolsVersion == null) {
             globalProperties.BuildingInsideVisualStudio = ''
             globalProperties.MSBuildToolsVersion = version
-            globalProperties.MSBuildToolsPath = globalProperties.MSBuildBinPath = Registry.getValue(Registry.HKEY_LOCAL_MACHINE, Msbuild.MSBUILD_PREFIX+version, Msbuild.MSBUILD_TOOLS_PATH)
+            if (OperatingSystem.current().windows)
+                globalProperties.MSBuildToolsPath = globalProperties.MSBuildBinPath = Registry.getValue(Registry.HKEY_LOCAL_MACHINE, MsbuildResolver.MSBUILD_PREFIX+version, MsbuildResolver.MSBUILD_TOOLS_PATH)
             if (System.getenv()['ProgramFiles(x86)']) {
                 globalProperties.MSBuildExtensionsPath32 = System.getenv()['ProgramFiles(x86)']+/\MSBuild/
                 globalProperties.MSBuildExtensionsPath64 = System.getenv()['ProgramFiles']+/\MSBuild/
@@ -278,9 +287,14 @@ class ProjectFileParser {
         if (repl != null) {
             return repl
         }
-        def matcher = str =~ /Registry:(.*?)\\(.*)@(.*)/
-        if (matcher.matches()) {
-            repl = Registry.getValue(Registry.getHkey(matcher.group(1)), matcher.group(2), matcher.group(3))
+        if (OperatingSystem.current().windows){
+            def matcher = str =~ /Registry:(.*?)\\(.*)@(.*)/
+            if (matcher.matches()) {
+                repl = Registry.getValue(
+                    Registry.getHkey(matcher.group(1)),
+                    matcher.group(2),
+                    matcher.group(3))
+            }
         }
         if (repl) {
             return repl
@@ -444,6 +458,4 @@ class ProjectFileParser {
         // TODO
         str
     }
-    
-
 }

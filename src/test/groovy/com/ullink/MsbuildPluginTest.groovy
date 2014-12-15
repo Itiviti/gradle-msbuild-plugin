@@ -1,14 +1,14 @@
 package com.ullink
-
-import static org.junit.Assert.*
 import groovy.xml.MarkupBuilder
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Test
 
+import static org.junit.Assert.assertTrue
+
 
 class MsbuildPluginTest {
-    
+
     @Test
     public void msbuildPluginAddsMsbuildTaskToProject() {
         Project project = ProjectBuilder.builder().build()

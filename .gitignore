@@ -4,3 +4,9 @@
 /bin
 /.idea
 *.iml
+.project
+.classpath
+/classes
+/.idea
+*.iml
+out/

@@ -1,17 +1,13 @@
 package com.ullink
 
-import org.gradle.api.Project;
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.StopActionException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskOutputs
+import org.gradle.internal.os.OperatingSystem
 
 class Msbuild extends ConventionTask {
-    static final String MSBUILD_TOOLS_PATH = 'MSBuildToolsPath'
-    static final String MSBUILD_EXE = 'msbuild.exe'
-    static final String MSBUILD_PREFIX         = "SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\"
-    static final String MSBUILD_WOW6432_PREFIX = "SOFTWARE\\Wow6432Node\\Microsoft\\MSBuild\\ToolsVersions\\"
-    
+
     String version
     String msbuildDir
     def solutionFile
@@ -33,16 +29,18 @@ class Msbuild extends ConventionTask {
     String verbosity
     Map<String, Object> parameters = [:]
     Map<String, ProjectFileParser> allProjects = [:]
+    String executable
     
     Msbuild() {
         description = 'Executes MSBuild on the specified project/solution'
-        (version == null ? ["4.0", "3.5","2.0"] : [version]).find { x ->
-            trySetMsbuild(MSBUILD_WOW6432_PREFIX + x) ||
-            trySetMsbuild(MSBUILD_PREFIX + x)
-        }
+
+        IExecutableResolver resolver =
+            OperatingSystem.current().windows ? new MsbuildResolver() : new XbuildResolver()
+
+        resolver.setupExecutable(this)
 
         if (msbuildDir == null) {
-            throw new StopActionException("Msbuild.exe not found")
+            throw new StopActionException("$executable not found")
         }
         conventionMapping.map "solutionFile", { project.file(project.name + ".sln").exists() ? project.name + ".sln" : null }
         conventionMapping.map "projectFile", { project.file(project.name + ".csproj").exists() ? project.name + ".csproj" : null }
@@ -71,7 +69,7 @@ class Msbuild extends ConventionTask {
         }
         output
     }
-    
+
     boolean isSolutionBuild() {
         projectFile == null && getSolutionFile() != null
     }
@@ -92,15 +90,6 @@ class Msbuild extends ConventionTask {
         }
     }
     
-    boolean trySetMsbuild(String key) {
-        def v = Registry.getValue(Registry.HKEY_LOCAL_MACHINE, key, MSBUILD_TOOLS_PATH)
-        if (v != null && new File(v).isDirectory()) {
-            msbuildDir = v
-            return true
-        }
-        false
-    }
-    
     boolean resolveProject() {
         if (parser == null) {
             if (isSolutionBuild()) {
@@ -108,7 +97,10 @@ class Msbuild extends ConventionTask {
                 solutionParser.readSolutionFile()
                 parser = solutionParser.initProjectParser
             } else if (isProjectBuild()) {
-                parser = new ProjectFileParser(msbuild: this, projectFile: getProjectFile(), initProperties: { getInitProperties() })
+                parser = new ProjectFileParser(
+                        msbuild: this,
+                        projectFile: getProjectFile(),
+                        initProperties: { getInitProperties() })
                 parser.readProjectFile()
             }
             if (parser != null && logger.debugEnabled) {
@@ -128,7 +120,7 @@ class Msbuild extends ConventionTask {
     @TaskAction
     def build() {
         
-        def commandLineArgs = [ new File(msbuildDir, MSBUILD_EXE) ]
+        def commandLineArgs = [ new File(msbuildDir, executable) ]
 
         commandLineArgs += '/nologo'
 
