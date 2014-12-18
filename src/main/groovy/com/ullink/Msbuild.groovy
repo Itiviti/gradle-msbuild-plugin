@@ -1,5 +1,8 @@
 package com.ullink
 
+import com.google.common.io.Files
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.StopActionException
 import org.gradle.api.tasks.TaskAction
@@ -23,18 +26,18 @@ class Msbuild extends ConventionTask {
     String projectName
     String configuration
     List<String> defineConstants
-    SolutionFileParser solutionParser
-    ProjectFileParser parser
     List<String> targets
     String verbosity
     Map<String, Object> parameters = [:]
     Map<String, ProjectFileParser> allProjects = [:]
     String executable
-    
+    ProjectFileParser projectParsed
+    IExecutableResolver resolver
+
     Msbuild() {
         description = 'Executes MSBuild on the specified project/solution'
 
-        IExecutableResolver resolver =
+        resolver =
             OperatingSystem.current().windows ? new MsbuildResolver() : new XbuildResolver()
 
         resolver.setupExecutable(this)
@@ -54,7 +57,7 @@ class Msbuild extends ConventionTask {
         }
         inputs.files {
             if (resolveProject()) {
-                parser.gatherInputs()
+                projectParsed.gatherInputs()
             }
         }
         outputs.upToDateWhen {
@@ -62,7 +65,7 @@ class Msbuild extends ConventionTask {
         }
         TaskOutputs output = outputs.dir {
             if (resolveProject()) {
-                parser.getOutputDirs().collect {
+                projectParsed.getOutputDirs().collect {
                     project.fileTree(dir: it, excludes: ['*.vshost.exe', '*.vshost.exe.*'] )
                 }
             }
@@ -86,31 +89,35 @@ class Msbuild extends ConventionTask {
     
     ProjectFileParser getMainProject() {
         if (resolveProject()) {
-            parser
+            projectParsed
+        }
+    }
+
+    def parseProjectFile(def file) {
+        def tmp = File.createTempFile('ProjectFileParser', '.exe')
+        try {
+            def src = getClass().getResourceAsStream('/META-INF/bin/ProjectFileParser.exe')
+            tmp.newOutputStream().leftShift(src).close();
+            def builder = resolver.executeDotNet(tmp)
+            builder.command().add(file.toString())
+            def proc = builder.start()
+            proc.out.leftShift(JsonOutput.toJson(getInitProperties())).close()
+            return new JsonSlurper().parse(new InputStreamReader(proc.in))
+        } finally {
+            tmp.delete()
         }
     }
     
     boolean resolveProject() {
-        if (parser == null) {
+        if (projectParsed == null) {
             if (isSolutionBuild()) {
-                solutionParser = new SolutionFileParser(msbuild: this, solutionFile: getSolutionFile(), properties: getInitProperties())
-                solutionParser.readSolutionFile()
-                parser = solutionParser.initProjectParser
+                def result = parseProjectFile(getSolutionFile())
+                projectParsed = new ProjectFileParser(msbuild: this, eval: result[projectName])
             } else if (isProjectBuild()) {
-                parser = new ProjectFileParser(
-                        msbuild: this,
-                        projectFile: getProjectFile(),
-                        initProperties: { getInitProperties() })
-                parser.readProjectFile()
-            }
-            if (parser != null && logger.debugEnabled) {
-                logger.debug "Resolved Msbuild properties:"
-                parser.properties.sort({ a,b->a.key <=> b.key }).each({ logger.debug it.toString() })
-                logger.debug "Resolved Msbuild items:"
-                parser.items.sort({ a,b->a.key <=> b.key }).each({ logger.debug it.toString() })
+                projectParsed = new ProjectFileParser(msbuild: this, eval: parseProjectFile(getProjectFile()))
             }
         }
-        parser != null
+        projectParsed != null
     }
     
     void setTarget(String s) {

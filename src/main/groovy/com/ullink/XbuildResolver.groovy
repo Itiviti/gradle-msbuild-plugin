@@ -11,6 +11,11 @@ class XbuildResolver implements IExecutableResolver {
             throw new StopActionException("Mono must be on PATH.")
     }
 
+    @Override
+    ProcessBuilder executeDotNet(File exe) {
+        return new ProcessBuilder("mono", exe.toString())
+    }
+
     void setupExecutable(Msbuild msbuild) {
         msbuild.executable = 'xbuild.exe'
         msbuild.msbuildDir = getXBuildDir(msbuild.version)

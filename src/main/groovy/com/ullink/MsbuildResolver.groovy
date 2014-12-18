@@ -15,6 +15,11 @@ class MsbuildResolver implements IExecutableResolver {
         msbuild.executable = 'msbuild.exe'
     }
 
+    @Override
+    ProcessBuilder executeDotNet(File exe) {
+        return new ProcessBuilder(exe.toString())
+    }
+
     static boolean trySetMsbuild(Msbuild msbuild, String key) {
         def v = Registry.getValue(Registry.HKEY_LOCAL_MACHINE, key, MSBUILD_TOOLS_PATH)
         if (v != null && new File(v).isDirectory()) {
