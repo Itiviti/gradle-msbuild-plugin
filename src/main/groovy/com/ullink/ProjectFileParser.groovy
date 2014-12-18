@@ -15,11 +15,15 @@ class ProjectFileParser {
     }
 
     def getProjectFile() {
-        return properties.MSBuildProjectFullPath
+        properties.MSBuildProjectFullPath
+    }
+
+    def getProjectName() {
+        properties.MSBuildProjectName
     }
 
     def getProperties() {
-        return eval.Properties
+        eval.Properties
     }
 
     Project getProject() {
@@ -27,7 +31,7 @@ class ProjectFileParser {
     }
 
     File findProjectFile(String str) {
-        findImportFile(new File(getProp('MSBuildProjectFullPath')).parentFile, str)
+        findImportFile(project.file(projectFile).parentFile, str)
     }
 
     Logger getLogger() {
