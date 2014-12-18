@@ -56,10 +56,11 @@ class ProjectFileParser {
             }
         }
         eval.ProjectReference.each {
-            def file = findProjectFile(it.Include).canonicalPath
-            def name = Files.getNameWithoutExtension(file)
-            def parser = msbuild.allProjects[name]
-            ret.addAll parser.gatherInputs()
+            def parser = msbuild.allProjects[it.Name]
+            if (parser)
+                ret.addAll parser.gatherInputs()
+            else
+                logger.warn("Project reference $it not found in solution")
         }
         eval.Reference.each {
             if (it.HintPath) {

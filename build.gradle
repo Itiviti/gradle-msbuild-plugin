@@ -3,7 +3,7 @@ apply from: "${ext.ullinkGradleScripts}/task-rules.gradle"
 apply from: "${ext.ullinkGradleScripts}/functions.gradle"
 apply from: "${ext.ullinkGradleScripts}/ullink-gradle-plugin-base.gradle"
 
-version = '1.11'
+version = '2.0'
 description 'gradle-msbuild-plugin is a Gradle plugin for MSBuild project build'
 
 dependencies {
