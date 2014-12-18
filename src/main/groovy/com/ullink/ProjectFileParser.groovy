@@ -11,25 +11,29 @@ class ProjectFileParser {
     Map<String, Object> eval
 
     Object getProp(String key) {
-        return eval.Properties[key]
+        return properties[key]
     }
 
     def getProjectFile() {
-        return eval.Properties.MSBuildProjectFullPath
+        return properties.MSBuildProjectFullPath
     }
-    
+
+    def getProperties() {
+        return eval.Properties
+    }
+
     Project getProject() {
         msbuild?.project
     }
-    
+
     File findProjectFile(String str) {
         findImportFile(new File(getProp('MSBuildProjectFullPath')).parentFile, str)
     }
-    
+
     Logger getLogger() {
         project?.logger ?: Logging.getLogger(getClass())
     }
-    
+
     File getProjectPropertyPath(String path) {
         if (getProp(path)) {
             findProjectFile(getProp(path))
@@ -39,10 +43,10 @@ class ProjectFileParser {
     Collection<File> getOutputDirs() {
         ['IntermediateOutputPath', 'OutputPath'].findResults { getProjectPropertyPath(it) }
     }
-    
+
     Collection<File> gatherInputs() {
         Set<File> ret = [projectFile]
-        ['Compile','EmbeddedResource','None','Content'].each {
+        ['Compile', 'EmbeddedResource', 'None', 'Content'].each {
             eval[it].each {
                 ret += findProjectFile(it.Include)
             }
@@ -64,7 +68,7 @@ class ProjectFileParser {
     static String ospath(String path) {
         path.replaceAll("\\\\|/", "\\" + System.getProperty("file.separator"))
     }
-    
+
     static File findImportFile(File baseDir, String s) {
         def path = ospath(s)
         def file = new File(path)

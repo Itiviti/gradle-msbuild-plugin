@@ -1,8 +1,8 @@
 package com.ullink
 
-import com.google.common.io.Files
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.StopActionException
 import org.gradle.api.tasks.TaskAction
@@ -36,17 +36,20 @@ class Msbuild extends ConventionTask {
 
     Msbuild() {
         description = 'Executes MSBuild on the specified project/solution'
-
         resolver =
-            OperatingSystem.current().windows ? new MsbuildResolver() : new XbuildResolver()
+                OperatingSystem.current().windows ? new MsbuildResolver() : new XbuildResolver()
 
         resolver.setupExecutable(this)
 
         if (msbuildDir == null) {
             throw new StopActionException("$executable not found")
         }
-        conventionMapping.map "solutionFile", { project.file(project.name + ".sln").exists() ? project.name + ".sln" : null }
-        conventionMapping.map "projectFile", { project.file(project.name + ".csproj").exists() ? project.name + ".csproj" : null }
+        conventionMapping.map "solutionFile", {
+            project.file(project.name + ".sln").exists() ? project.name + ".sln" : null
+        }
+        conventionMapping.map "projectFile", {
+            project.file(project.name + ".csproj").exists() ? project.name + ".csproj" : null
+        }
         conventionMapping.map "projectName", { project.name }
         inputs.files {
             if (isSolutionBuild()) {
@@ -66,7 +69,7 @@ class Msbuild extends ConventionTask {
         TaskOutputs output = outputs.dir {
             if (resolveProject()) {
                 projectParsed.getOutputDirs().collect {
-                    project.fileTree(dir: it, excludes: ['*.vshost.exe', '*.vshost.exe.*'] )
+                    project.fileTree(dir: it, excludes: ['*.vshost.exe', '*.vshost.exe.*'])
                 }
             }
         }
@@ -76,7 +79,7 @@ class Msbuild extends ConventionTask {
     boolean isSolutionBuild() {
         projectFile == null && getSolutionFile() != null
     }
-    
+
     boolean isProjectBuild() {
         solutionFile == null && getProjectFile() != null
     }
@@ -86,7 +89,7 @@ class Msbuild extends ConventionTask {
             allProjects
         }
     }
-    
+
     ProjectFileParser getMainProject() {
         if (resolveProject()) {
             projectParsed
@@ -101,33 +104,43 @@ class Msbuild extends ConventionTask {
             def builder = resolver.executeDotNet(tmp)
             builder.command().add(file.toString())
             def proc = builder.start()
-            proc.out.leftShift(JsonOutput.toJson(getInitProperties())).close()
-            return new JsonSlurper().parse(new InputStreamReader(proc.in))
+            try {
+                proc.out.leftShift(JsonOutput.toJson(getInitProperties())).close()
+                return new JsonSlurper().parse(new InputStreamReader(proc.in))
+            }
+            finally {
+                if (proc.waitFor() != 0) {
+                    proc.err.eachLine {
+                        logger.error scanner.nextLine()
+                    }
+                    throw new GradleException('Project file parsing failed')
+                }
+            }
         } finally {
             tmp.delete()
         }
     }
-    
+
     boolean resolveProject() {
         if (projectParsed == null) {
             if (isSolutionBuild()) {
                 def result = parseProjectFile(getSolutionFile())
-                projectParsed = new ProjectFileParser(msbuild: this, eval: result[projectName])
+                projectParsed = new ProjectFileParser(msbuild: this, eval: result[getProjectName()])
             } else if (isProjectBuild()) {
                 projectParsed = new ProjectFileParser(msbuild: this, eval: parseProjectFile(getProjectFile()))
             }
         }
         projectParsed != null
     }
-    
+
     void setTarget(String s) {
         targets = [s]
     }
-    
+
     @TaskAction
     def build() {
-        
-        def commandLineArgs = [ new File(msbuildDir, executable) ]
+
+        def commandLineArgs = [new File(msbuildDir, executable)]
 
         commandLineArgs += '/nologo'
 
@@ -136,12 +149,12 @@ class Msbuild extends ConventionTask {
         } else if (isProjectBuild()) {
             commandLineArgs += project.file(getProjectFile())
         }
-        
+
         if (loggerAssembly) {
-            commandLineArgs += '/l:'+loggerAssembly
+            commandLineArgs += '/l:' + loggerAssembly
         }
         if (targets && !targets.isEmpty()) {
-            commandLineArgs += '/t:'+targets.join(';')
+            commandLineArgs += '/t:' + targets.join(';')
         }
         String verb = verbosity
         if (!verb) {
@@ -154,17 +167,17 @@ class Msbuild extends ConventionTask {
             }
         }
         if (verb) {
-            commandLineArgs += '/v:'+verb
+            commandLineArgs += '/v:' + verb
         }
 
         def cmdParameters = getInitProperties()
-        
+
         cmdParameters.each {
             if (it.value) {
-                commandLineArgs += '/p:' + it.key + '='+ it.value
+                commandLineArgs += '/p:' + it.key + '=' + it.value
             }
         }
-        
+
         project.exec {
             commandLine = commandLineArgs
         }
