@@ -110,8 +110,8 @@ class Msbuild extends ConventionTask {
             }
             finally {
                 if (proc.waitFor() != 0) {
-                    proc.err.eachLine {
-                        logger.error scanner.nextLine()
+                    proc.err.eachLine { line ->
+                        logger.error line
                     }
                     throw new GradleException('Project file parsing failed')
                 }
@@ -125,7 +125,7 @@ class Msbuild extends ConventionTask {
         if (projectParsed == null) {
             if (isSolutionBuild()) {
                 def result = parseProjectFile(getSolutionFile())
-                allProjects = result.collectEntries { [it.key, new ProjectFileParser(msbuild: this, eval: it.value) ] }
+                allProjects = result.collectEntries { [it.key, new ProjectFileParser(msbuild: this, eval: it.value)] }
                 projectParsed = allProjects[getProjectName()]
             } else if (isProjectBuild()) {
                 projectParsed = new ProjectFileParser(msbuild: this, eval: parseProjectFile(getProjectFile()))
