@@ -1,4 +1,4 @@
-# Gradle MsBuild Plugin [![Build Status](https://buildhive.cloudbees.com/job/ullink/job/gradle-msbuild-plugin/badge/icon)](https://buildhive.cloudbees.com/job/ullink/job/gradle-msbuild-plugin/)
+# Gradle MsBuild Plugin [![Build status](https://ci.appveyor.com/api/projects/status/dx29ov4txa120okx/branch/master?svg=true)](https://ci.appveyor.com/project/gluck/gradle-msbuild-plugin/branch/master)
 
 This plugin allows to compile an MsBuild project.
 It also supports project file parsing, and some basic up-to-date checks to skip the build.
