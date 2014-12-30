@@ -24,7 +24,7 @@ Sample usage:
         }
     
         dependencies {
-            classpath "com.ullink.gradle:gradle-msbuild-plugin:1.6"
+            classpath "com.ullink.gradle:gradle-msbuild-plugin:2.1"
         }
     }
     
@@ -63,4 +63,4 @@ Sample usage:
 
 # License
 
-All these plugins are licensed under the [Creative Commons � CC0 1.0 Universal](http://creativecommons.org/publicdomain/zero/1.0/) license with no warranty (expressed or implied) for any purpose.
+All these plugins are licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html) with no warranty (expressed or implied) for any purpose.
