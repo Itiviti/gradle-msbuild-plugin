@@ -1,10 +1,17 @@
+plugins {
+    id 'nu.studer.plugindev' version '1.0.3'
+}
+
+group = 'com.ullink.gradle'
+version = '2.1'
+
 ext.ullinkGradleScripts = 'https://raw.github.com/gluck/gradle-scripts/master'
 apply from: "${ext.ullinkGradleScripts}/task-rules.gradle"
 apply from: "${ext.ullinkGradleScripts}/functions.gradle"
-apply from: "${ext.ullinkGradleScripts}/ullink-gradle-plugin-base.gradle"
 
-version = '2.1'
-description 'gradle-msbuild-plugin is a Gradle plugin for MSBuild project build'
+apply plugin: 'groovy'
+
+description 'Gradle plugin for MSBuild project build.'
 
 dependencies {
     testCompile 'junit:junit:4.11'
@@ -13,3 +20,26 @@ dependencies {
     compile 'net.java.dev.jna:platform:3.5.0'
     compile 'com.google.guava:guava:16.0.1'
 }
+
+bintray {
+    // to remove when upgraded to 1.0.4
+    user bintrayUser
+    key bintrayApiKey
+    pkg.repo = 'gradle-plugins'
+}
+
+plugindev {
+    pluginId 'com.ullink.msbuild'
+    pluginImplementationClass 'com.ullink.MsbuildPlugin'
+    pluginDescription project.description
+    pluginLicenses 'Apache-2.0'
+    pluginTags 'gradle', 'plugin', 'msbuild', 'c#', '.net'
+    authorId 'gluck'
+    authorName 'Francois Valdy'
+    authorEmail 'francois.valdy@gmail.com'
+    projectUrl "https://github.com/Ullink/${project.name}"
+    projectInceptionYear '2012'
+    done()
+}
+
+
