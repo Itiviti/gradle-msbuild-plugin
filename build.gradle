@@ -26,6 +26,7 @@ bintray {
     user project.properties.bintrayUser
     key project.properties.bintrayApiKey
     pkg.repo = 'gradle-plugins'
+    pkg.version.gpg.sign = true
 }
 
 plugindev {
