@@ -7,4 +7,6 @@ interface IExecutableResolver {
 
     void setupExecutable(Msbuild msbuild);
 
+    String getFileParserPath()
+
 }

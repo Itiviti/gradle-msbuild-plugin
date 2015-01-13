@@ -99,14 +99,14 @@ class Msbuild extends ConventionTask {
     def parseProjectFile(def file) {
         def tmp = File.createTempFile('ProjectFileParser', '.exe')
         try {
-            def src = getClass().getResourceAsStream('/META-INF/bin/ProjectFileParser.exe')
+            def src = getClass().getResourceAsStream(resolver.getFileParserPath())
             tmp.newOutputStream().leftShift(src).close();
             def builder = resolver.executeDotNet(tmp)
             builder.command().add(file.toString())
             def proc = builder.start()
             try {
                 proc.out.leftShift(JsonOutput.toJson(getInitProperties())).close()
-                return new JsonSlurper().parse(new InputStreamReader(proc.in))
+                return new JsonSlurper().parseText(new FilterJson(proc.in).toString())
             }
             finally {
                 if (proc.waitFor() != 0) {
