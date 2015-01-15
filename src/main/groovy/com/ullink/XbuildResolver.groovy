@@ -42,4 +42,8 @@ class XbuildResolver implements IExecutableResolver {
 
         throw new StopActionException("Can't find xbuild binary. Is Mono-Devel package is installed?")
     }
+
+    String getFileParserPath() {
+        return '/META-INF/bin/ProjectFileParser.exe'
+    }
 }
