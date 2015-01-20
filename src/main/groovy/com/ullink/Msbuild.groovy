@@ -86,6 +86,7 @@ class Msbuild extends ConventionTask {
     }
 
     Map<String, ProjectFileParser> getProjects() {
+        resolveProject()
         allProjects
     }
 
