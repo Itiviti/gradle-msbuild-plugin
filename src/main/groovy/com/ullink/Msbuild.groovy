@@ -33,6 +33,7 @@ class Msbuild extends ConventionTask {
     String executable
     ProjectFileParser projectParsed
     IExecutableResolver resolver
+    Boolean parseProject = true
 
     Msbuild() {
         description = 'Executes MSBuild on the specified project/solution'
@@ -85,9 +86,8 @@ class Msbuild extends ConventionTask {
     }
 
     Map<String, ProjectFileParser> getProjects() {
-        if (resolveProject()) {
-            allProjects
-        }
+        resolveProject()
+        allProjects
     }
 
     ProjectFileParser getMainProject() {
@@ -122,11 +122,15 @@ class Msbuild extends ConventionTask {
     }
 
     boolean resolveProject() {
-        if (projectParsed == null) {
+        if (projectParsed == null && parseProject == true) {
             if (isSolutionBuild()) {
                 def result = parseProjectFile(getSolutionFile())
                 allProjects = result.collectEntries { [it.key, new ProjectFileParser(msbuild: this, eval: it.value)] }
                 projectParsed = allProjects[getProjectName()]
+                if (projectParsed == null) {
+                    parseProject = false
+                    logger.warn "Project ${getProjectName()} found in solution, disabling input/output optimizations"
+                }
             } else if (isProjectBuild()) {
                 projectParsed = new ProjectFileParser(msbuild: this, eval: parseProjectFile(getProjectFile()))
                 allProjects[projectParsed.projectName] = projectParsed
