@@ -26,6 +26,10 @@ class ProjectFileParser {
         eval.Properties
     }
 
+    def getReferences() {
+        eval.Reference
+    }
+
     Project getProject() {
         msbuild?.project
     }
