@@ -97,6 +97,11 @@ class Msbuild extends ConventionTask {
     }
 
     def parseProjectFile(def file) {
+        logger.info "Parsing file $file ..."
+        if (!new File(file.toString()).exists()) {
+            throw new GradleException("Project/Solution file $file does not exist")
+        }
+
         def tmp = File.createTempFile('ProjectFileParser', '.exe')
         try {
             def src = getClass().getResourceAsStream(resolver.getFileParserPath())
