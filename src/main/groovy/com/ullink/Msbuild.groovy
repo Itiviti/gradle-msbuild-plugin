@@ -104,13 +104,15 @@ class Msbuild extends ConventionTask {
             def builder = resolver.executeDotNet(tmp)
             builder.command().add(file.toString())
             def proc = builder.start()
+            def stderrBuffer = new StringBuffer()
+            proc.consumeProcessErrorStream(stderrBuffer)
             try {
                 proc.out.leftShift(JsonOutput.toJson(getInitProperties())).close()
                 return new JsonSlurper().parseText(new FilterJson(proc.in).toString())
             }
             finally {
                 if (proc.waitFor() != 0) {
-                    proc.err.eachLine { line ->
+                    stderrBuffer.eachLine { line ->
                         logger.error line
                     }
                     throw new GradleException('Project file parsing failed')
