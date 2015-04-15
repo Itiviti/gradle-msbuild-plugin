@@ -59,6 +59,10 @@ Sample usage:
       
       // you can also provide properties by name (/p:SomeProperty=Value)
       parameters.SomeProperty = 'Value'
+      
+      // Or, if you use built-in msbuild parameters that aren't directly available here,
+      // you can take advantage of the ExtensionAware interface
+      ext["flp1:LogFile"] = file("${project.name}.errors.log").getPath() + ";ErrorsOnly;Verbosity=diag"
     }
 
 # License

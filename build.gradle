@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'com.ullink.gradle'
-version = '2.2'
+version = '2.4'
 
 ext.ullinkGradleScripts = 'https://raw.github.com/gluck/gradle-scripts/master'
 apply from: "${ext.ullinkGradleScripts}/task-rules.gradle"

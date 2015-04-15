@@ -122,7 +122,7 @@ class Msbuild extends ConventionTask {
     }
 
     boolean resolveProject() {
-        if (projectParsed == null && parseProject == true) {
+        if (projectParsed == null && parseProject) {
             if (isSolutionBuild()) {
                 def result = parseProjectFile(getSolutionFile())
                 allProjects = result.collectEntries { [it.key, new ProjectFileParser(msbuild: this, eval: it.value)] }
@@ -145,7 +145,12 @@ class Msbuild extends ConventionTask {
 
     @TaskAction
     def build() {
+        project.exec {
+            commandLine = getCommandLineArgs()
+        }
+    }
 
+    def getCommandLineArgs() {
         def commandLineArgs = [new File(msbuildDir, executable)]
 
         commandLineArgs += '/nologo'
@@ -162,16 +167,8 @@ class Msbuild extends ConventionTask {
         if (targets && !targets.isEmpty()) {
             commandLineArgs += '/t:' + targets.join(';')
         }
-        String verb = verbosity
-        if (!verb) {
-            if (logger.debugEnabled) {
-                verb = 'detailed'
-            } else if (logger.infoEnabled) {
-                verb = 'normal'
-            } else {
-                verb = 'minimal' // 'quiet'
-            }
-        }
+
+        String verb = getMSVerbosity(verbosity)
         if (verb) {
             commandLineArgs += '/v:' + verb
         }
@@ -184,9 +181,21 @@ class Msbuild extends ConventionTask {
             }
         }
 
-        project.exec {
-            commandLine = commandLineArgs
+        def extMap = getExtensions()?.getExtraProperties()?.getProperties()
+        if (extMap != null) {
+            commandLineArgs += extMap.collect { k, v ->
+                v ? "/$k=$v" : "/$k"
+            }
         }
+
+        commandLineArgs
+    }
+
+    String getMSVerbosity(String verbosity) {
+        if (verbosity) return verbosity
+        if (logger.debugEnabled) return 'detailed'
+        if (logger.infoEnabled) return 'normal'
+        return 'minimal' // 'quiet'
     }
 
     Map getInitProperties() {
