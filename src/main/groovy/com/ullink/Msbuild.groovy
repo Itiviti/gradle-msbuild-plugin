@@ -97,6 +97,11 @@ class Msbuild extends ConventionTask {
     }
 
     def parseProjectFile(def file) {
+        logger.info "Parsing file $file ..."
+        if (!new File(file.toString()).exists()) {
+            throw new GradleException("Project/Solution file $file does not exist")
+        }
+
         def tmp = File.createTempFile('ProjectFileParser', '.exe')
         try {
             def src = getClass().getResourceAsStream(resolver.getFileParserPath())
@@ -104,13 +109,15 @@ class Msbuild extends ConventionTask {
             def builder = resolver.executeDotNet(tmp)
             builder.command().add(file.toString())
             def proc = builder.start()
+            def stderrBuffer = new StringBuffer()
+            proc.consumeProcessErrorStream(stderrBuffer)
             try {
                 proc.out.leftShift(JsonOutput.toJson(getInitProperties())).close()
                 return new JsonSlurper().parseText(new FilterJson(proc.in).toString())
             }
             finally {
                 if (proc.waitFor() != 0) {
-                    proc.err.eachLine { line ->
+                    stderrBuffer.eachLine { line ->
                         logger.error line
                     }
                     throw new GradleException('Project file parsing failed')
