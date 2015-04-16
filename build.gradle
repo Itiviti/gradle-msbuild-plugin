@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'com.ullink.gradle'
-version = '2.4'
+version = '2.5'
 
 ext.ullinkGradleScripts = 'https://raw.github.com/gluck/gradle-scripts/master'
 apply from: "${ext.ullinkGradleScripts}/task-rules.gradle"
@@ -26,6 +26,7 @@ bintray {
     user project.properties.bintrayUser
     key project.properties.bintrayApiKey
     pkg.repo = 'gradle-plugins'
+    pkg.userOrg = 'ullink'
     pkg.version.gpg.sign = true
 }
 
