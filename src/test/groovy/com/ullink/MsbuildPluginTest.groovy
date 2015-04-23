@@ -36,6 +36,7 @@ class MsbuildPluginTest {
         Project p = ProjectBuilder.builder().build()
         p.apply plugin: 'msbuild'
         p.msbuild {
+            parserTempDir = new File(getClass().protectionDomain.codeSource.location.path).parentFile.parent + "\\tmp"
             projectFile = file
         }
         p.tasks.msbuild.execute()
