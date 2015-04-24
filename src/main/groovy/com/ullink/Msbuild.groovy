@@ -34,6 +34,7 @@ class Msbuild extends ConventionTask {
     ProjectFileParser projectParsed
     IExecutableResolver resolver
     Boolean parseProject = true
+    String parserTempDir = null
 
     Msbuild() {
         description = 'Executes MSBuild on the specified project/solution'
@@ -102,7 +103,16 @@ class Msbuild extends ConventionTask {
             throw new GradleException("Project/Solution file $file does not exist")
         }
 
-        def tmp = File.createTempFile('ProjectFileParser', '.exe')
+        File tmp = null
+        if (parserTempDir == null) {
+            tmp = File.createTempFile('ProjectFileParser', '.exe')
+        }
+        else {
+            def tdir = new File(parserTempDir)
+            tdir.mkdirs()
+            tmp = new File(tdir, 'ProjectFileParser.exe')
+        }
+        
         try {
             def src = getClass().getResourceAsStream(resolver.getFileParserPath())
             tmp.newOutputStream().leftShift(src).close();

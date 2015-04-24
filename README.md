@@ -51,6 +51,9 @@ Sample usage:
       // overrides project IntermediaryOutputPath
       intermediateDir = 'build/msbuild/obj"
       
+      // temporary directory where the plugin will extract the project file parser executable
+      parserTempDir = temporaryDir
+      
       // Generates XML documentation file (from javadoc through custom DocLet)
       generateDoc = false
       
