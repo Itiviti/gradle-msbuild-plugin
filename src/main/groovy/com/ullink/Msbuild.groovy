@@ -133,10 +133,15 @@ class Msbuild extends ConventionTask {
             if (isSolutionBuild()) {
                 def result = parseProjectFile(getSolutionFile())
                 allProjects = result.collectEntries { [it.key, new ProjectFileParser(msbuild: this, eval: it.value)] }
-                projectParsed = allProjects[getProjectName()]
-                if (projectParsed == null) {
+                def projectName = getProjectName()
+                if (projectName == null || projectName.isEmpty()) {
                     parseProject = false
-                    logger.warn "Project ${getProjectName()} found in solution, disabling input/output optimizations"
+                } else {
+                    projectParsed = allProjects[projectName]
+                    if (projectParsed == null) {
+                        parseProject = false
+                        logger.warn "Project ${projectName} not found in solution, disabling input/output optimizations"
+                    }
                 }
             } else if (isProjectBuild()) {
                 projectParsed = new ProjectFileParser(msbuild: this, eval: parseProjectFile(getProjectFile()))
