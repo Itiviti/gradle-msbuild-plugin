@@ -65,6 +65,16 @@ Sample usage:
       ext["flp1:LogFile"] = file("${project.name}.errors.log").getPath() + ";ErrorsOnly;Verbosity=diag"
     }
 
+# See also
+
+[Gradle NuGet plugin](https://github.com/Ullink/gradle-nuget-plugin) - Allows to restore NuGet packages prior to building the projects with this plugin, and to pack&push nuget packages.
+
+[Gradle NUnit plugin](https://github.com/muryoh/gradle-nunit-plugin) - Allows to execute NUnit tests from CI (used with this plugin to build the projects prior to UT execution)
+
+[Gradle OpenCover plugin](https://github.com/muryoh/gradle-opencover-plugin) - Allows to execute the UTs through OpenCover for coverage reports.
+
+You can see these 4 plugins in use on [ILRepack](https://github.com/gluck/il-repack) project ([build.gradle](https://github.com/gluck/il-repack/blob/master/build.gradle)).
+
 # License
 
 All these plugins are licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html) with no warranty (expressed or implied) for any purpose.
