@@ -40,11 +40,6 @@ class Msbuild extends ConventionTask {
         resolver =
                 OperatingSystem.current().windows ? new MsbuildResolver() : new XbuildResolver()
 
-        resolver.setupExecutable(this)
-
-        if (msbuildDir == null) {
-            throw new StopActionException("$executable not found")
-        }
         conventionMapping.map "solutionFile", {
             project.file(project.name + ".sln").exists() ? project.name + ".sln" : null
         }
@@ -163,6 +158,11 @@ class Msbuild extends ConventionTask {
     }
 
     def getCommandLineArgs() {
+        resolver.setupExecutable(this)
+
+        if (msbuildDir == null) {
+            throw new StopActionException("$executable not found")
+        }
         def commandLineArgs = [new File(msbuildDir, executable)]
 
         commandLineArgs += '/nologo'
