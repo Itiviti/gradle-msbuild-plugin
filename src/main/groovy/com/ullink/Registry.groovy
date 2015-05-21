@@ -7,7 +7,7 @@ import com.sun.jna.platform.win32.WinReg.HKEY
 class Registry {
     static boolean supported
     static HKEY HKEY_LOCAL_MACHINE
-    
+
     static {
         String prev = System.properties['jna.boot.library.name']
         System.properties['jna.boot.library.name'] = 'jnadispatchmsbuild'
@@ -23,7 +23,7 @@ class Registry {
             System.properties.remove('jna.boot.library.name')
         }
     }
-    
+
     static HKEY getHkey(String name) {
         if (!supported) {
             return null
@@ -34,7 +34,19 @@ class Registry {
             return null
         }
     }
-    
+
+    static String[] getKeys(HKEY hkey, String node) {
+        if (!supported) {
+            return null
+        }
+
+        try {
+            return Advapi32Util.registryGetKeys(hkey, node)
+        } catch (ignored) {
+            return null
+        }
+    }
+
     static String getValue(HKEY hkey, String node, String name) {
         if (!supported) {
             return null

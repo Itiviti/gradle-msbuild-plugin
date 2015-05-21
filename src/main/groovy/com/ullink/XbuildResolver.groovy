@@ -3,6 +3,7 @@ package com.ullink
 import org.gradle.api.tasks.StopActionException
 
 class XbuildResolver implements IExecutableResolver {
+    static final ArrayList<String> KNOWN_VERSIONS = ["4.0", "3.5", "2.0"]
 
     XbuildResolver(){
         def execute = "mono --version".execute()
@@ -30,7 +31,7 @@ class XbuildResolver implements IExecutableResolver {
         monoRoot = monoRoot - "/bin/mono\n"
 
         def versions = version == null ?
-            IExecutableResolver.KNOWN_VERSIONS :
+            KNOWN_VERSIONS :
             [version]
 
         for (v in versions) {
