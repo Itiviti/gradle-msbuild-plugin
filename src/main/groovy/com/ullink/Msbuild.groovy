@@ -1,10 +1,8 @@
 package com.ullink
-
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
-import org.gradle.api.tasks.StopActionException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskOutputs
 import org.gradle.internal.os.OperatingSystem
@@ -40,11 +38,6 @@ class Msbuild extends ConventionTask {
         resolver =
                 OperatingSystem.current().windows ? new MsbuildResolver() : new XbuildResolver()
 
-        resolver.setupExecutable(this)
-
-        if (msbuildDir == null) {
-            throw new StopActionException("$executable not found")
-        }
         conventionMapping.map "solutionFile", {
             project.file(project.name + ".sln").exists() ? project.name + ".sln" : null
         }
@@ -163,6 +156,11 @@ class Msbuild extends ConventionTask {
     }
 
     def getCommandLineArgs() {
+        resolver.setupExecutable(this)
+
+        if (msbuildDir == null) {
+            throw new GradleException("$executable not found")
+        }
         def commandLineArgs = [new File(msbuildDir, executable)]
 
         commandLineArgs += '/nologo'
