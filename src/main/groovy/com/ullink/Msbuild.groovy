@@ -194,7 +194,7 @@ class Msbuild extends ConventionTask {
         def extMap = getExtensions()?.getExtraProperties()?.getProperties()
         if (extMap != null) {
             commandLineArgs += extMap.collect { k, v ->
-                v ? "/$k=$v" : "/$k"
+                v ? "/$k:$v" : "/$k"
             }
         }
 
