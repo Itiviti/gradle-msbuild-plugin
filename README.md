@@ -62,7 +62,7 @@ Sample usage:
       
       // Or, if you use built-in msbuild parameters that aren't directly available here,
       // you can take advantage of the ExtensionAware interface
-      ext["flp1:LogFile"] = file("${project.name}.errors.log").getPath() + ";ErrorsOnly;Verbosity=diag"
+      ext["flp1"] = "LogFile=" + file("${project.name}.errors.log").path + ";ErrorsOnly;Verbosity=diag"
     }
 
 # See also
