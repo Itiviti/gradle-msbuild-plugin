@@ -1,6 +1,17 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'commons-io:commons-io:2.4'
+  }
+}
+
 plugins {
     id 'nu.studer.plugindev' version '1.0.3'
     id "com.jfrog.bintray" version "1.2"
+    id "com.ullink.msbuild" version "2.5"
+    id "com.ullink.nuget" version "2.5"
 }
 
 group = 'com.ullink.gradle'
@@ -10,12 +21,36 @@ apply plugin: 'groovy'
 
 description 'Gradle plugin for MSBuild project build.'
 
+ext.dotnetPath = file('src/dotnet')
+ext.mono = org.gradle.internal.os.OperatingSystem.current().unix
+ext.parserBinary = mono ? 'ProjectFileParser.exe' : 'ProjectFileParser_Win.exe'
+
 dependencies {
     testCompile 'junit:junit:4.11'
     testCompile group: 'org.spockframework', name: 'spock-core', version: '0.7-groovy-2.0', transitive: false
     compile 'net.java.dev.jna:jna:3.5.0'
     compile 'net.java.dev.jna:platform:3.5.0'
     compile 'com.google.guava:guava:16.0.1'
+}
+
+msbuild.dependsOn nugetRestore
+msbuild {
+    solutionFile = file('src/dotnet/ProjectFileParser.sln')
+    configuration = 'Release'
+    projectName = 'ProjectFileParser'
+}
+
+task generateExe(dependsOn: msbuild, type: Exec) {
+    workingDir = msbuild.mainProject.getProjectPropertyPath('OutputPath')
+    commandLine = (mono ? ['mono']:[]) + [new File(dotnetPath, 'packages/ILRepack.1.26.0/tools/ILRepack.exe'),
+                   '/log', '/wildcards', '/internalize', '/ndebug',
+                   '/out:'+file("src/main/resources/META-INF/bin/$parserBinary"),
+                   msbuild.mainProject.properties.TargetPath,
+                   'Newtonsoft.Json.dll']
+}
+
+nugetRestore {
+    solutionFile = file('src/dotnet/ProjectFileParser.sln')
 }
 
 bintray {
