@@ -31,8 +31,9 @@ Sample usage:
     apply plugin:'msbuild'
 
     msbuild {
-      // mandatory
-      projectFile = 'my-project.csproj'
+      // mandatory (one of those)
+      solutionFile = 'my-solution.sln'
+      projectFile = file('src/my-project.csproj')
       
       // MsBuild project name (/p:Project=...)
       projectName = project.name
@@ -46,10 +47,10 @@ Sample usage:
       // Below values can override settings from the project file
       
       // overrides project OutputPath
-      destinationDir = 'build/msbuild/bin"
+      destinationDir = 'build/msbuild/bin'
       
       // overrides project IntermediaryOutputPath
-      intermediateDir = 'build/msbuild/obj"
+      intermediateDir = 'build/msbuild/obj'
       
       // Generates XML documentation file (from javadoc through custom DocLet)
       generateDoc = false
