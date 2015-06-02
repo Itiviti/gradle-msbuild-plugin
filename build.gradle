@@ -15,7 +15,7 @@ plugins {
 }
 
 group = 'com.ullink.gradle'
-version = '2.5'
+version = '2.6'
 
 apply plugin: 'groovy'
 
@@ -23,7 +23,6 @@ description 'Gradle plugin for MSBuild project build.'
 
 ext.dotnetPath = file('src/dotnet')
 ext.mono = org.gradle.internal.os.OperatingSystem.current().unix
-ext.parserBinary = mono ? 'ProjectFileParser.exe' : 'ProjectFileParser_Win.exe'
 
 dependencies {
     testCompile 'junit:junit:4.11'
@@ -31,9 +30,11 @@ dependencies {
     compile 'net.java.dev.jna:jna:3.5.0'
     compile 'net.java.dev.jna:platform:3.5.0'
     compile 'com.google.guava:guava:16.0.1'
+    compile 'commons-io:commons-io:2.4'
 }
 
 msbuild.dependsOn nugetRestore
+msbuild.onlyIf { !mono }
 msbuild {
     solutionFile = file('src/dotnet/ProjectFileParser.sln')
     configuration = 'Release'
@@ -42,12 +43,13 @@ msbuild {
 
 task generateExe(dependsOn: msbuild, type: Exec) {
     workingDir = msbuild.mainProject.getProjectPropertyPath('OutputPath')
-    commandLine = (mono ? ['mono']:[]) + [new File(dotnetPath, 'packages/ILRepack.1.26.0/tools/ILRepack.exe'),
+    commandLine = [new File(dotnetPath, 'packages/ILRepack.1.26.0/tools/ILRepack.exe'),
                    '/log', '/wildcards', '/internalize', '/ndebug',
-                   '/out:'+file("src/main/resources/META-INF/bin/$parserBinary"),
+                   '/out:'+file("src/main/resources/META-INF/bin/ProjectFileParser.exe"),
                    msbuild.mainProject.properties.TargetPath,
                    'Newtonsoft.Json.dll']
 }
+generateExe.onlyIf { !mono }
 
 nugetRestore {
     solutionFile = file('src/dotnet/ProjectFileParser.sln')

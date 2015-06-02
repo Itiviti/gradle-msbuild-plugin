@@ -97,7 +97,7 @@ class Msbuild extends ConventionTask {
 
         File tmp = File.createTempFile('ProjectFileParser', '.exe', temporaryDir)
         try {
-            def src = getClass().getResourceAsStream(resolver.getFileParserPath())
+            def src = getClass().getResourceAsStream('/META-INF/bin/ProjectFileParser.exe')
             tmp.newOutputStream().leftShift(src).close();
             def builder = resolver.executeDotNet(tmp)
             builder.command().add(file.toString())

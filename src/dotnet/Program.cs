@@ -18,35 +18,59 @@ namespace ProjectFileParser
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine("Error during project file parsing: {0}", e.Message);
+                Console.Error.WriteLine("Error during project file parsing: {0}", e);
                 Console.Error.WriteLine(e.StackTrace);
                 Environment.ExitCode = -1;
             }
         }
 
+        static bool RunningMono
+        {
+            get
+            {
+                return Type.GetType("Mono.Runtime") != null;
+            }
+        }
+
+        interface Evaluator
+        {
+            IEnumerable<Tuple<string, IEnumerable<BuildItem>>> GetEvaluatedItemsByName(Project project);
+            IEnumerable<Tuple<string, string>> GetEvaluatedMetadata(BuildItem proj);
+        }
+
+        class MonoEvaluator : Evaluator
+        {
+            public IEnumerable<Tuple<string, IEnumerable<BuildItem>>> GetEvaluatedItemsByName(Project project)
+            {
+                var dic = (IDictionary<string, BuildItemGroup>)typeof(Project).GetProperty("EvaluatedItemsByName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(project, new object[0]);
+                return dic.Select(e => Tuple.Create(e.Key, e.Value.Cast<BuildItem>()));
+            }
+
+            public IEnumerable<Tuple<string, string>> GetEvaluatedMetadata(BuildItem proj)
+            {
+                var dic = (IDictionary)typeof(BuildItem).GetField("evaluatedMetadata", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(proj);
+                return dic.Cast<DictionaryEntry>().Select(e => Tuple.Create((string)e.Key, (string)e.Value));
+            }
+        }
+
+        class MSBuildEvaluator : Evaluator
+        {
+            public IEnumerable<Tuple<string, IEnumerable<BuildItem>>> GetEvaluatedItemsByName(Project project)
+            {
+                return project.EvaluatedItems.Cast<BuildItem>().GroupBy(item => item.Name).Select(g => Tuple.Create(g.Key, g.Cast<BuildItem>()));
+            }
+
+            public IEnumerable<Tuple<string, string>> GetEvaluatedMetadata(BuildItem proj)
+            {
+                return proj.MetadataNames.Cast<string>().Select(k => Tuple.Create(k, proj.GetEvaluatedMetadata(k)));
+            }
+        }
+
+        static readonly Evaluator eval = RunningMono ? (Evaluator)new MonoEvaluator() : new MSBuildEvaluator();
+
         static IEnumerable<BuildItem> GetBuildLevelItems(Project project)
         {
-            return GetEvaluatedItemsByName(project).Where(entry => entry.Item1.StartsWith("BuildLevel")).SelectMany(entry => entry.Item2);
-        }
-
-        static IEnumerable<Tuple<string, IEnumerable<BuildItem>>> GetEvaluatedItemsByName(Project project)
-        {
-#if __MonoCS__
-            var dic = (IDictionary<string, BuildItemGroup>)typeof(Project).GetProperty("EvaluatedItemsByName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(project, new object[0]);
-            return dic.Select(e => Tuple.Create(e.Key, e.Value.Cast<BuildItem>()));
-#else
-            return project.EvaluatedItems.Cast<BuildItem>().GroupBy(item => item.Name).Select(g => Tuple.Create(g.Key, g.Cast<BuildItem>()));
-#endif
-        }
-
-        static IEnumerable<Tuple<string, string>> GetEvaluatedMetadata(BuildItem proj)
-        {
-#if __MonoCS__
-            var dic = (IDictionary)typeof(BuildItem).GetField("evaluatedMetadata", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(proj);
-            return dic.Cast<DictionaryEntry>().Select(e => Tuple.Create((string)e.Key, (string)e.Value));
-#else
-            return proj.MetadataNames.Cast<string>().Select(k => Tuple.Create(k, proj.GetEvaluatedMetadata(k)));
-#endif
+            return eval.GetEvaluatedItemsByName(project).Where(entry => entry.Item1.StartsWith("BuildLevel")).SelectMany(entry => entry.Item2);
         }
 
         static void Parse(String file)
@@ -70,7 +94,7 @@ namespace ProjectFileParser
                 foreach (var proj in GetBuildLevelItems(solution))
                 {
                     var project = solution.ParentEngine.CreateNewProject();
-                    foreach (var meta in GetEvaluatedMetadata(proj))
+                    foreach (var meta in eval.GetEvaluatedMetadata(proj))
                     {
                         project.GlobalProperties[meta.Item1] = new BuildProperty(meta.Item1, meta.Item2);
                     }
@@ -91,7 +115,7 @@ namespace ProjectFileParser
             {
                 properties[entry.Name] = entry.ToString();
             }
-            foreach (var entry in GetEvaluatedItemsByName(project))
+            foreach (var entry in eval.GetEvaluatedItemsByName(project))
             {
                 JArray items = new JArray();
                 jProject[entry.Item1] = items;
@@ -99,7 +123,7 @@ namespace ProjectFileParser
                 {
                     var it = new JObject();
                     it["Include"] = item.FinalItemSpec;
-                    foreach (var meta in GetEvaluatedMetadata(item))
+                    foreach (var meta in eval.GetEvaluatedMetadata(item))
                     {
                         it[meta.Item1] = meta.Item2;
                     }

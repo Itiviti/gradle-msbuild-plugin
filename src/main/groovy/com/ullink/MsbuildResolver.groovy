@@ -46,10 +46,6 @@ class MsbuildResolver implements IExecutableResolver {
         }
         false
     }
-
-    String getFileParserPath() {
-        return '/META-INF/bin/ProjectFileParser_Win.exe'
-    }
 }
 
 

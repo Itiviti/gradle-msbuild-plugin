@@ -94,8 +94,4 @@ class XbuildResolver implements IExecutableResolver {
             throw new GradleException("Can't get mono location. Mono default installation prefix is usually /usr/lib/")
         monoRoot - "/bin/mono\n"
     }
-
-    String getFileParserPath() {
-        return '/META-INF/bin/ProjectFileParser.exe'
-    }
 }
