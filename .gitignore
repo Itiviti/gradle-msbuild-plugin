@@ -10,3 +10,6 @@
 /.idea
 *.iml
 out/
+*.cache
+packages/
+.vs/

@@ -1,16 +1,7 @@
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    // gradle portal didn't want to sync this one up
-    classpath 'com.ullink.gradle:gradle-msbuild-plugin:2.6'
-  }
-}
-
 plugins {
     id 'nu.studer.plugindev' version '1.0.3'
     id "com.jfrog.bintray" version "1.2"
+    id "com.ullink.msbuild" version "2.6"
     id "com.ullink.nuget" version "2.5"
 }
 
@@ -18,11 +9,10 @@ group = 'com.ullink.gradle'
 version = '2.7'
 
 apply plugin: 'groovy'
-apply plugin: 'com.ullink.msbuild'
 
 description 'Gradle plugin for MSBuild project build.'
 
-ext.dotnetPath = file('src/dotnet')
+ext.dotnetPath = file('src/main/dotnet')
 ext.mono = org.gradle.internal.os.OperatingSystem.current().unix
 
 dependencies {
@@ -37,14 +27,14 @@ dependencies {
 msbuild.dependsOn nugetRestore
 msbuild.onlyIf { !mono }
 msbuild {
-    solutionFile = file('src/dotnet/ProjectFileParser.sln')
+    solutionFile = file('ProjectFileParser.sln')
     configuration = 'Release'
     projectName = 'ProjectFileParser'
 }
 
 task generateExe(dependsOn: msbuild, type: Exec) {
     workingDir = msbuild.mainProject.getProjectPropertyPath('OutputPath')
-    commandLine = [new File(dotnetPath, 'packages/ILRepack.1.26.0/tools/ILRepack.exe'),
+    commandLine = [file('packages/ILRepack.1.26.0/tools/ILRepack.exe'),
                    '/log', '/wildcards', '/internalize', '/ndebug',
                    '/out:'+file("src/main/resources/META-INF/bin/ProjectFileParser.exe"),
                    msbuild.mainProject.properties.TargetPath,
@@ -53,7 +43,7 @@ task generateExe(dependsOn: msbuild, type: Exec) {
 generateExe.onlyIf { !mono }
 
 nugetRestore {
-    solutionFile = file('src/dotnet/ProjectFileParser.sln')
+    solutionFile = file('ProjectFileParser.sln')
 }
 
 bintray {
