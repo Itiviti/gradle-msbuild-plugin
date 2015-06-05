@@ -1,9 +1,6 @@
 ﻿using Microsoft.Build.BuildEngine;
 using Newtonsoft.Json.Linq;
-using ProjectFileParser.platform_helpers;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -34,7 +31,7 @@ namespace ProjectFileParser
             {
                 solution.GlobalProperties[prop.Key] = new BuildProperty(prop.Key, prop.Value.ToString());
             }
-            using (Load(solution, file))
+            using (PlatformProjectHelper.Instance.Load(solution, file))
             {
                 var result = ToJson(solution);
                 if (Path.GetExtension(file) == ".sln")
@@ -45,12 +42,12 @@ namespace ProjectFileParser
                     foreach (var proj in PlatformProjectHelper.Instance.GetBuildLevelItems(solution))
                     {
                         var project = solution.ParentEngine.CreateNewProject();
-                        using (Load(project, proj.FinalItemSpec))
+                        foreach (var meta in PlatformProjectHelper.Instance.GetEvaluatedMetadata(proj))
                         {
-                            foreach (var meta in PlatformProjectHelper.Instance.GetEvaluatedMetadata(proj))
-                            {
-                                project.GlobalProperties[meta.Item1] = new BuildProperty(meta.Item1, meta.Item2);
-                            }
+                            project.GlobalProperties[meta.Item1] = new BuildProperty(meta.Item1, meta.Item2);
+                        }
+                        using (PlatformProjectHelper.Instance.Load(project, proj.FinalItemSpec))
+                        {
                             var jProject = ToJson(project);
                             result[Path.GetFileNameWithoutExtension(proj.FinalItemSpec)] = jProject;
                         }
@@ -58,14 +55,6 @@ namespace ProjectFileParser
                 }
                 Console.WriteLine(result.ToString());
             }
-        }
-
-        static IDisposable Load(Project project, string file)
-        {
-            var backup = Directory.GetCurrentDirectory();
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(Path.GetFullPath(file)));
-            project.Load(Path.GetFileName(file));
-            return Disposable.Create(() => Directory.SetCurrentDirectory(backup));
         }
 
         private static JObject ToJson(Project project)

@@ -47,9 +47,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Disposable.cs" />
+    <Compile Include="platform-helpers\Reflection.cs" />
     <Compile Include="PlatformProjectHelper.cs" />
     <Compile Include="platform-helpers\MsbuildPlatform.cs" />
     <Compile Include="platform-helpers\MonoPlatform.cs" />

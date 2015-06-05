@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace ProjectFileParser.platform_helpers
 {
-    public class MonoPlatform : PlatformProjectHelper
+    internal class MonoPlatform : PlatformProjectHelper
     {
         public override void AddNewItem(Project project, string name, string include)
         {
@@ -15,13 +15,13 @@ namespace ProjectFileParser.platform_helpers
 
         public override IEnumerable<Tuple<string, IEnumerable<BuildItem>>> GetEvaluatedItemsByName(Project project, bool ignoreCondition)
         {
-            var dic = (IDictionary<string, BuildItemGroup>)typeof(Project).GetProperty(ignoreCondition ? "EvaluatedItemsByNameIgnoringCondition" : "EvaluatedItemsByName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(project, new object[0]);
+            var dic = Reflection.GetProperty<IDictionary<string, BuildItemGroup>, Project>(project, ignoreCondition ? "EvaluatedItemsByNameIgnoringCondition" : "EvaluatedItemsByName");
             return dic.Select(e => Tuple.Create(e.Key, e.Value.Cast<BuildItem>()));
         }
 
         public override IEnumerable<Tuple<string, string>> GetEvaluatedMetadata(BuildItem proj)
         {
-            var dic = (IDictionary)typeof(BuildItem).GetField("evaluatedMetadata", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(proj);
+            var dic = Reflection.GetField<IDictionary, BuildItem>(proj, "evaluatedMetadata");
             return dic.Cast<DictionaryEntry>().Select(e => Tuple.Create((string)e.Key, (string)e.Value));
         }
     }
