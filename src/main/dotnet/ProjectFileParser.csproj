@@ -37,11 +37,12 @@
     <StartupObject>ProjectFileParser.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Engine" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>packages\Newtonsoft.Json.6.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\packages\Newtonsoft.Json.6.0.8\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -51,6 +52,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Disposable.cs" />
+    <Compile Include="FileUtilities.cs" />
+    <Compile Include="solutionparser\ProjectConfigurationInSolution.cs" />
+    <Compile Include="solutionparser\Solution.cs" />
+    <Compile Include="solutionparser\SolutionProject.cs" />
+    <Compile Include="solutionparser\SolutionProjectType.cs" />
     <Compile Include="platform-helpers\Reflection.cs" />
     <Compile Include="PlatformProjectHelper.cs" />
     <Compile Include="platform-helpers\MsbuildPlatform.cs" />

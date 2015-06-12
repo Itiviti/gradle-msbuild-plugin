@@ -1,6 +1,8 @@
-﻿using Microsoft.Build.BuildEngine;
+﻿using Microsoft.Build.Evaluation;
+using Microsoft.Build.Logging;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -8,7 +10,9 @@ namespace ProjectFileParser
 {
     class Program
     {
-        static void Main(string[] args)
+        public static bool EndingWithSln { get; private set; }
+
+        static int Main(string[] args)
         {
             try
             {
@@ -17,47 +21,45 @@ namespace ProjectFileParser
             catch (Exception e)
             {
                 Console.Error.WriteLine("Error during project file parsing: {0}", e);
-                Console.Error.WriteLine(e.StackTrace);
-                Environment.ExitCode = -1;
+                return -1;
             }
+            return 0;
         }
 
+        /// <summary>
+        /// The goal is to parse the solution file to retrieve the different projects and serialize all
+        /// The parsing of the solution is done with the deprecated BuildEngine.Project class because the format hasn't
+        /// change so much. Projects are parsed with the new Evaluation.Project class and support all new tag in msbuild 4.0
+        /// </summary>
         static void Parse(String file)
         {
             var obj = JObject.Parse(Console.In.ReadToEnd());
-            var solution = new Project();
-            solution.ParentEngine.RegisterLogger(new ConsoleLogger());
-            foreach (var prop in obj)
+            EndingWithSln = Path.GetExtension(file).Equals(".sln");
+
+            ProjectCollection projects = new ProjectCollection(obj.ToObject<Dictionary<string, string>>(), new[] { new ConsoleLogger() }, ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry);
+            using (PlatformProjectHelper.Instance.Load(projects, file))
             {
-                solution.GlobalProperties[prop.Key] = new BuildProperty(prop.Key, prop.Value.ToString());
-            }
-            using (PlatformProjectHelper.Instance.Load(solution, file))
-            {
-                var result = ToJson(solution);
-                if (Path.GetExtension(file) == ".sln")
+                JObject result = new JObject();
+                if (EndingWithSln)
                 {
-                    var jSolution = result;
-                    result = new JObject();
-                    result["Solution"] = jSolution;
-                    foreach (var proj in PlatformProjectHelper.Instance.GetBuildLevelItems(solution))
-                    {
-                        var project = solution.ParentEngine.CreateNewProject();
-                        foreach (var meta in PlatformProjectHelper.Instance.GetEvaluatedMetadata(proj))
-                        {
-                            project.GlobalProperties[meta.Item1] = new BuildProperty(meta.Item1, meta.Item2);
-                        }
-                        using (PlatformProjectHelper.Instance.Load(project, proj.FinalItemSpec))
-                        {
-                            var jProject = ToJson(project);
-                            result[Path.GetFileNameWithoutExtension(proj.FinalItemSpec)] = jProject;
-                        }
-                    }
+                    result["Solution"] = ToJson(LoadSolution(file));
+                }
+                foreach (var entry in (EndingWithSln ? ToJson(projects) : ToJson(projects.LoadedProjects.First())))
+                {
+                    result[entry.Key] = entry.Value;
                 }
                 Console.WriteLine(result.ToString());
             }
         }
 
-        private static JObject ToJson(Project project)
+        private static Microsoft.Build.BuildEngine.Project LoadSolution(string file)
+        {
+            var solution = new Microsoft.Build.BuildEngine.Project();
+            solution.Load(file);
+            return solution;
+        }
+
+        private static JObject ToJson(Microsoft.Build.BuildEngine.Project project)
         {
             JObject jProject = new JObject();
             foreach (var entry in PlatformProjectHelper.Instance.GetEvaluatedItemsByName(project, false))
@@ -75,11 +77,17 @@ namespace ProjectFileParser
                 }
                 jProject[entry.Item1] = items;
             }
+            jProject["Properties"] = RetrieveSolutionProperties(project);
+            return jProject;
+        }
+
+        private static JObject RetrieveSolutionProperties(Microsoft.Build.BuildEngine.Project project)
+        {
             JObject properties = new JObject();
-            Func<BuildProperty, string> ToKey = s => "__" + s.Name + "__";
+            Func<Microsoft.Build.BuildEngine.BuildProperty, string> ToKey = s => "__" + s.Name + "__";
 
             project.EvaluatedProperties
-                .Cast<BuildProperty>()
+                .Cast<Microsoft.Build.BuildEngine.BuildProperty>()
                 .Where(p => p.ToString().Trim().StartsWith("@"))
                 .Select(p =>
                 {
@@ -92,13 +100,49 @@ namespace ProjectFileParser
                     var grp = PlatformProjectHelper.Instance.GetEvaluatedItemsByName(project, true).Where(t => t.Item1 == ToKey(p)).SelectMany(t => t.Item2);
                     properties[p.Name] = string.Join(";", grp.Select(i => i.FinalItemSpec));
                 });
-            foreach (var entry in project.EvaluatedProperties.Cast<BuildProperty>().Where(p => !p.ToString().Trim().StartsWith("@")))
+            foreach (var entry in project.EvaluatedProperties.Cast<Microsoft.Build.BuildEngine.BuildProperty>().Where(p => !p.ToString().Trim().StartsWith("@")))
             {
-                var value = entry.ToString();
                 properties[entry.Name] = entry.ToString();
+            }
+            return properties;
+        }
+
+        private static JObject ToJson(Microsoft.Build.Evaluation.Project project)
+        {
+            JObject jProject = new JObject();
+            foreach (var entry in PlatformProjectHelper.Instance.GetEvaluatedItemsByName(project, false))
+            {
+                JArray items = new JArray();
+                foreach (var item in entry.Item2)
+                {
+                    var it = new JObject();
+                    it["Include"] = item.EvaluatedInclude;
+                    foreach (var meta in PlatformProjectHelper.Instance.GetEvaluatedMetadata(item))
+                    {
+                        it[meta.Item1] = meta.Item2;
+                    }
+                    items.Add(it);
+                }
+                jProject[entry.Item1] = items;
+            }
+            JObject properties = new JObject();
+            foreach (var property in project.AllEvaluatedProperties)
+            {
+                properties[property.Name] = project.ExpandString(property.EvaluatedValue);
             }
             jProject["Properties"] = properties;
             return jProject;
+        }
+
+        private static JObject ToJson(ProjectCollection solution)
+        {
+            JObject jProjects = new JObject();
+            foreach (var project in solution.LoadedProjects)
+            {
+                var projectJson = ToJson(project);
+                jProjects[Path.GetFileNameWithoutExtension(project.FullPath)] = projectJson;
+            }
+            return jProjects;
         }
     }
 }

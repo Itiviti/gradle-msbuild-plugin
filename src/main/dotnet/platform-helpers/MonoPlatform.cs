@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.Build.BuildEngine;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.BuildEngine;
-using System.Collections;
 
 namespace ProjectFileParser.platform_helpers
 {
@@ -23,6 +23,16 @@ namespace ProjectFileParser.platform_helpers
         {
             var dic = Reflection.GetField<IDictionary, BuildItem>(proj, "evaluatedMetadata");
             return dic.Cast<DictionaryEntry>().Select(e => Tuple.Create((string)e.Key, (string)e.Value));
+        }
+
+        public override IEnumerable<Tuple<string, IEnumerable<Microsoft.Build.Evaluation.ProjectItem>>> GetEvaluatedItemsByName(Microsoft.Build.Evaluation.Project project, bool ignoreCondition)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IEnumerable<Tuple<string, string>> GetEvaluatedMetadata(Microsoft.Build.Evaluation.ProjectItem proj)
+        {
+            throw new NotImplementedException();
         }
     }
 }
