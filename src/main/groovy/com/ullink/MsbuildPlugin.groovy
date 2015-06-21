@@ -7,6 +7,8 @@ class MsbuildPlugin implements Plugin<Project> {
         project.apply plugin: 'base'
         project.task('msbuild', type: Msbuild)
         project.tasks.clean.dependsOn project.tasks.cleanMsbuild
+
+        project.task('assemblyInfoPatcher', type: AssemblyInfoVersionPatcher)
     }
 }
 

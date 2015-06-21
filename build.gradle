@@ -1,19 +1,20 @@
+import org.gradle.internal.os.OperatingSystem;
+
 plugins {
     id 'nu.studer.plugindev' version '1.0.3'
     id "com.jfrog.bintray" version "1.2"
-    id "com.ullink.msbuild" version "2.6"
-    id "com.ullink.nuget" version "2.5"
+    id "com.ullink.msbuild" version "2.8"
+    id "com.ullink.nuget" version "2.7"
 }
 
 group = 'com.ullink.gradle'
-version = '2.8'
+version = '2.9'
 
 apply plugin: 'groovy'
 
 description 'Gradle plugin for MSBuild project build.'
 
 ext.dotnetPath = file('src/main/dotnet')
-ext.mono = org.gradle.internal.os.OperatingSystem.current().unix
 
 dependencies {
     testCompile 'junit:junit:4.11'
@@ -25,7 +26,7 @@ dependencies {
 }
 
 msbuild.dependsOn nugetRestore
-msbuild.onlyIf { !mono }
+msbuild.onlyIf { OperatingSystem.current().windows }
 msbuild {
     solutionFile = file('ProjectFileParser.sln')
     configuration = 'Release'
@@ -40,7 +41,7 @@ task generateExe(dependsOn: msbuild, type: Exec) {
                    msbuild.mainProject.properties.TargetPath,
                    'Newtonsoft.Json.dll']
 }
-generateExe.onlyIf { !mono }
+generateExe.onlyIf { OperatingSystem.current().windows }
 
 nugetRestore {
     solutionFile = file('ProjectFileParser.sln')

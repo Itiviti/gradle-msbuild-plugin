@@ -66,6 +66,17 @@ Sample usage:
       ext["flp1"] = "LogFile=" + file("${project.name}.errors.log").path + ";ErrorsOnly;Verbosity=diag"
     }
 
+    assemblyInfoPatcher {
+      // optional task, you need to enable it if you want to patch your AssemblyInfo.cs/fs
+      enable = true
+
+      // defaults to project.version, but you might want to tweak it
+      version = project.version + '.0.0'
+
+      // defaults to above version
+      fileVersion = version + '-Beta'
+    }
+
 # See also
 
 [Gradle NuGet plugin](https://github.com/Ullink/gradle-nuget-plugin) - Allows to restore NuGet packages prior to building the projects with this plugin, and to pack&push nuget packages.
