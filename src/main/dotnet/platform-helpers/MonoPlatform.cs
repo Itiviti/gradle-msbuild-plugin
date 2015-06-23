@@ -27,12 +27,17 @@ namespace ProjectFileParser.platform_helpers
 
         public override IEnumerable<Tuple<string, IEnumerable<Microsoft.Build.Evaluation.ProjectItem>>> GetEvaluatedItemsByName(Microsoft.Build.Evaluation.Project project, bool ignoreCondition)
         {
-            throw new NotImplementedException();
+            return project.ItemsIgnoringCondition.GroupBy(item => item.ItemType).Select(g => Tuple.Create(g.Key, g.Cast<Microsoft.Build.Evaluation.ProjectItem>()));
         }
 
-        public override IEnumerable<Tuple<string, string>> GetEvaluatedMetadata(Microsoft.Build.Evaluation.ProjectItem proj)
+        public override IEnumerable<Tuple<string, string>> GetEvaluatedMetadata(Microsoft.Build.Evaluation.ProjectItem item)
         {
-            throw new NotImplementedException();
+            var fileUtilesMetadata = FileUtilities.ItemSpecModifiers.Where(itemSpecMetadata => item.HasMetadata(itemSpecMetadata)).Select(itemSpecMetadata => new Tuple<string, string>(itemSpecMetadata, item.GetMetadataValue(itemSpecMetadata)));
+
+            return item.Metadata
+                .Select(metadata => new Tuple<string, string>(metadata.ItemType, metadata.EvaluatedValue))
+                .Union(fileUtilesMetadata)
+                .Where(tuple => !string.IsNullOrEmpty(tuple.Item2));
         }
     }
 }
