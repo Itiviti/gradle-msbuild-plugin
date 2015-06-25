@@ -67,13 +67,11 @@ Sample usage:
     }
 
     assemblyInfoPatcher {
-      // optional task, you need to enable it if you want to patch your AssemblyInfo.cs/fs
-      enable = true
-
-      // defaults to project.version, but you might want to tweak it
+      // mandatory if you want to patch your AssemblyInfo.cs/fs
+      // TODO: not yet normalized, beware than .Net version must be X.Y.Z.B format, with Z/B optionals
       version = project.version + '.0.0'
 
-      // defaults to above version
+      // defaults to above version, fewer restrictions on the format
       fileVersion = version + '-Beta'
     }
 

@@ -11,13 +11,11 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
     def file
 
     AssemblyInfoVersionPatcher() {
-        enabled = false
         conventionMapping.map "file", { mainProjectAssemblyInfo }
-        conventionMapping.map "version", { project.version }
-        conventionMapping.map "fileVersion", { getVersion() }
+        conventionMapping.map "fileVersion", { version }
 
         project.afterEvaluate {
-            if (!enabled) return;
+            if (!version) return;
             if (mainProjectAssemblyInfo == getFile())
                 project.tasks.msbuild.dependsOn this
         }
