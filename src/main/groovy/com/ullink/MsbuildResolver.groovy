@@ -35,7 +35,7 @@ class MsbuildResolver implements IExecutableResolver {
     }
 
     static List<String> getMsBuildVersionsFromRegistry(String key) {
-        Registry.getKeys(Registry.HKEY_LOCAL_MACHINE, key).sort({ -parseFloat(it) }).collect({ key + it })
+        (Registry.getKeys(Registry.HKEY_LOCAL_MACHINE, key) ?: []).sort({ -parseFloat(it) }).collect({ key + it })
     }
 
     static boolean trySetMsbuild(Msbuild msbuild, String key) {
