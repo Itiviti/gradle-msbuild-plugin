@@ -8,9 +8,13 @@ class MsbuildResolver implements IExecutableResolver {
     static final String MSBUILD_WOW6432_PREFIX = "SOFTWARE\\Wow6432Node\\Microsoft\\MSBuild\\ToolsVersions\\"
 
     void setupExecutable(Msbuild msbuild) {
-        List<String> availableVersions =
-                getMsBuildVersionsFromRegistry(MSBUILD_WOW6432_PREFIX) +
-                getMsBuildVersionsFromRegistry(MSBUILD_PREFIX)
+        List<String> availableVersions = getMsBuildVersionsFromRegistry(MSBUILD_PREFIX)
+        
+        List<String> versionBuffer = getMsBuildVersionsFromRegistry(MSBUILD_WOW6432_PREFIX)
+        if (versionBuffer != null) { 
+            availableVersions = availableVersions + versionBuffer
+        }
+
         msbuild.logger.debug("Found following MSBuild versions in the registry: ${availableVersions}")
 
         List<String> versionsToCheck
@@ -35,7 +39,11 @@ class MsbuildResolver implements IExecutableResolver {
     }
 
     static List<String> getMsBuildVersionsFromRegistry(String key) {
-        Registry.getKeys(Registry.HKEY_LOCAL_MACHINE, key).sort({ -parseFloat(it) }).collect({ key + it })
+        String[] keys = Registry.getKeys(Registry.HKEY_LOCAL_MACHINE, key)
+        if (keys != null) {
+            return keys.sort({ -parseFloat(it) }).collect({ key + it })
+        }
+        return null
     }
 
     static boolean trySetMsbuild(Msbuild msbuild, String key) {
