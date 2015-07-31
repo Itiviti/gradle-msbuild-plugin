@@ -5,6 +5,10 @@ import org.gradle.api.tasks.TaskAction
 
 class SourceLinkIndexing extends ConventionTask {
     def projectFile
+    def sourcelinkDir
+    def properties = [:]
+    def url
+    def commit
 
     SourceLinkIndexing() {
 
@@ -20,15 +24,12 @@ class SourceLinkIndexing extends ConventionTask {
         }
     }
 
-    def sourcelinkDir
-    def properties = [:]
-    def url
-
     @TaskAction
     void run() {
-        def args = [ "$sourcelinkDir/SourceLink.exe", 'index',
-                        '-pr', getProjectFile(),
-                        '-u', url]
+        def args = [ "$sourcelinkDir/SourceLink.exe", 'index' ]
+        args += [ '-pr', getProjectFile() ]
+        if (commit) args += [ '-c', commit]
+        if (url) args += [ '-u', url]
         getProperties().each {
             args += [ '-pp', it.key, it.value ]
         }
