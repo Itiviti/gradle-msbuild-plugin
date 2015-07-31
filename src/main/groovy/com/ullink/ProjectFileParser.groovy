@@ -1,11 +1,8 @@
 package com.ullink
 
-import com.google.common.io.Files
 import org.apache.commons.io.FilenameUtils
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
 import org.gradle.internal.os.OperatingSystem
 
 // http://msdn.microsoft.com/en-us/library/5dy88c2e.aspx
@@ -66,40 +63,10 @@ class ProjectFileParser {
         findImportFile(project.file(projectFile).parentFile, str)
     }
 
-    Logger getLogger() {
-        project?.logger ?: Logging.getLogger(getClass())
-    }
-
     File getProjectPropertyPath(String path) {
         if (getProp(path)) {
             findProjectFile(getProp(path))
         }
-    }
-
-    Collection<File> getOutputDirs() {
-        ['IntermediateOutputPath', 'OutputPath'].findResults { getProjectPropertyPath(it) }
-    }
-
-    Collection<File> gatherInputs() {
-        Set<File> ret = [projectFile]
-        ['Compile', 'EmbeddedResource', 'None', 'Content'].each {
-            eval[it].each {
-                ret += findProjectFile(it.Include)
-            }
-        }
-        eval.ProjectReference.each {
-            def parser = msbuild.allProjects[it.Name]
-            if (parser)
-                ret.addAll parser.gatherInputs()
-            else
-                logger.warn("Project reference $it not found in solution")
-        }
-        eval.Reference.each {
-            if (it.HintPath) {
-                ret += findProjectFile(it.HintPath)
-            }
-        }
-        ret
     }
 
     static String ospath(String path) {

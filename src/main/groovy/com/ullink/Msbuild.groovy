@@ -4,7 +4,6 @@ import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.TaskOutputs
 import org.gradle.internal.os.OperatingSystem
 
 class Msbuild extends ConventionTask {
@@ -45,29 +44,6 @@ class Msbuild extends ConventionTask {
             project.file(project.name + ".csproj").exists() ? project.name + ".csproj" : null
         }
         conventionMapping.map "projectName", { project.name }
-        inputs.files {
-            if (isSolutionBuild()) {
-                project.file(getSolutionFile())
-            } else if (isProjectBuild()) {
-                project.file(getProjectFile())
-            }
-        }
-        inputs.files {
-            if (resolveProject()) {
-                projectParsed.gatherInputs()
-            }
-        }
-        outputs.upToDateWhen {
-            resolveProject()
-        }
-        TaskOutputs output = outputs.dir {
-            if (resolveProject()) {
-                projectParsed.getOutputDirs().collect {
-                    project.fileTree(dir: it, excludes: ['*.vshost.exe', '*.vshost.exe.*'])
-                }
-            }
-        }
-        output
     }
 
     boolean isSolutionBuild() {
@@ -133,7 +109,7 @@ class Msbuild extends ConventionTask {
                     projectParsed = allProjects[projectName]
                     if (projectParsed == null) {
                         parseProject = false
-                        logger.warn "Project ${projectName} not found in solution, disabling input/output optimizations"
+                        logger.warn "Project ${projectName} not found in solution"
                     }
                 }
             } else if (isProjectBuild()) {
