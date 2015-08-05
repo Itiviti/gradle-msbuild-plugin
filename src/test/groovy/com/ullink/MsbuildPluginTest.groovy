@@ -49,7 +49,6 @@ class MsbuildPluginTest {
         }
 
         expectedException.expect(GradleException.class);
-        expectedException.expectMessage("Project/Solution file C:\\con does not exist")
 
         p.tasks.msbuild.execute()
     }
