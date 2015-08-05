@@ -9,7 +9,6 @@ class MsbuildPlugin implements Plugin<Project> {
         project.tasks.clean.dependsOn project.tasks.cleanMsbuild
 
         project.task('assemblyInfoPatcher', type: AssemblyInfoVersionPatcher)
-        project.task('sourceLinkIndexing', type: SourceLinkIndexing)
     }
 }
 
