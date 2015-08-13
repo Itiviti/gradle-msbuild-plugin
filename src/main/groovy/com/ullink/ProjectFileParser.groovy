@@ -34,6 +34,12 @@ class ProjectFileParser {
         msbuild?.project
     }
 
+    Collection<File> getItems(def section) {
+        eval[section].collect {
+            findProjectFile(it.Include)
+        }
+    }
+
     def renameExtension(def file, def newExtension) {
         FilenameUtils.removeExtension(file) + newExtension
     }

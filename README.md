@@ -73,6 +73,9 @@ Sample usage:
 
       // defaults to above version, fewer restrictions on the format
       fileVersion = version + '-Beta'
+
+      // default to msbuild main project (of solution)
+      projects = [ 'MyProject1', 'MyProject2' ]
     }
 
 # See also
