@@ -40,46 +40,42 @@ class ProjectFileParser {
         }
     }
 
-    def renameExtension(def file, def newExtension) {
-        FilenameUtils.removeExtension(file) + newExtension
-    }
-
-    File getOutputPath() {
-        if (msbuild.destinationDir) {
-            project.file(msbuild.destinationDir)
-        }
-        if (properties.TargetDir) {
-            new File (properties.TargetDir)
-        }
-    }
-
     File getDotnetAssemblyFile() {
-        if (outputPath && properties.TargetFileName) {
-            new File (outputPath, properties.TargetFileName)
+        if (properties.TargetPath) {
+            project.file(properties.TargetPath)
         }
     }
 
-    File getDotnetDebugFile() {
-        if (outputPath && properties.TargetName) {
-            new File (outputPath, properties.TargetName + (OperatingSystem.current().windows ? '.pdb' : '.mdb'))
+    List getDotnetDebugFile() {
+        if (properties.DebugSymbols) {
+            if (eval._DebugSymbolsOutputPath) {
+                eval._DebugSymbolsOutputPath.collect { new File (it.FullPath) }
+            } else {
+                [ new File (outputPath, properties.TargetName + (OperatingSystem.current().windows ? '.pdb' : '.mdb')) ]
+            }
+        }
+    }
+
+    List getDocumentationFile() {
+        if (eval.FinalDocFile) {
+            eval.FinalDocFile.collect { new File (it.FullPath) }
         }
     }
     
-    File getDocumentationFile() {
-        def docFile = getProjectPropertyPath('DocumentationFile')
-        if (outputPath && docFile) {
-            new File (outputPath, docFile.name)
-        } else {
-            docFile
+    File getConfigFile() {
+        if (properties.TargetDir && properties.TargetFileName) {
+            new File (properties.TargetDir, properties.TargetFileName + ".config")
         }
     }
 
-     FileCollection getDotnetArtifacts() {
+    FileCollection getDotnetArtifacts() {
         project.files({
             def ret = [];
-            if (dotnetAssemblyFile) ret += dotnetAssemblyFile
-            if (dotnetDebugFile?.exists()) ret += dotnetDebugFile;
-            if (documentationFile?.exists()) ret += documentationFile;
+            // Missing localization resources
+            if (dotnetAssemblyFile) ret << dotnetAssemblyFile
+            if (dotnetDebugFile) ret << dotnetDebugFile
+            if (documentationFile) ret << documentationFile
+            if (configFile?.exists()) ret << configFile
             ret
         }) {
             builtBy msbuild
