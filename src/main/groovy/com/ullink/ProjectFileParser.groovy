@@ -44,21 +44,42 @@ class ProjectFileParser {
         FilenameUtils.removeExtension(file) + newExtension
     }
 
+    File getOutputPath() {
+        if (msbuild.destinationDir) {
+            project.file(msbuild.destinationDir)
+        }
+        if (properties.TargetDir) {
+            new File (properties.TargetDir)
+        }
+    }
+
     File getDotnetAssemblyFile() {
-        project.file(properties.TargetPath)
+        if (outputPath && properties.TargetFileName) {
+            new File (outputPath, properties.TargetFileName)
+        }
     }
 
     File getDotnetDebugFile() {
-        File target = project.file(properties.TargetPath)
-        new File(renameExtension(target.path, OperatingSystem.current().windows ? '.pdb' : '.mdb'))
+        if (outputPath && properties.TargetName) {
+            new File (outputPath, properties.TargetName + (OperatingSystem.current().windows ? '.pdb' : '.mdb'))
+        }
+    }
+    
+    File getDocumentationFile() {
+        def docFile = getProjectPropertyPath('DocumentationFile')
+        if (outputPath && docFile) {
+            new File (outputPath, docFile.name)
+        } else {
+            docFile
+        }
     }
 
      FileCollection getDotnetArtifacts() {
         project.files({
-            def ret = [dotnetAssemblyFile];
+            def ret = [];
+            if (dotnetAssemblyFile) ret += dotnetAssemblyFile
             if (dotnetDebugFile?.exists()) ret += dotnetDebugFile;
-            File doc = getProjectPropertyPath('DocumentationFile')
-            if (doc?.exists()) ret += doc;
+            if (documentationFile?.exists()) ret += documentationFile;
             ret
         }) {
             builtBy msbuild

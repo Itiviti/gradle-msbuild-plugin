@@ -44,6 +44,8 @@ class Msbuild extends ConventionTask {
             project.file(project.name + ".csproj").exists() ? project.name + ".csproj" : null
         }
         conventionMapping.map "projectName", { project.name }
+        
+        outputs.files { projects.collect { _, project -> project.dotnetArtifacts.files }.flatten() }
     }
 
     boolean isSolutionBuild() {
