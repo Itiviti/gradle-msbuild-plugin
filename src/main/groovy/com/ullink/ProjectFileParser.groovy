@@ -51,7 +51,7 @@ class ProjectFileParser {
             if (eval._DebugSymbolsOutputPath) {
                 eval._DebugSymbolsOutputPath.collect { new File (it.FullPath) }
             } else {
-                [ new File (outputPath, properties.TargetName + (OperatingSystem.current().windows ? '.pdb' : '.mdb')) ]
+                [ new File (properties.TargetPath, properties.TargetName + (OperatingSystem.current().windows ? '.pdb' : '.mdb')) ]
             }
         }
     }
