@@ -5,13 +5,7 @@ import org.gradle.api.GradleException
 import org.gradle.util.VersionNumber
 
 class XbuildResolver implements IExecutableResolver {
-    XbuildResolver(){
-        def execute = "mono --version".execute()
-        execute.waitFor()
-        if (execute.in.text == null)
-            throw new GradleException("Mono must be on PATH.")
-    }
-
+    
     @Override
     ProcessBuilder executeDotNet(File exe) {
         return new ProcessBuilder("mono", exe.toString())
