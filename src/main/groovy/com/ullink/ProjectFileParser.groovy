@@ -61,7 +61,7 @@ class ProjectFileParser {
             eval.FinalDocFile.collect { new File (it.FullPath) }
         } else if (properties.DocumentationFile) {
             // Mono
-            [ new File (properties.TargetPath, new File (properties.DocumentationFile).filename) ]
+            [ new File (properties.ProjectDir, properties.DocumentationFile) ]
         }
     }
     
