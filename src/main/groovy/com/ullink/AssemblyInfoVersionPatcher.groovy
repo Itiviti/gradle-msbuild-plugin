@@ -41,6 +41,9 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
     @Input
     def fileVersion
 
+    @Input
+    def charset = "UTF-8"
+    
     @InputFiles
     @OutputFiles
     FileCollection getPatchedFiles() {
@@ -58,9 +61,8 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
 
     void replace(def file, def name, def value) {
         if (FilenameUtils.getExtension(file.name) == 'fs')
-            project.ant.replaceregexp(file: file, match: /^\[<assembly: $name\(".*"\)>\]$/, replace: "[<assembly: ${name}(\"${value}\")>]", byline: true)
+            project.ant.replaceregexp(file: file, match: /^\[<assembly: $name\s*\(".*"\)\s*>\]$/, replace: "[<assembly: ${name}(\"${value}\")>]", byline: true, encoding: charset)
         else
-            project.ant.replaceregexp(file: file, match: /^\[assembly: $name\(".*"\)\]$/, replace: "[assembly: ${name}(\"${value}\")]", byline: true)
-
+            project.ant.replaceregexp(file: file, match: /^\[assembly: $name\s*\(".*"\)\s*\]$/, replace: "[assembly: ${name}(\"${value}\")]", byline: true, encoding: charset)
     }
 }
