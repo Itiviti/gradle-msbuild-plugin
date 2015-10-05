@@ -41,7 +41,7 @@ msbuild {
 }
 
 nunit {
-    nunitVersion = '3.0.1'
+    nunitVersion = '3.8.0'
     testAssemblies = [ msbuild.projects['ProjectFileParser_Tests'].properties.TargetPath ]
 }
 nunit.dependsOn msbuild
