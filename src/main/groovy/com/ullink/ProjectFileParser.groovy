@@ -75,6 +75,16 @@ class ProjectFileParser {
         }
     }
 
+    File findReferencedDll(String  dllName) {
+        def dllPath = references.find {
+            it.Filename.startsWith(dllName)
+        }.HintPath
+        println dllPath
+        if(dllPath == null || "".equals(dllPath))
+            null
+        findProjectFile(dllPath)
+    }
+
     static String ospath(String path) {
         path.replaceAll("\\\\|/", "\\" + System.getProperty("file.separator"))
     }
