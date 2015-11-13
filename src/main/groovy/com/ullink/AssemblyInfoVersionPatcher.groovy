@@ -22,6 +22,7 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
                 }
         }
         conventionMapping.map "fileVersion", { version }
+        conventionMapping.map "informationalVersion", { version }
 
         project.afterEvaluate {
             if (!version) return;
@@ -42,6 +43,9 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
     def fileVersion
 
     @Input
+    def informationalVersion
+
+    @Input
     def charset = "UTF-8"
     
     @InputFiles
@@ -56,6 +60,7 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
             logger.info("Replacing version attributes in $it")
             replace(it, 'AssemblyVersion', getVersion())
             replace(it, 'AssemblyFileVersion', getFileVersion())
+            replace(it, 'AssemblyInformationalVersion', getInformationalVersion())
         }
     }
 
