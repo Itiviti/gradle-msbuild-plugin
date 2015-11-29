@@ -40,25 +40,45 @@ class ProjectFileParser {
         }
     }
 
-    def renameExtension(def file, def newExtension) {
-        FilenameUtils.removeExtension(file) + newExtension
-    }
-
     File getDotnetAssemblyFile() {
-        project.file(properties.TargetPath)
+        if (properties.TargetPath) {
+            project.file(properties.TargetPath)
+        }
     }
 
-    File getDotnetDebugFile() {
-        File target = project.file(properties.TargetPath)
-        new File(renameExtension(target.path, OperatingSystem.current().windows ? '.pdb' : '.mdb'))
+    List getDotnetDebugFile() {
+        if (properties.DebugSymbols) {
+            if (eval._DebugSymbolsOutputPath) {
+                eval._DebugSymbolsOutputPath.collect { new File (it.FullPath) }
+            } else {
+                [ new File (properties.TargetPath, properties.TargetName + (OperatingSystem.current().windows ? '.pdb' : '.mdb')) ]
+            }
+        }
     }
 
-     FileCollection getDotnetArtifacts() {
+    List getDocumentationFile() {
+        if (eval.FinalDocFile) {
+            eval.FinalDocFile.collect { new File (it.FullPath) }
+        } else if (properties.DocumentationFile) {
+            // Mono
+            [ new File (properties.ProjectDir, properties.DocumentationFile) ]
+        }
+    }
+    
+    File getConfigFile() {
+        if (properties.TargetDir && properties.TargetFileName) {
+            new File (properties.TargetDir, properties.TargetFileName + ".config")
+        }
+    }
+
+    FileCollection getDotnetArtifacts() {
         project.files({
-            def ret = [dotnetAssemblyFile];
-            if (dotnetDebugFile?.exists()) ret += dotnetDebugFile;
-            File doc = getProjectPropertyPath('DocumentationFile')
-            if (doc?.exists()) ret += doc;
+            def ret = [];
+            // Missing localization resources
+            if (dotnetAssemblyFile) ret << dotnetAssemblyFile
+            if (dotnetDebugFile) ret << dotnetDebugFile
+            if (documentationFile) ret << documentationFile
+            if (configFile?.exists()) ret << configFile
             ret
         }) {
             builtBy msbuild
