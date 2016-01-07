@@ -2,9 +2,10 @@ import org.gradle.internal.os.OperatingSystem;
 
 plugins {
     id 'nu.studer.plugindev' version '1.0.3'
-    id "com.jfrog.bintray" version "1.2"
-    id "com.ullink.msbuild" version "2.8"
-    id "com.ullink.nuget" version "2.7"
+    id 'com.jfrog.bintray' version '1.2'
+    id 'com.ullink.msbuild' version '2.11'
+    id 'com.ullink.nuget' version '2.13'
+    id 'net.researchgate.release' version '2.3.4'
 }
 
 group = 'com.ullink.gradle'
@@ -36,7 +37,7 @@ task generateExe(dependsOn: msbuild, type: Exec) {
     workingDir = msbuild.mainProject.getProjectPropertyPath('OutputPath')
     commandLine = [file('packages/ILRepack.1.26.0/tools/ILRepack.exe'),
                    '/log', '/wildcards', '/internalize', '/ndebug',
-                   '/out:'+file("src/main/resources/META-INF/bin/ProjectFileParser.exe"),
+                   '/out:'+file('src/main/resources/META-INF/bin/ProjectFileParser.exe'),
                    msbuild.mainProject.properties.TargetPath,
                    'Newtonsoft.Json.dll']
 }
@@ -70,4 +71,5 @@ plugindev {
     done()
 }
 
+project.tasks.afterReleaseBuild.dependsOn project.tasks.bintrayUpload
 
