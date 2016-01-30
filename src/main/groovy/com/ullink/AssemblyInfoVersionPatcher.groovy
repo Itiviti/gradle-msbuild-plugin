@@ -13,7 +13,7 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
     List<String> projects = []
 
     AssemblyInfoVersionPatcher() {
-        conventionMapping.map "projects", { [ project.tasks.msbuild.mainProject?.projectName ] }
+        conventionMapping.map "projects", { project.tasks.msbuild.projects.collect { it.name } }
         conventionMapping.map "files", {
             getProjects()
                 .collect { project.tasks.msbuild.projects[it] }
