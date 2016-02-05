@@ -1,5 +1,10 @@
 # gradle-msbuild-plugin changelog
 
+## 2.13
+
+### Changed
+* assemblyInfoPatcher is now updating all projects by default
+
 ## 2.12
 
 ### Changed
