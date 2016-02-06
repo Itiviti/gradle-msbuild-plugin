@@ -5,6 +5,7 @@ plugins {
     id 'com.jfrog.bintray' version '1.2'
     id 'com.ullink.msbuild' version '2.11'
     id 'com.ullink.nuget' version '2.13'
+    id 'com.ullink.nunit' version '1.5'
     id 'net.researchgate.release' version '2.3.4'
 }
 
@@ -25,6 +26,10 @@ dependencies {
     compile 'commons-io:commons-io:2.4'
 }
 
+nugetRestore {
+    solutionFile = file('ProjectFileParser.sln')
+}
+
 msbuild.dependsOn nugetRestore
 msbuild.onlyIf { OperatingSystem.current().windows }
 msbuild {
@@ -33,19 +38,23 @@ msbuild {
     projectName = 'ProjectFileParser'
 }
 
-task generateExe(dependsOn: msbuild, type: Exec) {
+nunit {
+    nunitVersion = '3.0.1'
+    testAssemblies = [ msbuild.projects['ProjectFileParser_Tests'].properties.TargetPath ]
+}
+nunit.dependsOn msbuild
+
+task generateExe(dependsOn: nunit, type: Exec) {
     workingDir = msbuild.mainProject.getProjectPropertyPath('OutputPath')
-    commandLine = [file('packages/ILRepack.1.26.0/tools/ILRepack.exe'),
+    commandLine = [file('packages/ILRepack.2.0.10/tools/ILRepack.exe'),
                    '/log', '/wildcards', '/internalize', '/ndebug',
                    '/out:'+file('src/main/resources/META-INF/bin/ProjectFileParser.exe'),
                    msbuild.mainProject.properties.TargetPath,
-                   'Newtonsoft.Json.dll']
+                   'Newtonsoft.Json.dll', 'Microsoft.Build.dll', 'Microsoft.Build.Utilities.Core.dll']
 }
 generateExe.onlyIf { OperatingSystem.current().windows }
 
-nugetRestore {
-    solutionFile = file('ProjectFileParser.sln')
-}
+jar.dependsOn generateExe
 
 bintray {
     // to remove when upgraded plugindev to 1.0.4

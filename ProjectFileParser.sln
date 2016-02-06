@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22823.1
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectFileParser", "src\main\dotnet\ProjectFileParser.csproj", "{BB8169E4-9D52-49A1-A097-C300B9446483}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectFileParser", "src\main\dotnet\ProjectFileParser\ProjectFileParser.csproj", "{BB8169E4-9D52-49A1-A097-C300B9446483}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectFileParser_Tests", "src\main\dotnet\ProjectFileParser_Tests\ProjectFileParser_Tests.csproj", "{067456C0-086C-46A8-B37F-1405717B7BFC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{BB8169E4-9D52-49A1-A097-C300B9446483}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB8169E4-9D52-49A1-A097-C300B9446483}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB8169E4-9D52-49A1-A097-C300B9446483}.Release|Any CPU.Build.0 = Release|Any CPU
+		{067456C0-086C-46A8-B37F-1405717B7BFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{067456C0-086C-46A8-B37F-1405717B7BFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{067456C0-086C-46A8-B37F-1405717B7BFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{067456C0-086C-46A8-B37F-1405717B7BFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

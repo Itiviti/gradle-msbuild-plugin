@@ -2,8 +2,12 @@
 
 ## 2.13
 
+### Added
+* support ToolsVersion upto `14.0`
+
 ### Changed
 * assemblyInfoPatcher is now updating all projects by default
+* ProjectFileParser now requires .Net Framework 4.5.2
 
 ## 2.12
 
