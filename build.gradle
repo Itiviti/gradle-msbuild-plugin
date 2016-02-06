@@ -31,7 +31,6 @@ nugetRestore {
 }
 
 msbuild.dependsOn nugetRestore
-msbuild.onlyIf { OperatingSystem.current().windows }
 msbuild {
     solutionFile = file('ProjectFileParser.sln')
     configuration = 'Release'
@@ -52,6 +51,8 @@ task generateExe(dependsOn: nunit, type: Exec) {
                    msbuild.mainProject.properties.TargetPath,
                    'Newtonsoft.Json.dll', 'Microsoft.Build.dll', 'Microsoft.Build.Utilities.Core.dll']
 }
+msbuild.onlyIf { OperatingSystem.current().windows }
+nunit.onlyIf { OperatingSystem.current().windows }
 generateExe.onlyIf { OperatingSystem.current().windows }
 
 jar.dependsOn generateExe
