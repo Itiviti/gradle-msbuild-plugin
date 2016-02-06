@@ -1,5 +1,14 @@
 # gradle-msbuild-plugin changelog
 
+## 2.13
+
+### Added
+* support ToolsVersion upto `14.0`
+
+### Changed
+* ProjectFileParser now requires .Net Framework 4.5.2
+
+
 ## 2.12
 
 ### Changed
