@@ -3,7 +3,7 @@ import org.gradle.internal.os.OperatingSystem;
 plugins {
     id 'nu.studer.plugindev' version '1.0.3'
     id 'com.jfrog.bintray' version '1.2'
-    id 'com.ullink.msbuild' version '2.11'
+    id 'com.ullink.msbuild' version '2.12'
     id 'com.ullink.nuget' version '2.13'
     id 'com.ullink.nunit' version '1.5'
     id 'net.researchgate.release' version '2.3.4'
@@ -43,19 +43,21 @@ nunit {
 }
 nunit.dependsOn msbuild
 
-task generateExe(dependsOn: nunit, type: Exec) {
-    workingDir = msbuild.mainProject.getProjectPropertyPath('OutputPath')
-    commandLine = [file('packages/ILRepack.2.0.10/tools/ILRepack.exe'),
-                   '/log', '/wildcards', '/internalize', '/ndebug',
-                   '/out:'+file('src/main/resources/META-INF/bin/ProjectFileParser.exe'),
-                   msbuild.mainProject.properties.TargetPath,
-                   'Newtonsoft.Json.dll', 'Microsoft.Build.dll', 'Microsoft.Build.Utilities.Core.dll']
+task generateZip(dependsOn: msbuild, type: Zip) {
+    from (msbuild.mainProject.properties.TargetDir) {
+        include '*.exe'
+        include '*.dll'
+    }
+    into '/'
+    destinationDir file('src/main/resources/META-INF/')
+    archiveName 'ProjectFileParser.zip'
 }
+
 msbuild.onlyIf { OperatingSystem.current().windows }
 nunit.onlyIf { OperatingSystem.current().windows }
-generateExe.onlyIf { OperatingSystem.current().windows }
+generateZip.onlyIf { OperatingSystem.current().windows }
 
-jar.dependsOn generateExe
+jar.dependsOn generateZip
 
 bintray {
     // to remove when upgraded plugindev to 1.0.4
