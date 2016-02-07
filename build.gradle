@@ -43,7 +43,7 @@ nunit {
 }
 nunit.dependsOn msbuild
 
-task generateZip(dependsOn: msbuild, type: Zip) {
+task generateZip(dependsOn: nunit, type: Zip) {
     from (msbuild.mainProject.properties.TargetDir) {
         include '*.exe'
         include '*.dll'
