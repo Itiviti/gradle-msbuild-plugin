@@ -74,18 +74,6 @@
     <Content Include="Resources\visualstudio14.sln">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\..\..\..\packages\MSBuild.0.1.2\tools\Unix\Microsoft.CSharp.targets">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\..\packages\MSBuild.0.1.2\tools\Unix\Microsoft.CSharp.CurrentVersion.targets">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\..\packages\MSBuild.0.1.2\tools\Unix\Microsoft.Common.targets">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\..\packages\MSBuild.0.1.2\tools\Unix\Microsoft.Common.CurrentVersion.targets">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ProjectFileParser\ProjectFileParser.csproj">
