@@ -1,5 +1,3 @@
-import org.gradle.internal.os.OperatingSystem;
-
 plugins {
     id 'nu.studer.plugindev' version '1.0.3'
     id 'com.jfrog.bintray' version '1.2'
@@ -52,10 +50,6 @@ task generateZip(dependsOn: nunit, type: Zip) {
     destinationDir file('src/main/resources/META-INF/')
     archiveName 'ProjectFileParser.zip'
 }
-
-msbuild.onlyIf { OperatingSystem.current().windows }
-nunit.onlyIf { OperatingSystem.current().windows }
-generateZip.onlyIf { OperatingSystem.current().windows }
 
 jar.dependsOn generateZip
 
