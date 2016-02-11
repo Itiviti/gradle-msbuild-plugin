@@ -7,7 +7,7 @@
 
 ### Changed
 * assemblyInfoPatcher is now updating all projects by default
-* ProjectFileParser now requires .Net Framework 4.5.2
+* ProjectFileParser now requires .Net Framework 4.5.1
 
 ## 2.12
 
