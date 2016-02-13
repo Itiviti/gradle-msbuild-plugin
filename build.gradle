@@ -45,6 +45,8 @@ task generateZip(dependsOn: nunit, type: Zip) {
     from (msbuild.mainProject.properties.TargetDir) {
         include '*.exe'
         include '*.dll'
+        include '*.targets'
+        include '*.props'
     }
     into '/'
     destinationDir file('src/main/resources/META-INF/')
