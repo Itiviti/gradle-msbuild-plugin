@@ -1,0 +1,185 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{05305EC4-CAAE-403E-A6C2-8052EFB474B7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>POffice</RootNamespace>
+    <AssemblyName>POffice</AssemblyName>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <StartupObject>
+    </StartupObject>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="About.Designer.cs">
+      <DependentUpon>About.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ClosableTabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="CodeDataGridView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CodeDataGridView.Designer.cs">
+      <DependentUpon>CodeDataGridView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CodeTableMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CodeTableMain.Designer.cs">
+      <DependentUpon>CodeTableMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ExcelExporter.cs" />
+    <Compile Include="GlobalPath.cs" />
+    <Compile Include="Help.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Help.Designer.cs">
+      <DependentUpon>Help.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LoginPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="LoginPanel.Designer.cs">
+      <DependentUpon>LoginPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Memento\CircularStack.cs" />
+    <Compile Include="Memento\IMemento.cs" />
+    <Compile Include="Memento\UndoRedo.cs" />
+    <Compile Include="SqlEditor.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DB.cs" />
+    <Compile Include="POfficeMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="POfficeMain.Designer.cs">
+      <DependentUpon>POfficeMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="About.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CodeDataGridView.resx">
+      <DependentUpon>CodeDataGridView.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CodeTableMain.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CodeTableMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Help.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>Help.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoginPanel.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>LoginPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="POfficeMain.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>POfficeMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SQL.resx">
+      <DependentUpon>SQL.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SqlEditor.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>SqlEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="SQL.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SQL.designer.cs">
+      <DependentUpon>SQL.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SqlExecutor.cs" />
+    <Compile Include="SqlParser.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Graphics\Image\About.png" />
+    <None Include="Graphics\Image\Help.png" />
+    <None Include="Graphics\Image\Message.png" />
+    <None Include="Graphics\Image\Param.png" />
+    <None Include="Graphics\Image\POffice.png" />
+    <None Include="Graphics\Image\SQL.png" />
+    <None Include="Graphics\Icon\IconAbout.ico" />
+    <None Include="Graphics\Icon\IconHelp.ico" />
+    <None Include="Graphics\Icon\IconMessage.ico" />
+    <None Include="Graphics\Icon\IconParam.ico" />
+    <None Include="Graphics\Icon\IconPOffice.ico" />
+    <None Include="Graphics\Icon\IconSQL.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

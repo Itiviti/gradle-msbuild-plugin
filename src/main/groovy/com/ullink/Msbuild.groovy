@@ -1,4 +1,7 @@
 package com.ullink
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.nio.file.Files
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
@@ -70,30 +73,39 @@ class Msbuild extends ConventionTask {
         if (!new File(file.toString()).exists()) {
             throw new GradleException("Project/Solution file $file does not exist")
         }
+        File tempDir = Files.createTempDirectory('ProjectFileParser').toFile()
+        tempDir.deleteOnExit()
 
-        File tmp = File.createTempFile('ProjectFileParser', '.exe', temporaryDir)
+        def zipFileStream = this.class.getResourceAsStream("/META-INF/ProjectFileParser.zip")
+        ZipInputStream zis = new ZipInputStream(zipFileStream)
+        ZipEntry ze = zis.getNextEntry()
+        while (ze != null) {
+            String fileName = ze.getName()
+            File target = new File(tempDir, fileName)
+            target.newOutputStream().leftShift(zis).close()
+            target.deleteOnExit()
+            ze = zis.getNextEntry()
+        }
+        zis.closeEntry()
+        zis.close()
+
+        def executable = new File(tempDir, 'ProjectFileParser.exe')
+        def builder = resolver.executeDotNet(executable)
+        builder.command().add(file.toString())
+        def proc = builder.start()
+        def stderrBuffer = new StringBuffer()
+        proc.consumeProcessErrorStream(stderrBuffer)
         try {
-            def src = getClass().getResourceAsStream('/META-INF/bin/ProjectFileParser.exe')
-            tmp.newOutputStream().leftShift(src).close();
-            def builder = resolver.executeDotNet(tmp)
-            builder.command().add(file.toString())
-            def proc = builder.start()
-            def stderrBuffer = new StringBuffer()
-            proc.consumeProcessErrorStream(stderrBuffer)
-            try {
-                proc.out.leftShift(JsonOutput.toJson(getInitProperties())).close()
-                return new JsonSlurper().parseText(new FilterJson(proc.in).toString())
-            }
-            finally {
-                if (proc.waitFor() != 0) {
-                    stderrBuffer.eachLine { line ->
-                        logger.error line
-                    }
-                    throw new GradleException('Project file parsing failed')
+            proc.out.leftShift(JsonOutput.toJson(getInitProperties())).close()
+            return new JsonSlurper().parseText(new FilterJson(proc.in).toString())
+        }
+        finally {
+            if (proc.waitFor() != 0) {
+                stderrBuffer.eachLine { line ->
+                    logger.error line
                 }
+                throw new GradleException('Project file parsing failed')
             }
-        } finally {
-            tmp.delete()
         }
     }
 

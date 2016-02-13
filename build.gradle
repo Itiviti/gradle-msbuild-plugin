@@ -1,10 +1,9 @@
-import org.gradle.internal.os.OperatingSystem;
-
 plugins {
     id 'nu.studer.plugindev' version '1.0.3'
     id 'com.jfrog.bintray' version '1.2'
-    id 'com.ullink.msbuild' version '2.11'
+    id 'com.ullink.msbuild' version '2.12'
     id 'com.ullink.nuget' version '2.13'
+    id 'com.ullink.nunit' version '1.5'
     id 'net.researchgate.release' version '2.3.4'
 }
 
@@ -25,27 +24,36 @@ dependencies {
     compile 'commons-io:commons-io:2.4'
 }
 
+nugetRestore {
+    solutionFile = file('ProjectFileParser.sln')
+}
+
 msbuild.dependsOn nugetRestore
-msbuild.onlyIf { OperatingSystem.current().windows }
 msbuild {
     solutionFile = file('ProjectFileParser.sln')
     configuration = 'Release'
     projectName = 'ProjectFileParser'
 }
 
-task generateExe(dependsOn: msbuild, type: Exec) {
-    workingDir = msbuild.mainProject.getProjectPropertyPath('OutputPath')
-    commandLine = [file('packages/ILRepack.1.26.0/tools/ILRepack.exe'),
-                   '/log', '/wildcards', '/internalize', '/ndebug',
-                   '/out:'+file('src/main/resources/META-INF/bin/ProjectFileParser.exe'),
-                   msbuild.mainProject.properties.TargetPath,
-                   'Newtonsoft.Json.dll']
+nunit {
+    nunitVersion = '3.0.1'
+    testAssemblies = [ msbuild.projects['ProjectFileParser_Tests'].properties.TargetPath ]
 }
-generateExe.onlyIf { OperatingSystem.current().windows }
+nunit.dependsOn msbuild
 
-nugetRestore {
-    solutionFile = file('ProjectFileParser.sln')
+task generateZip(dependsOn: nunit, type: Zip) {
+    from (msbuild.mainProject.properties.TargetDir) {
+        include '*.exe'
+        include '*.dll'
+        include '*.targets'
+        include '*.props'
+    }
+    into '/'
+    destinationDir file('src/main/resources/META-INF/')
+    archiveName 'ProjectFileParser.zip'
 }
+
+jar.dependsOn generateZip
 
 bintray {
     // to remove when upgraded plugindev to 1.0.4
