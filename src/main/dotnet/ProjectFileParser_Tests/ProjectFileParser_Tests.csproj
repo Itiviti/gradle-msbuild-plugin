@@ -83,20 +83,14 @@
   </ItemGroup>
   <ItemGroup>
     <TargetFiles Include="..\..\..\..\packages\MSBuild.0.1.2\tools\Unix\*.targets">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         <Link>targets\%(Filename)%(Extension)</Link>
     </TargetFiles>
     <TargetFiles Include="..\..\..\..\packages\MSBuild.0.1.2\tools\Unix\*.props">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         <Link>targets\%(Filename)%(Extension)</Link>
     </TargetFiles>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
   <Target Name="AfterBuild">
+    <Copy SourceFiles="@(TargetFiles)" DestinationFolder="$(OutputPath)" ContinueOnError="true" />
   </Target>
-  -->
 </Project>
