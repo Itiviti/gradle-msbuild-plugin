@@ -12,7 +12,10 @@ namespace ProjectFileParser
     {
         public static Project[] GetProjects(SolutionFile solution, IDictionary<string, string> args)
         {
-            return solution.ProjectsInOrder.Select(p => LoadProject(p.AbsolutePath, SpecializeArgsForSolutionProject(solution, p, args))).ToArray();
+            return solution.ProjectsInOrder
+                .Where(p => p.ProjectType != SolutionProjectType.SolutionFolder)
+                .Select(p => LoadProject(p.AbsolutePath, SpecializeArgsForSolutionProject(solution, p, args)))
+                .ToArray();
         }
 
         private static IDictionary<string, string> SpecializeArgsForSolutionProject(SolutionFile solution, ProjectInSolution p, IDictionary<string, string> args)
