@@ -28,13 +28,41 @@ namespace ProjectFileParser_Tests
         public void Project_ToJson_Success(string relativePath, int referenceCount, int compileCount, string projectName)
         {
             var path = GetResourcePath(relativePath);
-            var project = ProjectHelpers.Load(path);
+            var project = ProjectHelpers.LoadProject(path, new Dictionary<string, string>());
             var json = Jsonify.ToJson(project);
 
             Assert.AreEqual(referenceCount, json[projectName]["Reference"].Count());
             Assert.AreEqual(compileCount, json[projectName]["Compile"].Count());
             Assert.AreEqual(projectName, json[projectName]["Properties"]["MSBuildProjectName"].Value<String>());
         }
+
+        [TestCase]
+        public void Project_Parameters_AreApplied()
+        {
+            var path = GetResourcePath("Resources/dummy.csproj");
+            var args = new Dictionary<string, string>();
+            args["Configuration"] = "Release";
+            var project = ProjectHelpers.LoadProject(path, args);
+            var json = Jsonify.ToJson(project);
+
+            Assert.AreEqual("Release", json["dummy"]["Properties"]["Configuration"].Value<String>());
+        }
+
+        [TestCase]
+        public void Solution_Parameters_AreApplied()
+        {
+            var path = GetResourcePath("Resources/dummy.sln");
+            var args = new Dictionary<string, string>();
+            args["Configuration"] = "Release";
+            args["Platform"] = "x86";
+            var projects = ProjectHelpers.GetProjects(SolutionFile.Parse(path), args);
+            var json = Jsonify.ToJson(projects);
+
+            Assert.AreEqual("Release", json["dummy"]["Properties"]["Configuration"].Value<String>());
+            Assert.AreEqual("AnyCPU", json["dummy"]["Properties"]["Platform"].Value<String>());
+        }
+
+
 
         private static IEnumerable<TestCaseData> SolutionData()
         {
@@ -50,7 +78,7 @@ namespace ProjectFileParser_Tests
             var path = GetResourcePath(relativePath);
             SolutionFile solution = SolutionFile.Parse(path);
 
-            var json = Jsonify.ToJson(solution);
+            var json = Jsonify.ToJson(ProjectHelpers.GetProjects(solution, new Dictionary<string, string>()));
             int i = 0;
             foreach (var project in json)
             {

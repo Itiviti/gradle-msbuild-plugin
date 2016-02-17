@@ -1,7 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Construction;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.Collections;
 
 namespace ProjectFileParser
 {
@@ -11,7 +14,8 @@ namespace ProjectFileParser
         {
             try
             {
-                var result = Parse(args[0]);
+                var obj = JObject.Parse(Console.In.ReadToEnd());
+                var result = Parse(args[0], obj);
                 Console.WriteLine(result.ToString());
             }
             catch (Exception e)
@@ -22,22 +26,32 @@ namespace ProjectFileParser
             return 0;
         }
 
-        static JObject Parse(string file)
+        static JObject Parse(string file, JObject args)
         {
             var isSolution = Path.GetExtension(file).Equals(".sln", StringComparison.InvariantCultureIgnoreCase);
-            return isSolution ? ParseSolution(file) : ParseProject(file);
+            return isSolution ? ParseSolution(file, args) : ParseProject(file, args);
         }
 
-        static JObject ParseSolution(string file)
+        static JObject ParseSolution(string file, JObject args)
         {
-            var solution = SolutionFile.Parse(file);
-            return Jsonify.ToJson(solution);
+            var projects = ProjectHelpers.GetProjects(SolutionFile.Parse(file), ParamsToDic(args));
+            return Jsonify.ToJson(projects);
         }
 
-        static JObject ParseProject(string file)
+        static JObject ParseProject(string file, JObject args)
         {
-            var project = ProjectHelpers.Load(file);
+            var project = ProjectHelpers.LoadProject(file, ParamsToDic(args));
             return Jsonify.ToJson(project);
+        }
+
+        static IDictionary<string, string> ParamsToDic(JObject args)
+        {
+            var dic = new Dictionary<string, string>();
+            foreach (var kvp in args)
+            {
+                dic[kvp.Key] = kvp.Value.Value<String>();
+            }
+            return dic;
         }
     }
 }

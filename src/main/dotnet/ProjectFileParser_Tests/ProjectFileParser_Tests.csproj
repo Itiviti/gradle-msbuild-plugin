@@ -68,6 +68,12 @@
     <Content Include="Resources\POfficeExe.csproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\dummy.sln">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\dummy.csproj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\visualstudio14.csproj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -9,12 +9,6 @@ namespace ProjectFileParser
 {
     public static class Jsonify
     {
-        public static JObject ToJson(SolutionFile solution)
-        {
-            var projects = solution.ProjectsInOrder.Select(p => ProjectHelpers.Load(p.AbsolutePath)).ToArray();
-            return ToJson(projects);
-        }
-
         public static JObject ToJson(params Project[] projects)
         {
             JObject json = new JObject();
