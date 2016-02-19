@@ -49,11 +49,14 @@ task generateZip(dependsOn: nunit, type: Zip) {
         include '*.props'
     }
     into '/'
-    destinationDir file('src/main/resources/META-INF/')
     archiveName 'ProjectFileParser.zip'
 }
 
-jar.dependsOn generateZip
+jar {
+    from(generateZip.outputs.files) {
+        into 'META-INF'
+    }
+}
 
 bintray {
     // to remove when upgraded plugindev to 1.0.4

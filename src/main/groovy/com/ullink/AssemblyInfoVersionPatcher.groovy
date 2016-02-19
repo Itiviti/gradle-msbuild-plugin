@@ -28,7 +28,7 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
             if (!version) return;
             project.tasks.withType(Msbuild) { task ->
                 task.projects.each { proj ->
-                    if (proj.value.getItems('Compile').intersect(files)) {
+                    if (proj.value.getItems('Compile').intersect(getFiles())) {
                         task.dependsOn this
                     }
                 }
