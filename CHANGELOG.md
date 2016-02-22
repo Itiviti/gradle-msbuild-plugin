@@ -1,5 +1,12 @@
 # gradle-msbuild-plugin changelog
 
+## 2.14
+
+### Fixed
+* solutionFile / projectFile now work also if relative (non-rooted)
+ paths are provided, as it used to before 2.13
+
+
 ## 2.13
 
 ### Added
