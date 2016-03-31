@@ -57,6 +57,14 @@ class Msbuild extends ConventionTask {
         solutionFile == null && getProjectFile() != null
     }
 
+    def getRootedProjectFile() {
+        project.file(getProjectFile())
+    }
+
+    def getRootedSolutionFile() {
+        project.file(getSolutionFile())
+    }
+
     Map<String, ProjectFileParser> getProjects() {
         resolveProject()
         allProjects
@@ -70,7 +78,7 @@ class Msbuild extends ConventionTask {
 
     def parseProjectFile(def file) {
         logger.info "Parsing file $file ..."
-        if (!new File(file.toString()).exists()) {
+        if (!file.exists()) {
             throw new GradleException("Project/Solution file $file does not exist")
         }
         File tempDir = Files.createTempDirectory('ProjectFileParser').toFile()
@@ -112,7 +120,7 @@ class Msbuild extends ConventionTask {
     boolean resolveProject() {
         if (projectParsed == null && parseProject) {
             if (isSolutionBuild()) {
-                def result = parseProjectFile(getSolutionFile())
+                def result = parseProjectFile(getRootedSolutionFile())
                 allProjects = result.collectEntries { [it.key, new ProjectFileParser(msbuild: this, eval: it.value)] }
                 def projectName = getProjectName()
                 if (projectName == null || projectName.isEmpty()) {
@@ -125,8 +133,9 @@ class Msbuild extends ConventionTask {
                     }
                 }
             } else if (isProjectBuild()) {
-                projectParsed = new ProjectFileParser(msbuild: this, eval: parseProjectFile(getProjectFile()))
-                allProjects[projectParsed.projectName] = projectParsed
+                def result = parseProjectFile(getRootedProjectFile())
+                allProjects = result.collectEntries {[it.key, new ProjectFileParser(msbuild: this, eval: it.value)]}
+                projectParsed = allProjects.values().first()
             }
         }
         projectParsed != null
@@ -154,9 +163,9 @@ class Msbuild extends ConventionTask {
         commandLineArgs += '/nologo'
 
         if (isSolutionBuild()) {
-            commandLineArgs += project.file(getSolutionFile())
+            commandLineArgs += getRootedSolutionFile()
         } else if (isProjectBuild()) {
-            commandLineArgs += project.file(getProjectFile())
+            commandLineArgs += getRootedProjectFile()
         }
 
         if (loggerAssembly) {
