@@ -24,6 +24,7 @@ class XbuildResolver implements IExecutableResolver {
         /*
             we can encounter the following scenario:
                 /Library/Frameworks/Mono.framework/Versions/4.0.0/lib/mono/4.5
+                /Library/Frameworks/Mono.framework/Versions/4.0.0/lib/mono/4.5-api
                 /Library/Frameworks/Mono.framework/Versions/4.0.0/lib/mono/xbuild/14.0
                 /Library/Frameworks/Mono.framework/Versions/4.0.0/lib/mono/xbuild/12.0
                 /Library/Frameworks/Mono.framework/Versions/3.12.0/lib/mono/4.5
@@ -35,23 +36,19 @@ class XbuildResolver implements IExecutableResolver {
                 /Library/Frameworks/Mono.framework/Versions/4.0.0/lib/mono/xbuild/12.0
                 /Library/Frameworks/Mono.framework/Versions/3.12.0/lib/mono/xbuild/12.0
                 /Library/Frameworks/Mono.framework/Versions/4.0.0/lib/mono/4.5
+                /Library/Frameworks/Mono.framework/Versions/4.0.0/lib/mono/4.5-api
                 /Library/Frameworks/Mono.framework/Versions/3.12.0/lib/mono/4.5
          */
         def existingXBuilds = xbuildRoots
             .collectMany { ["$it/lib/mono", "$it/lib/mono/xbuild"] }
             .collectMany { getVersionDirectories(it) }
-            .collect {
-                String versionString = it.substring(it.lastIndexOf('/') + 1);
-                [it, Float.parseFloat(versionString)]
-            }
-            .sort { -it[1] }
             .collectMany { [
                 [new File(it[0], "xbuild.exe"), it[1]],
                 [new File(it[0], "bin/xbuild.exe"), it[1]]
             ]}
             .findAll { it[0].exists() }
 
-        def foundXBuild = existingXBuilds.find { msbuild.version == null || msbuild.version.equals(String.valueOf(it[1])) }
+        def foundXBuild = existingXBuilds.find { msbuild.version == null || msbuild.version.equals("${it[1].major}.${it[1].minor}".toString()) }
         if (foundXBuild != null) {
             File file = foundXBuild[0]
             msbuild.logger.info("Resolved xbuild to: ${file.absolutePath}")
@@ -63,20 +60,19 @@ class XbuildResolver implements IExecutableResolver {
     }
 
     private static List<String> getOSXMonoRootDirectories() {
-        getVersionDirectories("/Library/Frameworks/Mono.framework/Versions/")
+        getVersionDirectories("/Library/Frameworks/Mono.framework/Versions/").collect { it[0] }
     }
 
-    private static List<String> getVersionDirectories(String path) {
+    private static List<String[]> getVersionDirectories(String path) {
         File file = new File(path)
         if (!file.exists()) {
             return []
         }
 
         return file.listFiles((FileFilter) DirectoryFileFilter.INSTANCE)
-                .collect { [VersionNumber.parse(it.name), it.absolutePath] }
-                .findAll { !VersionNumber.UNKNOWN.equals(it[0]) }
-                .sort { a, b -> b[0].compareTo(a[0]) }
-                .collect { it[1] }
+                .collect { [it.absolutePath, VersionNumber.parse(it.name)] }
+                .findAll { !VersionNumber.UNKNOWN.equals(it[1]) }
+                .sort { a, b -> b[1].compareTo(a[1]) }
     }
 
 
