@@ -54,7 +54,7 @@ class ProjectFileParser {
     }
 
     File getDotnetDebugFile() {
-        File target = project.file(properties.TargetPath)
+        File target = getDotnetAssemblyFile()
         new File(renameExtension(target.path, OperatingSystem.current().windows ? '.pdb' : '.mdb'))
     }
 
