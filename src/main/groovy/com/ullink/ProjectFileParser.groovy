@@ -23,7 +23,7 @@ class ProjectFileParser {
     }
 
     def getProperties() {
-        eval.Properties
+        eval.Properties ?: [:]
     }
 
     def getReferences() {

@@ -24,9 +24,21 @@ class XbuildLocateTest {
     @Test
     public void testXBuildCanBeFound() {
         def resolver = new XbuildResolver()
+
+        // Unspecified version
         Project p = ProjectBuilder.builder().build()
         p.apply plugin: 'msbuild'
         def xbuildDir = resolver.getXBuildDir(p.tasks.msbuild)
+        assertNotNull(xbuildDir)
+
+        // Specified version
+        p = ProjectBuilder.builder().build()
+        p.apply plugin: 'msbuild'
+        def xbuildVersion = new BigDecimal(new File(xbuildDir).name)
+        p.msbuild {
+            version = xbuildVersion
+        }
+        xbuildDir = resolver.getXBuildDir(p.tasks.msbuild)
         assertNotNull(xbuildDir)
     }
 
