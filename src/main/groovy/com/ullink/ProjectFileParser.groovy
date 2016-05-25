@@ -45,7 +45,12 @@ class ProjectFileParser {
     }
 
     File getDotnetAssemblyFile() {
-        project.file(properties.TargetPath)
+        if (properties.TargetPath) {
+            return project.file(properties.TargetPath)
+        }
+        // When parsing FSharp project with sln, TargetPath is missing
+        def ext = properties.OutputType in ['Exe', 'Winexe'] ? 'exe' : 'dll'
+        new File(properties.MSBuildProjectDirectory, "${properties.OutputPath}${properties.AssemblyName}.${ext}")
     }
 
     File getDotnetDebugFile() {
