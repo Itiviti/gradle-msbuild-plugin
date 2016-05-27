@@ -44,13 +44,9 @@
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Build">
-      <HintPath>..\..\..\..\packages\MSBuild.0.1.2\tools\Unix\Microsoft.Build.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Build.Utilities.Core, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\packages\MSBuild.0.1.2\tools\Unix\Microsoft.Build.Utilities.Core.dll</HintPath>
-    </Reference>
+    <Reference Include="Microsoft.Build, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Build.Framework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Build.Utilities.Core, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"/>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -66,14 +62,6 @@
     <Compile Include="ProjectHelpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <TargetFiles Include="..\..\..\..\packages\MSBuild.0.1.2\tools\Unix\*.targets">
-        <Link>targets\%(Filename)%(Extension)</Link>
-    </TargetFiles>
-    <TargetFiles Include="..\..\..\..\packages\MSBuild.0.1.2\tools\Unix\*.props">
-        <Link>targets\%(Filename)%(Extension)</Link>
-    </TargetFiles>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AfterBuild">
