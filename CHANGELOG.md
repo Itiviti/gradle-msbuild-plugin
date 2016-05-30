@@ -1,5 +1,11 @@
 # gradle-msbuild-plugin changelog
 
+## 2.15
+
+### Fixed
+* although the recommended use is to build through the solution, parsing the project file only now works (again, regression since 2.13)
+* support for mono '-api' suffixed platform files
+
 ## 2.14
 
 ### Fixed
