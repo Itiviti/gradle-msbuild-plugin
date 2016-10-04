@@ -1,5 +1,10 @@
 # gradle-msbuild-plugin changelog
 
+## 2.16
+
+### Fixed
+* Registry keys are found when looking for msbuild versions. The issue is related to the JNA version used in other plugins.
+
 ## 2.15
 
 ### Fixed
