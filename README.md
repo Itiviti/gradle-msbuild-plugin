@@ -24,7 +24,7 @@ Sample usage:
         }
     
         dependencies {
-            classpath "com.ullink.gradle:gradle-msbuild-plugin:2.9"
+            classpath "com.ullink.gradle:gradle-msbuild-plugin:2.16"
         }
     }
     
