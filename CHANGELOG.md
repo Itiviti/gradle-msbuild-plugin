@@ -1,5 +1,8 @@
 # gradle-msbuild-plugin changelog
 
+## 2.17
+* support resolving msbuild for version >= 15.0 by vswhere
+
 ## 2.16
 
 ### Fixed
