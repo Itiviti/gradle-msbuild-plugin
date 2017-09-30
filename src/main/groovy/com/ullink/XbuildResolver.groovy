@@ -13,7 +13,7 @@ class XbuildResolver implements IExecutableResolver {
 
     void setupExecutable(Msbuild msbuild) {
         msbuild.executable = 'xbuild.exe'
-        if (msbuild.msbuildDir != null) {
+        if (msbuild.msbuildDir == null) {
             msbuild.msbuildDir = getXBuildDir(msbuild)
         }
     }
