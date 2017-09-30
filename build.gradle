@@ -64,9 +64,16 @@ task downloadVsWhere(type: de.undercouch.gradle.tasks.download.Download) {
 }
 
 jar {
-    into ('META-INF') {
-        from(generateZip.outputs.files)
-        from(downloadVsWhere.outputs.files)
+    from(generateZip.outputs.files) {
+        into ('META-INF')
+    }
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = [ downloadVsWhere.temporaryDir ]
+        }
     }
 }
 
@@ -94,4 +101,5 @@ plugindev {
     done()
 }
 
-project.tasks.afterReleaseBuild.dependsOn project.tasks.bintrayUpload
+processResources.dependsOn downloadVsWhere
+afterReleaseBuild.dependsOn bintrayUpload

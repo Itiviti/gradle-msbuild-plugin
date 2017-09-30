@@ -16,11 +16,16 @@ class MsbuildResolver implements IExecutableResolver {
         File tempDir = Files.createTempDirectory('vswhere').toFile()
         tempDir.deleteOnExit()
 
-        def vswhereURL = MsbuildResolver.getResource("/META-INF/vswhere.exe")
+        def vswhereURL = MsbuildResolver.getResource("/vswhere.exe")
         def vswhereFile = new File(tempDir, 'vwshere.exe')
         FileUtils.copyURLToFile(vswhereURL, vswhereFile)
         def vswhere = new ProcessBuilder(vswhereFile.toString())
-        vswhere.command() << '-latest' << '-products' << '*' << '-requires' << 'Microsoft.Component.MSBuild' << '-property' << 'installationPath'
+        if (msbuild.version) {
+            vswhere.command() << '-version' << msbuild.version
+        } else {
+            vswhere.command() << '-latest'
+        }
+        vswhere.command() << '-products' << '*' << '-requires' << 'Microsoft.Component.MSBuild' << '-property' << 'installationPath'
 
         def proc = vswhere.start()
         proc.waitFor()
