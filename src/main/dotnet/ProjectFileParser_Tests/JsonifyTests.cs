@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Microsoft.Build.Construction;
+using Newtonsoft.Json.Linq;
+using NUnit.Framework;
+using ProjectFileParser;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Build.Construction;
-using Newtonsoft.Json.Linq;
-using NUnit.Framework;
-using ProjectFileParser;
 
 namespace ProjectFileParser_Tests
 {
@@ -49,6 +49,31 @@ namespace ProjectFileParser_Tests
         }
 
         [TestCase]
+        public void Project_NugetDependencies_AreParsed()
+        {
+            var path = GetResourcePath("Resources/dummy.csproj");
+            var args = new Dictionary<string, string>();
+            args["Configuration"] = "Release";
+            var project = ProjectHelpers.LoadProject(path, args);
+            var json = Jsonify.ToJson(project);
+
+            var dependencies = ((JArray)json["dummy"]["NugetDependencies"]);
+            Assert.AreEqual(5, dependencies.Count);
+            AssertDependency(dependencies, 0, "Microsoft.Web.Xdt", "2.1.1");
+            AssertDependency(dependencies, 1, "MSBuild", "0.1.2");
+            AssertDependency(dependencies, 2, "Newtonsoft.Json", "8.0.2");
+            AssertDependency(dependencies, 3, "NuGet.Core", "2.14.0");
+            AssertDependency(dependencies, 4, "FooBar", "0.2.3.0-gerrit96533-SNAPSHOT", true);
+        }
+
+        private void AssertDependency(JArray dependencies, int index, string id, string version, bool isDevelopmentDependency = false)
+        {
+            Assert.AreEqual(id, dependencies[index]["Id"].Value<string>());
+            Assert.AreEqual(version, dependencies[index]["Version"].Value<string>());
+            Assert.AreEqual(isDevelopmentDependency, dependencies[index]["IsDevelopmentDependency"].Value<bool>());
+        }
+
+        [TestCase]
         public void Solution_Parameters_AreApplied()
         {
             var path = GetResourcePath("Resources/dummy.sln");
@@ -69,7 +94,7 @@ namespace ProjectFileParser_Tests
             // solution created by Visual Studio 2015
             yield return new TestCaseData("Resources/visualstudio14.sln", new string[] { "visualstudio14" });
             // solution created by Visual Studio 2005
-            yield return new TestCaseData("Resources/POffice.sln", new string[] { "POffice", "POfficeExe"});
+            yield return new TestCaseData("Resources/POffice.sln", new string[] { "POffice", "POfficeExe" });
         }
 
         [TestCaseSource("SolutionData")]

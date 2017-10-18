@@ -1,5 +1,11 @@
 # gradle-msbuild-plugin changelog
 
+## 2.18
+
+### Added
+* ProjectFileParser now parses "NugetDependencies" as an array of dependencies on the project.
+  Available properties for a dependency are "Id", "Version", "TargetFramework", "IsDevelopmentDependency", "RequireReinstallation", "VersionConstraint"
+
 ## 2.17
 * support resolving msbuild for version >= 15.0 by vswhere
 
