@@ -16,7 +16,14 @@ Prior to execution, this task will parse the provided project file and gather al
 
 OutputPath (e.g. bin/Debug) & Intermediary (e.g. obj/Debug) are set as output directories for the task.
 
-Sample usage:
+To apply the plugin:
+
+    // Starting from gradle 2.1
+    plugins {
+      id "com.ullink.msbuild" version "2.18"
+    }
+
+or
 
     buildscript {
         repositories {
@@ -24,11 +31,12 @@ Sample usage:
         }
     
         dependencies {
-            classpath "com.ullink.gradle:gradle-msbuild-plugin:2.16"
+            classpath "com.ullink.gradle:gradle-msbuild-plugin:2.18"
         }
     }
-    
-    apply plugin:'msbuild'
+    apply plugin:'com.ullink.msbuild'
+
+and configure by:
 
     msbuild {
       // mandatory (one of those)
