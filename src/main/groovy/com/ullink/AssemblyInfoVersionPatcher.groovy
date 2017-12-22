@@ -44,8 +44,8 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
 
     @Input
     def informationalVersion
-	
-	@Input
+    
+    @Input
     def assemblyDescription = ''
 
     @Input
