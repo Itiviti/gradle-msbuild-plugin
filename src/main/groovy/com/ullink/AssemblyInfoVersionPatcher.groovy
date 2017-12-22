@@ -64,7 +64,7 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
             replace(it, 'AssemblyVersion', getVersion())
             replace(it, 'AssemblyFileVersion', getFileVersion())
             replace(it, 'AssemblyInformationalVersion', getInformationalVersion())
-			replace(it, 'AssemblyDescription', getAssemblyDescription())
+	    replace(it, 'AssemblyDescription', getAssemblyDescription())
         }
     }
 
