@@ -44,6 +44,9 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
 
     @Input
     def informationalVersion
+    
+    @Input
+    def assemblyDescription = ''
 
     @Input
     def charset = "UTF-8"
@@ -61,6 +64,7 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
             replace(it, 'AssemblyVersion', getVersion())
             replace(it, 'AssemblyFileVersion', getFileVersion())
             replace(it, 'AssemblyInformationalVersion', getInformationalVersion())
+            replace(it, 'AssemblyDescription', getAssemblyDescription())
         }
     }
 
