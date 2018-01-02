@@ -64,7 +64,10 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
             replace(it, 'AssemblyVersion', getVersion())
             replace(it, 'AssemblyFileVersion', getFileVersion())
             replace(it, 'AssemblyInformationalVersion', getInformationalVersion())
-            replace(it, 'AssemblyDescription', getAssemblyDescription())
+			if (getAssemblyDescription() != '') {
+				//only change the description if it is specified in this build script.
+				replace(it, 'AssemblyDescription', getAssemblyDescription())
+			}
         }
     }
 
