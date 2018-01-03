@@ -61,13 +61,20 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
     void run() {
         getPatchedFiles().each {
             logger.info("Replacing version attributes in $it")
-            replace(it, 'AssemblyVersion', getVersion())
-            replace(it, 'AssemblyFileVersion', getFileVersion())
-            replace(it, 'AssemblyInformationalVersion', getInformationalVersion())
-			if (getAssemblyDescription() != '') {
-				//only change the description if it is specified in this build script.
-				replace(it, 'AssemblyDescription', getAssemblyDescription())
-			}
+            //only change the values if they specified in this build script.
+            //if the parameters are blank, then keep whatever is already in the assemblyinfo file.
+            if (getVersion() != '') {
+                replace(it, 'AssemblyVersion', getVersion())
+            }
+            if (getFileVersion() != '') {
+                replace(it, 'AssemblyFileVersion', getFileVersion())
+            }
+            if (getInformationalVersion() != '') {
+                replace(it, 'AssemblyInformationalVersion', getInformationalVersion())
+            }
+            if (getAssemblyDescription() != '') {
+                replace(it, 'AssemblyDescription', getAssemblyDescription())
+            }
         }
     }
 
