@@ -63,22 +63,15 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
             logger.info("Replacing version attributes in $it")
             //only change the values if they specified in this build script.
             //if the parameters are blank, then keep whatever is already in the assemblyinfo file.
-            if (getVersion() != '') {
-                replace(it, 'AssemblyVersion', getVersion())
-            }
-            if (getFileVersion() != '') {
-                replace(it, 'AssemblyFileVersion', getFileVersion())
-            }
-            if (getInformationalVersion() != '') {
-                replace(it, 'AssemblyInformationalVersion', getInformationalVersion())
-            }
-            if (getAssemblyDescription() != '') {
-                replace(it, 'AssemblyDescription', getAssemblyDescription())
-            }
+            replace(it, 'AssemblyVersion', getVersion())
+            replace(it, 'AssemblyFileVersion', getFileVersion())
+            replace(it, 'AssemblyInformationalVersion', getInformationalVersion())
+            replace(it, 'AssemblyDescription', getAssemblyDescription())
         }
     }
 
     void replace(def file, def name, def value) {
+		if (!value || value == '') return
         if (FilenameUtils.getExtension(file.name) == 'fs')
             project.ant.replaceregexp(file: file, match: /^\[<assembly: $name\s*\(".*"\)\s*>\]$/, replace: "[<assembly: ${name}(\"${value}\")>]", byline: true, encoding: charset)
         else
