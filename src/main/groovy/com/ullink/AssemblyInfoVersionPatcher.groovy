@@ -69,6 +69,10 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
     }
 
     void replace(def file, def name, def value) {
+        //only change the assembly values if they specified here (not blank or null)
+        //if the parameters are blank, then keep whatever is already in the assemblyinfo file.
+        if (value == null || value.isEmpty()) return
+    
         if (FilenameUtils.getExtension(file.name) == 'fs')
             project.ant.replaceregexp(file: file, match: /^\[<assembly: $name\s*\(".*"\)\s*>\]$/, replace: "[<assembly: ${name}(\"${value}\")>]", byline: true, encoding: charset)
         else if (FilenameUtils.getExtension(file.name) == 'vb')
