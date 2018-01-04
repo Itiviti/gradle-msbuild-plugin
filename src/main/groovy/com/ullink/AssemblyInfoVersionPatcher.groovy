@@ -75,6 +75,8 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
     
         if (FilenameUtils.getExtension(file.name) == 'fs')
             project.ant.replaceregexp(file: file, match: /^\[<assembly: $name\s*\(".*"\)\s*>\]$/, replace: "[<assembly: ${name}(\"${value}\")>]", byline: true, encoding: charset)
+        else if (FilenameUtils.getExtension(file.name) == 'vb')
+            project.ant.replaceregexp(file: file, match: /^<Assembly: $name\s*\(".*"\)\s*>$/, replace: "<Assembly: ${name}(\"${value}\")>", byline: true, encoding: charset)
         else
             project.ant.replaceregexp(file: file, match: /^\[assembly: $name\s*\(".*"\)\s*\]$/, replace: "[assembly: ${name}(\"${value}\")]", byline: true, encoding: charset)
     }
