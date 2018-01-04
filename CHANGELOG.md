@@ -1,5 +1,14 @@
 # gradle-msbuild-plugin changelog
 
+## 2.19
+
+### Added
+* added support for updating assembly info for `VB.Net` projects in AssemblyInfo.vb files.
+
+### Changed
+* changed the `AssemblyInfoVersionPatcher` so that it will not overwrite values in the AssemblyInfo files if the value being set is blank.  
+* changed NuGet.exe dependency from `2.8.6` to version `4.4.0`
+
 ## 2.18
 
 ### Added

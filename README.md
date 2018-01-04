@@ -75,12 +75,26 @@ and configure by:
     }
 
     assemblyInfoPatcher {
-      // mandatory if you want to patch your AssemblyInfo.cs/fs
+      // mandatory if you want to patch your AssemblyInfo.cs/fs/vb
+            
+      // replaces the AssemblyVersion value in your AssemblyInfo file.
+      // when explicitly set to blank, AssemblyVersion will not be updated and will keep the existing value in your AssemblyInfo file
       // TODO: not yet normalized, beware than .Net version must be X.Y.Z.B format, with Z/B optionals
       version = project.version + '.0.0'
 
+      // replaces the AssemblyFileVersion value in your AssemblyInfo file.
       // defaults to above version, fewer restrictions on the format
+      // when explicitly set to blank, AssemblyFileVersion will not be updated and will keep the existing value in your AssemblyInfo file
       fileVersion = version + '-Beta'
+      
+      // replaces the AssemblyInformationalVersion value in your AssemblyInfo file.
+      // defaults to above version, fewer restrictions on the format
+      // when explicitly set to blank, AssemblyInformationalVersion will not be updated and will keep the existing value in your AssemblyInfo file
+      informationalVersion = version + '-Beta'
+      
+      // replaces the AssemblyDescription in the your AssemblyInfo file.
+      // when set to blank (default), AssemblyDescription will not be updated and will keep the existing value in your AssemblyInfo file
+      description = 'My Project Description'
 
       // default to msbuild main project (of solution)
       projects = [ 'MyProject1', 'MyProject2' ]
