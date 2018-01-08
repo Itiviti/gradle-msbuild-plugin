@@ -18,87 +18,92 @@ OutputPath (e.g. bin/Debug) & Intermediary (e.g. obj/Debug) are set as output di
 
 To apply the plugin:
 
-    // Starting from gradle 2.1
-    plugins {
-      id "com.ullink.msbuild" version "2.18"
-    }
+```groovy
+// Starting from gradle 2.1
+plugins {
+  id "com.ullink.msbuild" version "2.18"
+}
+```
 
 or
-
-    buildscript {
-        repositories {
-          mavenCentral()
-        }
-    
-        dependencies {
-            classpath "com.ullink.gradle:gradle-msbuild-plugin:2.18"
-        }
+```groovy
+buildscript {
+    repositories {
+      mavenCentral()
     }
-    apply plugin:'com.ullink.msbuild'
+
+    dependencies {
+        classpath "com.ullink.gradle:gradle-msbuild-plugin:2.18"
+    }
+}
+apply plugin:'com.ullink.msbuild'
+```
 
 and configure by:
 
-    msbuild {
-      // mandatory (one of those)
-      solutionFile = 'my-solution.sln'
-      projectFile = file('src/my-project.csproj')
-      
-      // MsBuild project name (/p:Project=...)
-      projectName = project.name
-      
-      // Verbosity (/v:detailed, by default uses gradle logging level)
-      verbosity = 'detailed'
-      
-      // targets to execute (/t:Clean;Rebuild, no default)
-      targets = ['Clean', 'Rebuild']
-      
-      // Below values can override settings from the project file
-      
-      // overrides project OutputPath
-      destinationDir = 'build/msbuild/bin'
-      
-      // overrides project IntermediaryOutputPath
-      intermediateDir = 'build/msbuild/obj'
-      
-      // Generates XML documentation file (from javadoc through custom DocLet)
-      generateDoc = false
-      
-      // Other msbuild options can be set:
-      // loggerAssembly, generateDoc, debugType, optimize, debugSymbols, configuration, platform, defineConstants ...
-      
-      // you can also provide properties by name (/p:SomeProperty=Value)
-      parameters.SomeProperty = 'Value'
-      
-      // Or, if you use built-in msbuild parameters that aren't directly available here,
-      // you can take advantage of the ExtensionAware interface
-      ext["flp1"] = "LogFile=" + file("${project.name}.errors.log").path + ";ErrorsOnly;Verbosity=diag"
-    }
+```groovy
+msbuild {
+  // mandatory (one of those)
+  solutionFile = 'my-solution.sln'
+  projectFile = file('src/my-project.csproj')
+  
+  // MsBuild project name (/p:Project=...)
+  projectName = project.name
+  
+  // Verbosity (/v:detailed, by default uses gradle logging level)
+  verbosity = 'detailed'
+  
+  // targets to execute (/t:Clean;Rebuild, no default)
+  targets = ['Clean', 'Rebuild']
+  
+  // Below values can override settings from the project file
+  
+  // overrides project OutputPath
+  destinationDir = 'build/msbuild/bin'
+  
+  // overrides project IntermediaryOutputPath
+  intermediateDir = 'build/msbuild/obj'
+  
+  // Generates XML documentation file (from javadoc through custom DocLet)
+  generateDoc = false
+  
+  // Other msbuild options can be set:
+  // loggerAssembly, generateDoc, debugType, optimize, debugSymbols, configuration, platform, defineConstants ...
+  
+  // you can also provide properties by name (/p:SomeProperty=Value)
+  parameters.SomeProperty = 'Value'
+  
+  // Or, if you use built-in msbuild parameters that aren't directly available here,
+  // you can take advantage of the ExtensionAware interface
+  ext["flp1"] = "LogFile=" + file("${project.name}.errors.log").path + ";ErrorsOnly;Verbosity=diag"
+}
 
-    assemblyInfoPatcher {
-      // mandatory if you want to patch your AssemblyInfo.cs/fs/vb
-            
-      // replaces the AssemblyVersion value in your AssemblyInfo file.
-      // when explicitly set to blank, AssemblyVersion will not be updated and will keep the existing value in your AssemblyInfo file
-      // TODO: not yet normalized, beware than .Net version must be X.Y.Z.B format, with Z/B optionals
-      version = project.version + '.0.0'
+assemblyInfoPatcher {
+  // mandatory if you want to patch your AssemblyInfo.cs/fs/vb
+        
+  // replaces the AssemblyVersion value in your AssemblyInfo file.
+  // when explicitly set to blank, AssemblyVersion will not be updated and will keep the existing value in your AssemblyInfo file
+  // TODO: not yet normalized, beware than .Net version must be X.Y.Z.B format, with Z/B optionals
+  version = project.version + '.0.0'
 
-      // replaces the AssemblyFileVersion value in your AssemblyInfo file.
-      // defaults to above version, fewer restrictions on the format
-      // when explicitly set to blank, AssemblyFileVersion will not be updated and will keep the existing value in your AssemblyInfo file
-      fileVersion = version + '-Beta'
-      
-      // replaces the AssemblyInformationalVersion value in your AssemblyInfo file.
-      // defaults to above version, fewer restrictions on the format
-      // when explicitly set to blank, AssemblyInformationalVersion will not be updated and will keep the existing value in your AssemblyInfo file
-      informationalVersion = version + '-Beta'
-      
-      // replaces the AssemblyDescription in the your AssemblyInfo file.
-      // when set to blank (default), AssemblyDescription will not be updated and will keep the existing value in your AssemblyInfo file
-      description = 'My Project Description'
+  // replaces the AssemblyFileVersion value in your AssemblyInfo file.
+  // defaults to above version, fewer restrictions on the format
+  // when explicitly set to blank, AssemblyFileVersion will not be updated and will keep the existing value in your AssemblyInfo file
+  fileVersion = version + '-Beta'
+  
+  // replaces the AssemblyInformationalVersion value in your AssemblyInfo file.
+  // defaults to above version, fewer restrictions on the format
+  // when explicitly set to blank, AssemblyInformationalVersion will not be updated and will keep the existing value in your AssemblyInfo file
+  informationalVersion = version + '-Beta'
+  
+  // replaces the AssemblyDescription in the your AssemblyInfo file.
+  // when set to blank (default), AssemblyDescription will not be updated and will keep the existing value in your AssemblyInfo file
+  description = 'My Project Description'
 
-      // default to msbuild main project (of solution)
-      projects = [ 'MyProject1', 'MyProject2' ]
-    }
+  // default to msbuild main project (of solution)
+  projects = [ 'MyProject1', 'MyProject2' ]
+}
+```
 
 # See also
 
