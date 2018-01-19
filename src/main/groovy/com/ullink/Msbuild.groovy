@@ -240,4 +240,18 @@ class Msbuild extends ConventionTask {
         }
         return cmdParameters
     }
+
+    def getOutputDirs() {
+        def HashMap<String, Object> cmdParameters = getInitProperties()
+        def HashMap<String, String> dirs = ['OutputPath': '.\\build\\bin\\' , 'IntermediateOutputPath' : '.\\build\\obj\\']
+        def List<Object> outputDirs = []
+         dirs.keySet().each {
+            if(cmdParameters[it]){
+                outputDirs.add(cmdParameters[it])
+            } else {
+                outputDirs.add(dirs[it])
+            }
+        }
+        return outputDirs
+    }
 }
