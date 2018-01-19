@@ -1,4 +1,7 @@
 package com.ullink
+
+import org.apache.tools.ant.ProjectHelper
+
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.nio.file.Files
@@ -240,4 +243,9 @@ class Msbuild extends ConventionTask {
         }
         return cmdParameters
     }
+
+    def getOutputDirs() {
+       projectParsed.getProperties().TargetPath
+    }
+
 }
