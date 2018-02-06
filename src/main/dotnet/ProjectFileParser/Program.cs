@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using Microsoft.Build.Construction;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using System.Collections;
+using System.Reflection;
 
 namespace ProjectFileParser
 {
@@ -12,6 +11,7 @@ namespace ProjectFileParser
     {
         static int Main(string[] args)
         {
+            SetIsMonoExplicitly();
             try
             {
                 var obj = JObject.Parse(Console.In.ReadToEnd());
@@ -24,6 +24,19 @@ namespace ProjectFileParser
                 return -1;
             }
             return 0;
+        }
+
+        // We have to set _isMono explicitly if running in Mono, otherwise we will have PlatformNotSupportedException when TryFromVisualStudioProcess
+        // _isMono can be found in https://github.com/Microsoft/msbuild/blob/master/src/Shared/NativeMethodsShared.cs
+        // TryFromVisualStudioProcess can be found in https://github.com/Microsoft/msbuild/blob/master/src/Shared/BuildEnvironmentHelper.cs
+        private static void SetIsMonoExplicitly()
+        {
+            if (Type.GetType("Mono.Runtime") != null)
+            {
+                var nativeSharedMethod = typeof(SolutionFile).Assembly.GetType("Microsoft.Build.Shared.NativeMethodsShared");
+                var isMonoField = nativeSharedMethod.GetField("_isMono", BindingFlags.Static | BindingFlags.NonPublic);
+                isMonoField.SetValue(null, true);
+            }
         }
 
         static JObject Parse(string file, JObject args)
