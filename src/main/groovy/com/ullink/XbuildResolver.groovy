@@ -5,7 +5,7 @@ import org.gradle.api.GradleException
 import org.gradle.util.VersionNumber
 
 class XbuildResolver implements IExecutableResolver {
-    
+
     @Override
     ProcessBuilder executeDotNet(File exe) {
         return new ProcessBuilder("mono", exe.toString())
@@ -13,7 +13,9 @@ class XbuildResolver implements IExecutableResolver {
 
     void setupExecutable(Msbuild msbuild) {
         msbuild.executable = 'xbuild.exe'
-        msbuild.msbuildDir = getXBuildDir(msbuild)
+        if (msbuild.msbuildDir == null) {
+            msbuild.msbuildDir = getXBuildDir(msbuild)
+        }
     }
 
     public static String getXBuildDir(Msbuild msbuild) {

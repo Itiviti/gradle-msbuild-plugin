@@ -16,10 +16,10 @@ class MsbuildPluginTest {
     @Test
     public void msbuildPluginAddsMsbuildTaskToProject() {
         Project project = ProjectBuilder.builder().build()
-        project.apply plugin: 'msbuild'
+        project.apply plugin: MsbuildPlugin
         assertTrue(project.tasks.msbuild instanceof Msbuild)
     }
-    
+
     @Test
     public void testExecution() {
         def writer = new StringWriter()
@@ -32,9 +32,9 @@ class MsbuildPluginTest {
             deleteOnExit()
             write writer.toString()
         }
-        
+
         Project p = ProjectBuilder.builder().build()
-        p.apply plugin: 'msbuild'
+        p.apply plugin: MsbuildPlugin
         p.msbuild {
             projectFile = file
         }
@@ -43,7 +43,7 @@ class MsbuildPluginTest {
     @Test
     public void execution_nonExistentProjectFile_throwsGradleException() {
         Project p = ProjectBuilder.builder().build()
-        p.apply plugin: 'msbuild'
+        p.apply plugin: MsbuildPlugin
         p.msbuild {
             projectFile = "C:\\con" // we can never create a windows file called `con`
         }

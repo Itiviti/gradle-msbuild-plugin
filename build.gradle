@@ -5,6 +5,7 @@ plugins {
     id 'com.ullink.nuget' version '2.15'
     id 'com.ullink.nunit' version '1.5'
     id 'net.researchgate.release' version '2.3.4'
+    id 'de.undercouch.download' version '3.2.0'
 }
 
 group = 'com.ullink.gradle'
@@ -22,6 +23,10 @@ dependencies {
     compile 'net.java.dev.jna:jna-platform:4.2.2'
     compile 'com.google.guava:guava:16.0.1'
     compile 'commons-io:commons-io:2.4'
+}
+
+nuget {
+    version = '4.4.0'
 }
 
 nugetRestore {
@@ -52,9 +57,22 @@ task generateZip(dependsOn: nunit, type: Zip) {
     archiveName 'ProjectFileParser.zip'
 }
 
+task downloadVsWhere(type: de.undercouch.gradle.tasks.download.Download) {
+    src 'https://github.com/Microsoft/vswhere/releases/download/2.1.4/vswhere.exe'
+    dest "$temporaryDir/vswhere.exe"
+}
+
 jar {
     from(generateZip.outputs.files) {
-        into 'META-INF'
+        into ('META-INF')
+    }
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = [ downloadVsWhere.temporaryDir ]
+        }
     }
 }
 
@@ -82,5 +100,5 @@ plugindev {
     done()
 }
 
-project.tasks.afterReleaseBuild.dependsOn project.tasks.bintrayUpload
-
+processResources.dependsOn downloadVsWhere
+afterReleaseBuild.dependsOn bintrayUpload

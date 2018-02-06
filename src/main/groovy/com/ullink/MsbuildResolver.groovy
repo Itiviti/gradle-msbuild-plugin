@@ -1,16 +1,49 @@
 package com.ullink
 
 import static java.lang.Float.parseFloat
+import groovy.io.FileType
+import java.lang.ProcessBuilder
+import java.nio.file.Files
+import org.apache.commons.io.FileUtils
 
 class MsbuildResolver implements IExecutableResolver {
     static final String MSBUILD_TOOLS_PATH = 'MSBuildToolsPath'
     static final String MSBUILD_PREFIX = "SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\"
     static final String MSBUILD_WOW6432_PREFIX = "SOFTWARE\\Wow6432Node\\Microsoft\\MSBuild\\ToolsVersions\\"
 
-    void setupExecutable(Msbuild msbuild) {
+    // Find msbuild >= 15.0 by vswhere
+    static def findMsbuildByVsWhere(Msbuild msbuild) {
+        File tempDir = Files.createTempDirectory('vswhere').toFile()
+        tempDir.deleteOnExit()
+
+        def vswhereURL = MsbuildResolver.getResource("/vswhere.exe")
+        def vswhereFile = new File(tempDir, 'vwshere.exe')
+        FileUtils.copyURLToFile(vswhereURL, vswhereFile)
+        def vswhere = new ProcessBuilder(vswhereFile.toString())
+        if (msbuild.version) {
+            vswhere.command() << '-version' << msbuild.version
+        } else {
+            vswhere.command() << '-latest'
+        }
+        vswhere.command() << '-products' << '*' << '-requires' << 'Microsoft.Component.MSBuild' << '-property' << 'installationPath'
+
+        def proc = vswhere.start()
+        proc.waitFor()
+        def location = proc.in.text?.trim();
+        if (location) {
+            def msbuildDir = new File(location, 'MSBuild')
+            msbuild.logger.info("Found following MSBuild installation folder: ${msbuildDir}")
+            msbuildDir.eachDirMatch(~/\d+(\.\d+)*/) { dir ->
+                msbuild.msbuildDir = new File(dir, 'Bin')
+                return
+            }
+        }
+    }
+
+    static def findMsbuildFromRegistry(Msbuild msbuild) {
         List<String> availableVersions =
-                getMsBuildVersionsFromRegistry(MSBUILD_WOW6432_PREFIX) +
-                getMsBuildVersionsFromRegistry(MSBUILD_PREFIX)
+            getMsBuildVersionsFromRegistry(MSBUILD_WOW6432_PREFIX) +
+            getMsBuildVersionsFromRegistry(MSBUILD_PREFIX)
         msbuild.logger.debug("Found following MSBuild versions in the registry: ${availableVersions}")
 
         List<String> versionsToCheck
@@ -21,10 +54,21 @@ class MsbuildResolver implements IExecutableResolver {
             versionsToCheck = availableVersions
         }
 
-        if (versionsToCheck.find( { trySetMsbuild(msbuild, it) } ))
+        versionsToCheck.find( { trySetMsbuild(msbuild, it) } )
+    }
+
+    void setupExecutable(Msbuild msbuild) {
+        if (msbuild.msbuildDir == null) {
+            findMsbuildByVsWhere(msbuild)
+        }
+        if (msbuild.msbuildDir == null) {
+            findMsbuildFromRegistry(msbuild)
+        }
+
+        if (msbuild.msbuildDir)
             msbuild.logger.info("Resolved MSBuild to ${msbuild.msbuildDir}")
         else
-            msbuild.logger.warn("Couldn't resolve MSBuild in the system (existing versions: ${availableVersions}).")
+            msbuild.logger.warn("Couldn't resolve MSBuild in the system")
 
         msbuild.executable = 'msbuild.exe'
     }
@@ -42,9 +86,7 @@ class MsbuildResolver implements IExecutableResolver {
         def v = Registry.getValue(Registry.HKEY_LOCAL_MACHINE, key, MSBUILD_TOOLS_PATH)
         if (v != null && new File(v).isDirectory()) {
             msbuild.msbuildDir = v
-            return true
         }
-        false
     }
 }
 

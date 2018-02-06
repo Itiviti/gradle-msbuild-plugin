@@ -27,13 +27,13 @@ class XbuildLocateTest {
 
         // Unspecified version
         Project p = ProjectBuilder.builder().build()
-        p.apply plugin: 'msbuild'
+        p.apply plugin: MsbuildPlugin
         def xbuildDir = resolver.getXBuildDir(p.tasks.msbuild)
         assertNotNull(xbuildDir)
 
         // Specified version
         p = ProjectBuilder.builder().build()
-        p.apply plugin: 'msbuild'
+        p.apply plugin: MsbuildPlugin
         def xbuildVersion = new BigDecimal(new File(xbuildDir).name)
         p.msbuild {
             version = xbuildVersion
@@ -46,7 +46,7 @@ class XbuildLocateTest {
     public void givenInvalidMSBuildVersion_throwsException() {
         def resolver = new XbuildResolver()
         Project p = ProjectBuilder.builder().build()
-        p.apply plugin: 'msbuild'
+        p.apply plugin: MsbuildPlugin
         p.msbuild {
             version = 999.3
         }

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.Build.Evaluation;
+using Newtonsoft.Json.Linq;
+using NuGet;
+using System;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Evaluation;
-using Newtonsoft.Json.Linq;
 
 namespace ProjectFileParser
 {
@@ -39,6 +39,11 @@ namespace ProjectFileParser
                     jsonItem[metaData.Name] = metaData.EvaluatedValue;
                 }
                 array.Add(jsonItem);
+
+                if (item.EvaluatedInclude?.EndsWith("packages.config") ?? false)
+                {
+                    jsonProject["NugetDependencies"] = ParseNugetDependencies(Path.Combine(Path.GetDirectoryName(project.FullPath), item.EvaluatedInclude));
+                }
             }
             // Project properties
             JObject jsonProperties = new JObject();
@@ -66,6 +71,39 @@ namespace ProjectFileParser
             }
             jsonProject["Properties"] = jsonProperties;
             return jsonProject;
+        }
+
+        private static JArray ParseNugetDependencies(string packagesConfigPath)
+        {
+            var nugetDependencies = new JArray();
+            if (!File.Exists(packagesConfigPath))
+            {
+                Console.Error.WriteLine($"Unable to find nuget dependencies file during project file parsing: {packagesConfigPath}");
+                return nugetDependencies;
+            }
+
+            var file = new PackageReferenceFile(packagesConfigPath);
+            foreach (PackageReference packageReference in file.GetPackageReferences())
+            {
+                var dependency = new JObject();
+                dependency["Id"] = packageReference.Id;
+                dependency["Version"] = packageReference.Version.ToString();
+                dependency["TargetFramework"] = packageReference.TargetFramework.ToString();
+                dependency["RequireReinstallation"] = packageReference.RequireReinstallation;
+                dependency["IsDevelopmentDependency"] = packageReference.IsDevelopmentDependency;
+                JObject versionConstraint = null;
+                if (packageReference.VersionConstraint != null)
+                {
+                    versionConstraint = new JObject();
+                    versionConstraint["MinVersion"] = packageReference.VersionConstraint.MinVersion.ToString();
+                    versionConstraint["MaxVersion"] = packageReference.VersionConstraint.MaxVersion.ToString();
+                    versionConstraint["IsMinInclusive"] = packageReference.VersionConstraint.IsMinInclusive;
+                    versionConstraint["IsMaxInclusive"] = packageReference.VersionConstraint.IsMaxInclusive;
+                }
+                dependency["VersionConstraint"] = versionConstraint;
+                nugetDependencies.Add(dependency);
+            }
+            return nugetDependencies;
         }
     }
 }
