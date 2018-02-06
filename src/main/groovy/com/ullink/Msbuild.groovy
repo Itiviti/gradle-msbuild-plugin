@@ -1,4 +1,9 @@
 package com.ullink
+
+import org.gradle.api.tasks.OutputDirectories
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFile
+
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.nio.file.Files
@@ -240,4 +245,17 @@ class Msbuild extends ConventionTask {
         }
         return cmdParameters
     }
+
+    @OutputDirectories
+    def getOutputDirs() {
+        def paths = []
+        def cmdParameters = getInitProperties()
+        ['OutDir', 'OutputPath', 'BaseIntermediateOutputPath', 'IntermediateOutputPath', 'PublishDir'].each {
+            if (cmdParameters[it]) {
+                paths.add(project.file(cmdParameters[it]))
+            }
+        }
+        paths
+    }
+
 }
