@@ -1,7 +1,7 @@
 plugins {
     id 'nu.studer.plugindev' version '1.0.3'
     id 'com.jfrog.bintray' version '1.2'
-    id 'com.ullink.msbuild' version '2.15'
+    id 'com.ullink.msbuild' version '2.16'
     id 'com.ullink.nuget' version '2.15'
     id 'com.ullink.nunit' version '1.5'
     id 'net.researchgate.release' version '2.3.4'
