@@ -34,7 +34,7 @@ namespace ProjectFileParser
         public static Project LoadProject(string fullPath, IDictionary<string, string> args)
         {
             var collection = new ProjectCollection(args);
-            var project = collection.LoadProject(fullPath);
+            var project = collection.LoadProject(fullPath, "14.0");
             return project;
         }
     }

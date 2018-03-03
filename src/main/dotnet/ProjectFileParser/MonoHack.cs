@@ -6,7 +6,7 @@ namespace ProjectFileParser
 {
     // We have to set MSBUILD_EXE_PATH to some valid path for faking the BuildEnvironment on Mono
     // or else will throw PlatformUnsupportedException
-    internal class MonoHack : IDisposable
+    public class MonoHack : IDisposable
     {
         private const string MSBUILD_EXE_PATH = "MSBUILD_EXE_PATH";
         private readonly string _msbuildExePath;
