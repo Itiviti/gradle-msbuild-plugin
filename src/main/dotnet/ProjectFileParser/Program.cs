@@ -3,38 +3,12 @@ using System.IO;
 using Microsoft.Build.Construction;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace ProjectFileParser
 {
     class Program
     {
-        // We have to set MSBUILD_EXE_PATH to some valid path for faking the BuildEnvironment on Mono
-        // or else will throw PlatformUnsupportedException
-        private class MonoHack : IDisposable
-        {
-            private const string MSBUILD_EXE_PATH = "MSBUILD_EXE_PATH";
-            private readonly string _msbuildExePath;
-            private readonly bool _isMono;
-
-            public MonoHack()
-            {
-                _isMono = Type.GetType("Mono.Runtime") != null;
-                if (_isMono)
-                {
-                    _msbuildExePath = Environment.GetEnvironmentVariable(MSBUILD_EXE_PATH);
-                    Environment.SetEnvironmentVariable(MSBUILD_EXE_PATH, typeof(Program).Assembly.Location);
-                }
-            }
-
-            public void Dispose()
-            {
-                if (_isMono)
-                {
-                    Environment.SetEnvironmentVariable(MSBUILD_EXE_PATH, _msbuildExePath);
-                }
-            }
-        }
-
         static int Main(string[] args)
         {
             using (new MonoHack())
