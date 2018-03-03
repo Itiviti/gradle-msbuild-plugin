@@ -88,6 +88,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MonoHack.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Jsonify.cs" />
     <Compile Include="ProjectHelpers.cs" />
