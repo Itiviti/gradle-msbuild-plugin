@@ -34,8 +34,8 @@ namespace ProjectFileParser
         public static Project LoadProject(string fullPath, IDictionary<string, string> args)
         {
             var collection = new ProjectCollection(args);
-            var project = collection.LoadProject(fullPath, "14.0");
-            return project;
+            // parsing fails in Mono with the default "15.0" as /usr/lib/mono/xbuild/15.0/bin/Microsoft.CSharp.targets not found
+            return collection.LoadProject(fullPath, MonoHack.IsMono ? "14.0" : null);
         }
     }
 }
