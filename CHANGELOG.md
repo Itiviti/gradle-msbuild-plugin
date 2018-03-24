@@ -8,6 +8,8 @@
 ### Changed
 * changed the `AssemblyInfoVersionPatcher` so that it will not overwrite values in the AssemblyInfo files if the value being set is blank.  
 * changed NuGet.exe dependency from `2.8.6` to version `4.4.0`
+* support resolving projects for ToolsVersion `15.0`
+* minimum required .Net Framework version for now is `v4.6`
 
 ## 2.18
 
