@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using Microsoft.Build.Construction;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using System.Collections;
+using System.Reflection;
 
 namespace ProjectFileParser
 {
@@ -12,16 +11,19 @@ namespace ProjectFileParser
     {
         static int Main(string[] args)
         {
-            try
+            using (new MonoHack())
             {
-                var obj = JObject.Parse(Console.In.ReadToEnd());
-                var result = Parse(args[0], obj);
-                Console.WriteLine(result.ToString());
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine("Error during project file parsing: {0}", e);
-                return -1;
+                try
+                {
+                    var obj = JObject.Parse(Console.In.ReadToEnd());
+                    var result = Parse(args[0], obj);
+                    Console.WriteLine(result.ToString());
+                }
+                catch (Exception e)
+                {
+                    Console.Error.WriteLine("Error during project file parsing: {0}", e);
+                    return -1;
+                }
             }
             return 0;
         }

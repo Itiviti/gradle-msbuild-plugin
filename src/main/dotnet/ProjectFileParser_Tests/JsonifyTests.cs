@@ -13,6 +13,12 @@ namespace ProjectFileParser_Tests
     [TestFixture]
     public class JsonifyTests
     {
+        [SetUp]
+        public void Setup()
+        {
+            var monoHack = new MonoHack();
+        }
+
         private string GetResourcePath(string relativePath)
         {
             return Path.Combine(Path.GetDirectoryName(Assembly.GetCallingAssembly().Location), relativePath);
@@ -86,8 +92,6 @@ namespace ProjectFileParser_Tests
             Assert.AreEqual("Release", json["dummy"]["Properties"]["Configuration"].Value<String>());
             Assert.AreEqual("AnyCPU", json["dummy"]["Properties"]["Platform"].Value<String>());
         }
-
-
 
         private static IEnumerable<TestCaseData> SolutionData()
         {
