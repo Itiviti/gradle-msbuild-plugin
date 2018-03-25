@@ -7,6 +7,9 @@ I doubt it'll work on anything else than .csproj files right now, but adding sup
 Plugin applies the base plugin automatically, and hooks msbuild output folders into the clean task process.
 Below tasks are provided by the plugin:
 
+## Prerequisites
+* .Net Framework 4.6
+
 ## msbuild
 
 Prior to execution, this task will parse the provided project file and gather all its inputs (which are added to the task inputs):
@@ -21,7 +24,7 @@ To apply the plugin:
 ```groovy
 // Starting from gradle 2.1
 plugins {
-  id "com.ullink.msbuild" version "2.18"
+  id "com.ullink.msbuild" version "2.19"
 }
 ```
 
@@ -33,7 +36,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.ullink.gradle:gradle-msbuild-plugin:2.18"
+        classpath "com.ullink.gradle:gradle-msbuild-plugin:2.19"
     }
 }
 apply plugin:'com.ullink.msbuild'
