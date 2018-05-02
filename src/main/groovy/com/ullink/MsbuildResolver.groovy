@@ -30,13 +30,17 @@ class MsbuildResolver implements IExecutableResolver {
         def proc = vswhere.start()
         proc.waitFor()
         def location = proc.in.text?.trim();
-        if (location) {
-            def msbuildDir = new File(location, 'MSBuild')
-            msbuild.logger.info("Found following MSBuild installation folder: ${msbuildDir}")
-            msbuildDir.eachDirMatch(~/\d+(\.\d+)*/) { dir ->
-                msbuild.msbuildDir = new File(dir, 'Bin')
-                return
-            }
+        if (!location) {
+            return
+        }
+        def msbuildDir = new File(location, 'MSBuild')
+        if (!msbuildDir.exists()) {
+            return
+        }
+        msbuild.logger.info("Found following MSBuild installation folder: ${msbuildDir}")
+        msbuildDir.eachDirMatch(~/\d+(\.\d+)*/) { dir ->
+            msbuild.msbuildDir = new File(dir, 'Bin')
+            return
         }
     }
 

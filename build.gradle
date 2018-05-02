@@ -58,7 +58,7 @@ task generateZip(dependsOn: nunit, type: Zip) {
 }
 
 task downloadVsWhere(type: de.undercouch.gradle.tasks.download.Download) {
-    src 'https://github.com/Microsoft/vswhere/releases/download/2.3.7/vswhere.exe'
+    src 'https://github.com/Microsoft/vswhere/releases/download/2.4.1/vswhere.exe'
     dest "$temporaryDir/vswhere.exe"
 }
 
