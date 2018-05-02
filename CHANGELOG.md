@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+## 2.20
+### Fixed
+* Resolving msbuild failure when msbuild version has been defined in build script
+
 ## 2.19
 
 ### Added
