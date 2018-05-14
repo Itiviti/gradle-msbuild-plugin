@@ -127,21 +127,9 @@ class Msbuild extends ConventionTask {
                     parseProject = false
                 } else {
                     projectParsed = allProjects[projectName]
-
-                    if (projectParsed == null) {
-                        def potentialProject = allProjects.values().find {
-                            it.properties.containsKey('ProjectDir')
-                        }
-
-                        if (potentialProject != null) {
-                            projectParsed = potentialProject
-                            logger.info "Auto-detected project ${projectParsed.projectName} as main project in solution "
-                        }
-                    }
-
                     if (projectParsed == null) {
                         parseProject = false
-                        logger.warn "Project ${projectName} not found in solution. Please set the 'projectName' property manually."
+                        logger.warn "Project ${projectName} not found in solution"
                     }
                 }
             } else if (isProjectBuild()) {
