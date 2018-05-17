@@ -41,6 +41,15 @@ class XbuildResolver implements IExecutableResolver {
                 /Library/Frameworks/Mono.framework/Versions/4.0.0/lib/mono/4.5-api
                 /Library/Frameworks/Mono.framework/Versions/3.12.0/lib/mono/4.5
          */
+        def existingMsBuilds = xbuildRoots
+                .collectMany { ["$it/lib/mono", "$it/lib/mono/msbuild"] }
+                .collectMany { getVersionDirectories(it) }
+                .collectMany { [
+                [new File(it[0], "MSBuild.dll"), it[1]],
+                [new File(it[0], "bin/MSBuild.dll"), it[1]]
+        ]}
+        .findAll { it[0].exists() }
+
         def existingXBuilds = xbuildRoots
             .collectMany { ["$it/lib/mono", "$it/lib/mono/xbuild"] }
             .collectMany { getVersionDirectories(it) }
@@ -50,9 +59,11 @@ class XbuildResolver implements IExecutableResolver {
             ]}
             .findAll { it[0].exists() }
 
-        def foundXBuild = existingXBuilds.find { msbuild.version == null || msbuild.version.equals("${it[1].major}.${it[1].minor}".toString()) }
+        def buildOptions = existingMsBuilds + existingXBuilds
+
+        def foundXBuild = buildOptions.find { msbuild.version == null || msbuild.version.equals("${it[1].major}.${it[1].minor}".toString()) }
         if (foundXBuild != null) {
-            File file = foundXBuild[0]
+            File file = buildOptions.first()
             msbuild.logger.info("Resolved xbuild to: ${file.absolutePath}")
             return file.getParent()
         }
