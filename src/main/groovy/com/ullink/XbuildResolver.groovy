@@ -12,9 +12,15 @@ class XbuildResolver implements IExecutableResolver {
     }
 
     void setupExecutable(Msbuild msbuild) {
-        msbuild.executable = 'xbuild.exe'
-        if (msbuild.msbuildDir == null) {
-            msbuild.msbuildDir = getXBuildDir(msbuild)
+        def msBuildResolver = new PosixMsbuildResolver(msbuild.version)
+        if(msBuildResolver.msBuildFound()) {
+            msBuildResolver.setupExecutable(msbuild)
+        }
+        else {
+            msbuild.executable = 'xbuild.exe'
+            if (msbuild.msbuildDir == null) {
+                msbuild.msbuildDir = getXBuildDir(msbuild)
+            }
         }
     }
 
@@ -41,29 +47,18 @@ class XbuildResolver implements IExecutableResolver {
                 /Library/Frameworks/Mono.framework/Versions/4.0.0/lib/mono/4.5-api
                 /Library/Frameworks/Mono.framework/Versions/3.12.0/lib/mono/4.5
          */
-        def existingMsBuilds = xbuildRoots
-                .collectMany { ["$it/lib/mono", "$it/lib/mono/msbuild"] }
+        def existingXBuilds = xbuildRoots
+                .collectMany { ["$it/lib/mono", "$it/lib/mono/xbuild"] }
                 .collectMany { getVersionDirectories(it) }
                 .collectMany { [
-                [new File(it[0], "MSBuild.dll"), it[1]],
-                [new File(it[0], "bin/MSBuild.dll"), it[1]]
+                [new File(it[0], "xbuild.exe"), it[1]],
+                [new File(it[0], "bin/xbuild.exe"), it[1]]
         ]}
         .findAll { it[0].exists() }
 
-        def existingXBuilds = xbuildRoots
-            .collectMany { ["$it/lib/mono", "$it/lib/mono/xbuild"] }
-            .collectMany { getVersionDirectories(it) }
-            .collectMany { [
-                [new File(it[0], "xbuild.exe"), it[1]],
-                [new File(it[0], "bin/xbuild.exe"), it[1]]
-            ]}
-            .findAll { it[0].exists() }
-
-        def buildOptions = existingMsBuilds + existingXBuilds
-
-        def foundXBuild = buildOptions.find { msbuild.version == null || msbuild.version.equals("${it[1].major}.${it[1].minor}".toString()) }
+        def foundXBuild = existingXBuilds.find { msbuild.version == null || msbuild.version.equals("${it[1].major}.${it[1].minor}".toString()) }
         if (foundXBuild != null) {
-            File file = buildOptions.first()
+            File file = foundXBuild[0]
             msbuild.logger.info("Resolved xbuild to: ${file.absolutePath}")
             return file.getParent()
         }
