@@ -1,6 +1,5 @@
 package com.ullink
 
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.testfixtures.ProjectBuilder
@@ -11,6 +10,7 @@ import org.junit.Test
 import org.junit.rules.ExpectedException
 
 import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertNull
 
 class PosixMsbuildLocateTests {
     @Rule
@@ -53,9 +53,8 @@ class PosixMsbuildLocateTests {
             version = 999.3
         }
 
-        expectedException.expect(GradleException.class)
-        expectedException.expectMessage("Cannot find an msbuild binary")
-        resolver.locateMsBuild(VersionNumber.parse(p.tasks.msbuild.version))
+        def msbuild = resolver.locateMsBuild(VersionNumber.parse(p.tasks.msbuild.version))
+        assertNull(msbuild)
 
     }
 }
