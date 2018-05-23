@@ -9,10 +9,7 @@ class PosixMsbuildResolver implements IExecutableResolver {
 
     PosixMsbuildResolver(VersionNumber version)
     {
-        try {
-            msbuild = locateMsBuild(version)
-        }
-        catch (GradleException){}
+        msbuild = locateMsBuild(version)
     }
 
     boolean msBuildFound() {
@@ -57,9 +54,6 @@ class PosixMsbuildResolver implements IExecutableResolver {
             msbuild = msbuilds.find { (version == it[1]) }
         }
 
-        if(msbuild == null)
-            throw new GradleException("Cannot find an msbuild binary. Is mono SDK installed? " +
-                    "(Existing binaries: ${msbuilds.collect{it[0]}})")
         return msbuild
     }
 
