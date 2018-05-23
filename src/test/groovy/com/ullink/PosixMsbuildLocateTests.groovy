@@ -45,7 +45,7 @@ class PosixMsbuildLocateTests {
     }
 
     @Test
-    public void givenInvalidMSBuildVersion_throwsException() {
+    public void givenInvalidMSBuildVersion_returnsNull() {
         def resolver = new PosixMsbuildResolver()
         Project p = ProjectBuilder.builder().build()
         p.apply plugin: MsbuildPlugin
