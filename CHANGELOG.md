@@ -2,7 +2,7 @@
 
 ## 2.21
 ### Fixed
-* Use msbuild on Lininx if available
+* Use msbuild on Linux if available
 
 ## 2.20
 ### Fixed
