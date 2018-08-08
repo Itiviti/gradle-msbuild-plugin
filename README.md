@@ -24,7 +24,7 @@ To apply the plugin:
 ```groovy
 // Starting from gradle 2.1
 plugins {
-  id "com.ullink.msbuild" version "2.19"
+  id "com.ullink.msbuild" version "2.21"
 }
 ```
 
@@ -36,7 +36,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.ullink.gradle:gradle-msbuild-plugin:2.19"
+        classpath "com.ullink.gradle:gradle-msbuild-plugin:2.21"
     }
 }
 apply plugin:'com.ullink.msbuild'
@@ -49,33 +49,41 @@ msbuild {
   // mandatory (one of those)
   solutionFile = 'my-solution.sln'
   projectFile = file('src/my-project.csproj')
-  
+
   // MsBuild project name (/p:Project=...)
   projectName = project.name
-  
+
   // Verbosity (/v:detailed, by default uses gradle logging level)
   verbosity = 'detailed'
-  
+
   // targets to execute (/t:Clean;Rebuild, no default)
   targets = ['Clean', 'Rebuild']
-  
+
+
+  // MsBuild resolution
+  // it support to search the msbuild tools from vswhere (by default it searches the latest)
+  version = '15.0'
+  // or define the exact msbuild dir explicity
+  msbuildDir = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\MSBuild\\15.0\\bin'
+
+
   // Below values can override settings from the project file
-  
+
   // overrides project OutputPath
   destinationDir = 'build/msbuild/bin'
-  
+
   // overrides project IntermediaryOutputPath
   intermediateDir = 'build/msbuild/obj'
-  
+
   // Generates XML documentation file (from javadoc through custom DocLet)
   generateDoc = false
-  
+
   // Other msbuild options can be set:
   // loggerAssembly, generateDoc, debugType, optimize, debugSymbols, configuration, platform, defineConstants ...
-  
+
   // you can also provide properties by name (/p:SomeProperty=Value)
   parameters.SomeProperty = 'Value'
-  
+
   // Or, if you use built-in msbuild parameters that aren't directly available here,
   // you can take advantage of the ExtensionAware interface
   ext["flp1"] = "LogFile=" + file("${project.name}.errors.log").path + ";ErrorsOnly;Verbosity=diag"
@@ -83,7 +91,7 @@ msbuild {
 
 assemblyInfoPatcher {
   // mandatory if you want to patch your AssemblyInfo.cs/fs/vb
-        
+
   // replaces the AssemblyVersion value in your AssemblyInfo file.
   // when explicitly set to blank, AssemblyVersion will not be updated and will keep the existing value in your AssemblyInfo file
   // TODO: not yet normalized, beware than .Net version must be X.Y.Z.B format, with Z/B optionals
@@ -93,12 +101,12 @@ assemblyInfoPatcher {
   // defaults to above version, fewer restrictions on the format
   // when explicitly set to blank, AssemblyFileVersion will not be updated and will keep the existing value in your AssemblyInfo file
   fileVersion = version + '-Beta'
-  
+
   // replaces the AssemblyInformationalVersion value in your AssemblyInfo file.
   // defaults to above version, fewer restrictions on the format
   // when explicitly set to blank, AssemblyInformationalVersion will not be updated and will keep the existing value in your AssemblyInfo file
   informationalVersion = version + '-Beta'
-  
+
   // replaces the AssemblyDescription in the your AssemblyInfo file.
   // when set to blank (default), AssemblyDescription will not be updated and will keep the existing value in your AssemblyInfo file
   description = 'My Project Description'
