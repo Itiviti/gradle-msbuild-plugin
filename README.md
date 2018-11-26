@@ -116,6 +116,25 @@ assemblyInfoPatcher {
 }
 ```
 
+## Custom tasks
+
+You can create custom `msbuild` and `assemblyInfoPatcher` tasks like so:
+
+```groovy
+import com.ullink.Msbuild
+import com.ullink.AssemblyInfoVersionPatcher
+
+task compileFoo(type: Msbuild) {
+    projectFile = "Foo.vcxproj"
+    // Other properties
+}
+
+task versionPatchFoo(type: AssemblyInfoVersionPatcher) {
+    projects = ['Foo']
+    // Other properties
+}
+```
+
 # See also
 
 [Gradle PdbIndex plugin](https://github.com/Ullink/gradle-pdbindex-plugin) - Allows to source index generated PDB files.
