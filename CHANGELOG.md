@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+## 2.22
+### Fixed
+* Upgrade download-task to fix expires header parsing
+
 ## 2.21
 ### Fixed
 * Use msbuild on Linux if available
