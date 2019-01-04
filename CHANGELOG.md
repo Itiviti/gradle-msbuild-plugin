@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+# 2.23
+### Changes
+* Update for VS 2017 to use local installed MsBuild (VS no longer installs assemblies in GAC.)
+
 ## 2.22
 ### Fixed
 * Upgrade download-task to fix expires header parsing

@@ -3,7 +3,6 @@ using System.IO;
 using Microsoft.Build.Construction;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace ProjectFileParser
 {
@@ -11,11 +10,14 @@ namespace ProjectFileParser
     {
         static int Main(string[] args)
         {
+            MSBuildCustomLocator.Register();
+
             using (new MonoHack())
             {
                 try
                 {
-                    var obj = JObject.Parse(Console.In.ReadToEnd());
+                    var customPropertiesText = "{}";//Console.In.ReadToEnd();
+                    var obj = JObject.Parse(customPropertiesText);
                     var result = Parse(args[0], obj);
                     Console.WriteLine(result.ToString());
                 }

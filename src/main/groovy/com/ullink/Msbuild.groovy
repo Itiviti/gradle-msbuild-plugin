@@ -89,6 +89,13 @@ class Msbuild extends ConventionTask {
         ZipEntry ze = zis.getNextEntry()
         while (ze != null) {
             String fileName = ze.getName()
+            if (ze.isDirectory()) {
+                File subFolder = new File(tempDir, fileName)
+                subFolder.mkdir()
+                subFolder.deleteOnExit()
+                ze = zis.getNextEntry()
+                continue
+            }
             File target = new File(tempDir, fileName)
             target.newOutputStream().leftShift(zis).close()
             target.deleteOnExit()
