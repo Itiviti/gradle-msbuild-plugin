@@ -38,7 +38,7 @@ class MsbuildPluginTest {
         p.msbuild {
             projectFile = file
         }
-        p.tasks.msbuild.execute()
+        p.tasks.msbuild.build()
     }
     @Test
     public void execution_nonExistentProjectFile_throwsGradleException() {
@@ -50,6 +50,6 @@ class MsbuildPluginTest {
 
         expectedException.expect(GradleException.class);
 
-        p.tasks.msbuild.execute()
+        p.tasks.msbuild.build()
     }
 }
