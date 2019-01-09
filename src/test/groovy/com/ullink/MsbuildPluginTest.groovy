@@ -2,6 +2,7 @@ package com.ullink
 import groovy.xml.MarkupBuilder
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Rule
 import org.junit.Test
@@ -45,7 +46,7 @@ class MsbuildPluginTest {
         Project p = ProjectBuilder.builder().build()
         p.apply plugin: MsbuildPlugin
         p.msbuild {
-            projectFile = "C:\\con" // we can never create a windows file called `con`
+            projectFile = OperatingSystem.current().isWindows() ? 'C:\\con' : '/con' // we can never create a file called `con` in root
         }
 
         expectedException.expect(GradleException.class);
