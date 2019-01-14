@@ -15,7 +15,7 @@ Below tasks are provided by the plugin:
 Prior to execution, this task will parse the provided project file and gather all its inputs (which are added to the task inputs):
 - included files (Compile, EmbeddedResource, None, Content)
 - ProjectReference (recursively gathers its inputs) // TODO: should use outputs instead ?
-- References with an HintPath
+- References with a HintPath
 
 OutputPath (e.g. bin/Debug) & Intermediary (e.g. obj/Debug) are set as output directories for the task.
 
