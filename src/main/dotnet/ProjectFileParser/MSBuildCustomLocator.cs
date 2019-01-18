@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.Build.Locator;
+﻿using Microsoft.Build.Locator;
+using System;
 
 namespace ProjectFileParser
 {
@@ -13,8 +13,8 @@ namespace ProjectFileParser
             }
             catch (InvalidOperationException ex)
             {
-                Console.WriteLine("MSBuildLocator cannot detect VS location, falling back to GAC register MSBuild dlls");
-                Console.WriteLine("Error was: {0}", ex);
+                Console.Error.WriteLine("MSBuildLocator cannot detect VS location, falling back to GAC register MSBuild dlls");
+                Console.Error.WriteLine("Error was: {0}", ex);
 
                 RegisterFallback();
             }
