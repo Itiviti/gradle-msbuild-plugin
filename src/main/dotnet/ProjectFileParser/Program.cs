@@ -1,23 +1,25 @@
-﻿using System;
-using System.IO;
-using Microsoft.Build.Construction;
+﻿using Microsoft.Build.Construction;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
-using System.Reflection;
+using System.IO;
 
 namespace ProjectFileParser
 {
-    class Program
+    internal class Program
     {
-        static int Main(string[] args)
+        private static int Main(string[] args)
         {
+            MSBuildCustomLocator.Register();
+
             using (new MonoHack())
             {
                 try
                 {
-                    var obj = JObject.Parse(Console.In.ReadToEnd());
+                    var customPropertiesText = Console.In.ReadToEnd();
+                    var obj = JObject.Parse(customPropertiesText);
                     var result = Parse(args[0], obj);
-                    Console.WriteLine(result.ToString());
+                    Console.WriteLine(result);
                 }
                 catch (Exception e)
                 {
@@ -28,25 +30,25 @@ namespace ProjectFileParser
             return 0;
         }
 
-        static JObject Parse(string file, JObject args)
+        private static JObject Parse(string file, JObject args)
         {
             var isSolution = Path.GetExtension(file).Equals(".sln", StringComparison.InvariantCultureIgnoreCase);
             return isSolution ? ParseSolution(file, args) : ParseProject(file, args);
         }
 
-        static JObject ParseSolution(string file, JObject args)
+        private static JObject ParseSolution(string file, JObject args)
         {
             var projects = ProjectHelpers.GetProjects(SolutionFile.Parse(file), ParamsToDic(args));
             return Jsonify.ToJson(projects);
         }
 
-        static JObject ParseProject(string file, JObject args)
+        private static JObject ParseProject(string file, JObject args)
         {
             var project = ProjectHelpers.LoadProject(file, ParamsToDic(args));
             return Jsonify.ToJson(project);
         }
 
-        static IDictionary<string, string> ParamsToDic(JObject args)
+        private static IDictionary<string, string> ParamsToDic(JObject args)
         {
             var dic = new Dictionary<string, string>();
             foreach (var kvp in args)

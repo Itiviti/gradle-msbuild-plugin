@@ -37,7 +37,7 @@ class MsbuildResolver implements IExecutableResolver {
         if (!msbuildDir.exists()) {
             return
         }
-        msbuild.logger.info("Found following MSBuild installation folder: ${msbuildDir}")
+        msbuild.logger.info("Found the following MSBuild (using vswhere) installation folder: ${msbuildDir}")
         msbuildDir.eachDirMatch(~/\d+(\.\d+)*/) { dir ->
             msbuild.msbuildDir = new File(dir, 'Bin')
             return
@@ -48,7 +48,7 @@ class MsbuildResolver implements IExecutableResolver {
         List<String> availableVersions =
             getMsBuildVersionsFromRegistry(MSBUILD_WOW6432_PREFIX) +
             getMsBuildVersionsFromRegistry(MSBUILD_PREFIX)
-        msbuild.logger.debug("Found following MSBuild versions in the registry: ${availableVersions}")
+        msbuild.logger.debug("Found the following MSBuild (in the registry) versions: ${availableVersions}")
 
         List<String> versionsToCheck
         if (msbuild.version != null) {

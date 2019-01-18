@@ -89,6 +89,13 @@ class Msbuild extends ConventionTask {
         ZipEntry ze = zis.getNextEntry()
         while (ze != null) {
             String fileName = ze.getName()
+            if (ze.isDirectory()) {
+                File subFolder = new File(tempDir, fileName)
+                subFolder.mkdir()
+                subFolder.deleteOnExit()
+                ze = zis.getNextEntry()
+                continue
+            }
             File target = new File(tempDir, fileName)
             target.newOutputStream().leftShift(zis).close()
             target.deleteOnExit()
@@ -101,17 +108,31 @@ class Msbuild extends ConventionTask {
         def builder = resolver.executeDotNet(executable)
         builder.command().add(file.toString())
         def proc = builder.start()
+
         def stderrBuffer = new StringBuffer()
         proc.consumeProcessErrorStream(stderrBuffer)
+        def stdoutBuffer = new StringBuffer()
+        proc.consumeProcessErrorStream(stdoutBuffer)
+
         try {
-            proc.out.leftShift(JsonOutput.toJson(getInitProperties())).close()
+            def initPropertiesJson = JsonOutput.toJson(getInitProperties())
+            logger.debug "Sending ${initPropertiesJson} to ProjectFileParser"
+            proc.out.leftShift(initPropertiesJson).close()
             return new JsonSlurper().parseText(new FilterJson(proc.in).toString())
         }
         finally {
-            if (proc.waitFor() != 0) {
-                stderrBuffer.eachLine { line ->
+            def hasErrors = proc.waitFor() != 0
+            logger.debug "Output from ProjectFileParser: "
+            stdoutBuffer.eachLine { line ->
+                 logger.debug line
+            }
+            stderrBuffer.eachLine { line ->
+                if (hasErrors)
                     logger.error line
-                }
+                else
+                    logger.debug line
+            }
+            if (hasErrors) {
                 throw new GradleException('Project file parsing failed')
             }
         }
