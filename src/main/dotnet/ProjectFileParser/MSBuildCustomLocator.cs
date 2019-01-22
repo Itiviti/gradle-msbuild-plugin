@@ -11,7 +11,7 @@ namespace ProjectFileParser
             {
                 MSBuildLocator.RegisterDefaults();
             }
-            catch (InvalidOperationException ex)
+            catch (Exception ex)
             {
                 Console.Error.WriteLine("MSBuildLocator cannot detect VS location, falling back to GAC register MSBuild dlls");
                 Console.Error.WriteLine("Error was: {0}", ex);

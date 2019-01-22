@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+# 3.1
+### Fixed
+* The plugin now works on Linux again
+
 # 3.0
 ### Changed
 * Update for VS 2017 to use local installed MsBuild (VS no longer installs assemblies in GAC.)
