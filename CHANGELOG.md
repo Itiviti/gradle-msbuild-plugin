@@ -4,6 +4,9 @@
 ### Fixed
 * The plugin now works on Linux again
 
+### Changed
+* Upgrade gradle-nunit-plugin to 1.14
+
 # 3.0
 ### Changed
 * Update for VS 2017 to use local installed MsBuild (VS no longer installs assemblies in GAC.)

@@ -3,7 +3,7 @@ plugins {
     id 'com.jfrog.bintray' version '1.8.4'
     id 'com.ullink.msbuild' version '3.1'
     id 'com.ullink.nuget' version '2.15'
-    id 'com.ullink.nunit' version '1.13'
+    id 'com.ullink.nunit' version '1.14'
     id 'net.researchgate.release' version '2.6.0'
     id 'de.undercouch.download' version '3.4.3'
 }
@@ -41,10 +41,7 @@ msbuild {
     projectName = 'ProjectFileParser'
 }
 
-nunit {
-    nunitVersion = '3.0.1'
-    testAssemblies = [ msbuild.projects['ProjectFileParser_Tests'].properties.TargetPath ]
-}
+
 nunit.dependsOn msbuild
 
 task generateZip(dependsOn: nunit, type: Zip) {
