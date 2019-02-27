@@ -22,8 +22,7 @@ dependencies {
     compile gradleApi()
     compile 'net.java.dev.jna:jna:4.2.2'
     compile 'net.java.dev.jna:jna-platform:4.2.2'
-    compile 'com.google.guava:guava:16.0.1'
-    compile 'commons-io:commons-io:2.4'
+    compile 'com.google.guava:guava:27.0.1-jre'
 }
 
 nuget {
@@ -54,11 +53,11 @@ task generateZip(dependsOn: nunit, type: Zip) {
         include '*.config'
     }
     into '/'
-    archiveName 'ProjectFileParser.zip'
+    archiveFileName = 'ProjectFileParser.zip'
 }
 
 task downloadVsWhere(type: de.undercouch.gradle.tasks.download.Download) {
-    src 'https://github.com/Microsoft/vswhere/releases/download/2.4.1/vswhere.exe'
+    src 'https://github.com/Microsoft/vswhere/releases/download/2.6.7/vswhere.exe'
     dest "$temporaryDir/vswhere.exe"
 }
 
