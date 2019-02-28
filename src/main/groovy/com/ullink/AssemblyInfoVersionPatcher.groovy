@@ -101,9 +101,8 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
             // project file
             case ~/.*proj$/:
                 if (name != 'AssemblyVersion' && name.startsWith('Assembly')) {
-                    name = name.subString('Assembly'.length())
+                    name = name.substring('Assembly'.length())
                 }
-                name == 'AssemblyVersion' ? 'AssemblyVersion' : name.trim('Assembly')
                 project.ant.replaceregexp(file: file, match: /<$name>\s*([^\s]+)\s*\<\/$name>$/, replace: "<$name>$value</$name>", byline: true, encoding: charset)
                 break
             default:
