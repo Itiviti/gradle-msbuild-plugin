@@ -63,10 +63,25 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
     Property<String> informationalVersion
 
     @Input
-    def assemblyDescription = ''
+    String title
 
     @Input
-    def charset = "UTF-8"
+    String company
+
+    @Input
+    String product
+
+    @Input
+    String copyright
+
+    @Input
+    String trademark
+
+    @Input
+    String assemblyDescription
+
+    @Input
+    def charset = 'UTF-8'
 
     @InputFiles
     @OutputFiles
@@ -82,13 +97,20 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
             replace(it, 'AssemblyFileVersion', fileVersion.get())
             replace(it, 'AssemblyInformationalVersion', informationalVersion.get())
             replace(it, 'AssemblyDescription', assemblyDescription)
+            replace(it, 'AssemblyTitle', title)
+            replace(it, 'AssemblyCompany', company)
+            replace(it, 'AssemblyProduct', product)
+            replace(it, 'AssemblyCopyright', copyright)
+            replace(it, 'AssemblyTrademark', trademark)
         }
     }
 
     void replace(File file, def name, def value) {
         // only change the assembly values if they specified here (not blank or null)
         // if the parameters are blank, then keep whatever is already in the assemblyInfo file.
-        if (value == null || value.isEmpty()) return
+        if (!value) {
+            return
+        }
 
         def extension = Files.getFileExtension(file.absolutePath)
         switch (extension) {
@@ -100,7 +122,7 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
                 break
             // project file
             case ~/.*proj$/:
-                if (name != 'AssemblyVersion' && name.startsWith('Assembly')) {
+                if (name != 'AssemblyVersion' && name != 'AssemblyTitle' && name.startsWith('Assembly')) {
                     name = name.substring('Assembly'.length())
                 }
                 project.ant.replaceregexp(file: file, match: /<$name>\s*([^\s]+)\s*\<\/$name>$/, replace: "<$name>$value</$name>", byline: true, encoding: charset)

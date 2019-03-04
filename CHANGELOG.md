@@ -1,5 +1,10 @@
 # gradle-msbuild-plugin changelog
 
+# 3.2
+### Added
+* Support patching new VS2017 project file in AssemblyInfoVersionPatcher
+* Support patching `company`, `product`, `trademark`, `title` and `copyright` in AssemblyInfoVersionPatcher
+
 # 3.1
 ### Fixed
 * The plugin now works on Linux again

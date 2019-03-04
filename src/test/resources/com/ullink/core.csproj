@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <Version>2.0.0</Version>
+    <Company>my company</Company>
+    <Product>my product</Product>
+    <Description>my description</Description>
+    <AssemblyVersion>2.0.0.1</AssemblyVersion>
+    <FileVersion>2.0.0.2</FileVersion>
+    <Copyright>my copyright</Copyright>
+    <Title>my title</Title>
+  </PropertyGroup>
+
+</Project>
