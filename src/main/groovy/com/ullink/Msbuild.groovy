@@ -73,6 +73,9 @@ class Msbuild extends ConventionTask {
     ProjectFileParser getMainProject() {
         if (resolveProject()) {
             projectParsed
+        } else {
+            logger.warn "Main project was resolved to null due to a parse error. The .sln file might be missing or incorrectly named."
+            throw new GradleException("Failed to resolve main project. Make sure the name of the .sln file matches the one of the repository")
         }
     }
 
@@ -159,6 +162,7 @@ class Msbuild extends ConventionTask {
                 projectParsed = allProjects.values().first()
             }
         }
+        logger.warn "Parsed project is null (not a solution / project build)"
         projectParsed != null
     }
 
