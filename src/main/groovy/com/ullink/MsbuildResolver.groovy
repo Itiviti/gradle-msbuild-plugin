@@ -1,10 +1,10 @@
 package com.ullink
 
-import static java.lang.Float.parseFloat
-import groovy.io.FileType
-import java.lang.ProcessBuilder
+import com.google.common.io.Resources
+
 import java.nio.file.Files
-import org.apache.commons.io.FileUtils
+
+import static java.lang.Float.parseFloat
 
 class MsbuildResolver implements IExecutableResolver {
     static final String MSBUILD_TOOLS_PATH = 'MSBuildToolsPath'
@@ -16,9 +16,9 @@ class MsbuildResolver implements IExecutableResolver {
         File tempDir = Files.createTempDirectory('vswhere').toFile()
         tempDir.deleteOnExit()
 
-        def vswhereURL = MsbuildResolver.getResource("/vswhere.exe")
         def vswhereFile = new File(tempDir, 'vwshere.exe')
-        FileUtils.copyURLToFile(vswhereURL, vswhereFile)
+        Resources.asByteSource(MsbuildResolver.getResource("/vswhere.exe")).copyTo(com.google.common.io.Files.asByteSink(vswhereFile))
+
         def vswhere = new ProcessBuilder(vswhereFile.toString())
         if (msbuild.version) {
             vswhere.command() << '-version' << msbuild.version

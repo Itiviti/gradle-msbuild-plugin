@@ -1,10 +1,9 @@
 package com.ullink
 
-import org.apache.commons.io.FilenameUtils
+import com.google.common.io.Files
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.internal.os.OperatingSystem
-
 // http://msdn.microsoft.com/en-us/library/5dy88c2e.aspx
 class ProjectFileParser {
     Msbuild msbuild
@@ -40,8 +39,8 @@ class ProjectFileParser {
         }
     }
 
-    def renameExtension(def file, def newExtension) {
-        FilenameUtils.removeExtension(file) + newExtension
+    def static renameExtension(File file, String newExtension) {
+        return new File(file.getParent(), Files.getNameWithoutExtension(file.toString()) + newExtension)
     }
 
     File getDotnetAssemblyFile() {
@@ -50,15 +49,15 @@ class ProjectFileParser {
 
     File getDotnetDebugFile() {
         File target = project.file(properties.TargetPath)
-        new File(renameExtension(target.path, OperatingSystem.current().windows ? '.pdb' : '.mdb'))
+        renameExtension(target, OperatingSystem.current().windows ? '.pdb' : '.mdb')
     }
 
      FileCollection getDotnetArtifacts() {
         project.files({
-            def ret = [dotnetAssemblyFile];
-            if (dotnetDebugFile?.exists()) ret += dotnetDebugFile;
+            def ret = [dotnetAssemblyFile]
+            if (dotnetDebugFile?.exists()) ret += dotnetDebugFile
             File doc = getProjectPropertyPath('DocumentationFile')
-            if (doc?.exists()) ret += doc;
+            if (doc?.exists()) ret += doc
             ret
         }) {
             builtBy msbuild

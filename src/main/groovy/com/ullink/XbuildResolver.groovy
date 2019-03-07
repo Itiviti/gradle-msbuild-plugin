@@ -1,6 +1,5 @@
 package com.ullink
 
-import org.apache.commons.io.filefilter.DirectoryFileFilter
 import org.gradle.api.GradleException
 import org.gradle.util.VersionNumber
 
@@ -68,7 +67,7 @@ class XbuildResolver implements IExecutableResolver {
     }
 
     private static List<String> getOSXMonoRootDirectories() {
-        getVersionDirectories("/Library/Frameworks/Mono.framework/Versions/").collect { it[0] }
+        getVersionDirectories('/Library/Frameworks/Mono.framework/Versions/').collect { it[0] }
     }
 
     private static List<String[]> getVersionDirectories(String path) {
@@ -76,8 +75,8 @@ class XbuildResolver implements IExecutableResolver {
         if (!file.exists()) {
             return []
         }
-
-        return file.listFiles((FileFilter) DirectoryFileFilter.INSTANCE)
+        return file.listFiles()
+                .findAll { it.isDirectory() }
                 .collect { [it.absolutePath, VersionNumber.parse(it.name)] }
                 .findAll { !VersionNumber.UNKNOWN.equals(it[1]) }
                 .sort { a, b -> b[1].compareTo(a[1]) }

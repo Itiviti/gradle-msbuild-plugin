@@ -1,34 +1,51 @@
 package com.ullink
 
-import org.apache.commons.io.FilenameUtils
+import com.google.common.io.Files
+import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
-import org.gradle.api.internal.ConventionTask
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.TaskAction
 
-class AssemblyInfoVersionPatcher extends ConventionTask {
-    def files
-    List<String> projects = []
+class AssemblyInfoVersionPatcher extends DefaultTask {
+    ListProperty<String> files
+    ListProperty<String> projects
 
     AssemblyInfoVersionPatcher() {
-        conventionMapping.map "projects", { [ project.tasks.msbuild.mainProject?.projectName ] }
-        conventionMapping.map "files", {
-            getProjects()
+        projects = project.getObjects().listProperty(String)
+        projects.set(project.provider({
+            project.tasks.msbuild.projects.collect { it.key }
+        }))
+
+        files = project.getObjects().listProperty(String)
+        files.set(project.provider({
+            projects.get()
                 .collect { project.tasks.msbuild.projects[it] }
                 .collect {
-                    it?.getItems('Compile').find { FilenameUtils.getBaseName(it.name) == 'AssemblyInfo' }
+                    if (it.properties.UsingMicrosoftNETSdk == 'true') {
+                        it.properties.MSBuildProjectFullPath
+                    } else {
+                        it?.getItems('Compile').find { Files.getNameWithoutExtension(it) == 'AssemblyInfo' }
+                    }
                 }
-        }
-        conventionMapping.map "fileVersion", { version }
-        conventionMapping.map "informationalVersion", { version }
+        }))
+
+        fileVersion = project.getObjects().property(String)
+        informationalVersion = project.getObjects().property(String)
+        fileVersion.set(project.provider ({ version }))
+        informationalVersion.set(project.provider ({ version }))
 
         project.afterEvaluate {
-            if (!version) return;
+            if (!version) return
             project.tasks.withType(Msbuild) { task ->
                 task.projects.each { proj ->
-                    if (proj.value.getItems('Compile').intersect(getFiles())) {
+                    if (proj.value.getItems('Compile')?.intersect(files.get())) {
+                        task.dependsOn this
+                    }
+                    if (files.get().contains(proj.properties.MSBuildProjectFullPath)) {
                         task.dependsOn this
                     }
                 }
@@ -37,47 +54,83 @@ class AssemblyInfoVersionPatcher extends ConventionTask {
     }
 
     @Input
-    def version
+    String version
 
     @Input
-    def fileVersion
+    Property<String> fileVersion
 
     @Input
-    def informationalVersion
-    
-    @Input
-    def assemblyDescription = ''
+    Property<String> informationalVersion
 
     @Input
-    def charset = "UTF-8"
-    
+    String title
+
+    @Input
+    String company
+
+    @Input
+    String product
+
+    @Input
+    String copyright
+
+    @Input
+    String trademark
+
+    @Input
+    String assemblyDescription
+
+    @Input
+    def charset = 'UTF-8'
+
     @InputFiles
     @OutputFiles
     FileCollection getPatchedFiles() {
-        project.files(getFiles())
+        project.files(files.get())
     }
 
     @TaskAction
     void run() {
         getPatchedFiles().each {
             logger.info("Replacing version attributes in $it")
-            replace(it, 'AssemblyVersion', getVersion())
-            replace(it, 'AssemblyFileVersion', getFileVersion())
-            replace(it, 'AssemblyInformationalVersion', getInformationalVersion())
-            replace(it, 'AssemblyDescription', getAssemblyDescription())
+            replace(it, 'AssemblyVersion', version)
+            replace(it, 'AssemblyFileVersion', fileVersion.get())
+            replace(it, 'AssemblyInformationalVersion', informationalVersion.get())
+            replace(it, 'AssemblyDescription', assemblyDescription)
+            replace(it, 'AssemblyTitle', title)
+            replace(it, 'AssemblyCompany', company)
+            replace(it, 'AssemblyProduct', product)
+            replace(it, 'AssemblyCopyright', copyright)
+            replace(it, 'AssemblyTrademark', trademark)
         }
     }
 
-    void replace(def file, def name, def value) {
-        //only change the assembly values if they specified here (not blank or null)
-        //if the parameters are blank, then keep whatever is already in the assemblyinfo file.
-        if (value == null || value.isEmpty()) return
-    
-        if (FilenameUtils.getExtension(file.name) == 'fs')
-            project.ant.replaceregexp(file: file, match: /^\[<assembly: $name\s*\(".*"\)\s*>\]$/, replace: "[<assembly: ${name}(\"${value}\")>]", byline: true, encoding: charset)
-        else if (FilenameUtils.getExtension(file.name) == 'vb')
-            project.ant.replaceregexp(file: file, match: /^<Assembly: $name\s*\(".*"\)\s*>$/, replace: "<Assembly: ${name}(\"${value}\")>", byline: true, encoding: charset)
-        else
-            project.ant.replaceregexp(file: file, match: /^\[assembly: $name\s*\(".*"\)\s*\]$/, replace: "[assembly: ${name}(\"${value}\")]", byline: true, encoding: charset)
+    void replace(File file, def name, def value) {
+        // only change the assembly values if they specified here (not blank or null)
+        // if the parameters are blank, then keep whatever is already in the assemblyInfo file.
+        if (!value) {
+            return
+        }
+
+        def extension = Files.getFileExtension(file.absolutePath)
+        switch (extension) {
+            case 'fs':
+                project.ant.replaceregexp(file: file, match: /^\[<assembly: $name\s*\(".*"\)\s*>\]$/, replace: "[<assembly: ${name}(\"${value}\")>]", byline: true, encoding: charset)
+                break
+            case 'vb':
+                project.ant.replaceregexp(file: file, match: /^\[<assembly: $name\s*\(".*"\)\s*>\]$/, replace: "[<assembly: ${name}(\"${value}\")>]", byline: true, encoding: charset)
+                break
+            // project file
+            case ~/.*proj$/:
+                if (name != 'AssemblyVersion' && name != 'AssemblyTitle' && name.startsWith('Assembly')) {
+                    name = name.substring('Assembly'.length())
+                }
+                project.ant.replaceregexp(file: file, match: /<$name>\s*([^\s]+)\s*\<\/$name>$/, replace: "<$name>$value</$name>", byline: true, encoding: charset)
+                break
+            default:
+                project.ant.replaceregexp(file: file, match: /^\[assembly: $name\s*\(".*"\)\s*\]$/, replace: "[assembly: ${name}(\"${value}\")]", byline: true, encoding: charset)
+                break
+
+        }
     }
 }
