@@ -1,13 +1,10 @@
 package com.ullink
 
-import org.gradle.api.GradleException
-import org.gradle.util.VersionNumber
-
 class PosixMsbuildResolver implements IExecutableResolver {
 
     String[] msbuild
 
-    PosixMsbuildResolver(VersionNumber version)
+    PosixMsbuildResolver(String version)
     {
         msbuild = locateMsBuild(version)
     }
@@ -44,14 +41,14 @@ class PosixMsbuildResolver implements IExecutableResolver {
         return existingMsBuilds
     }
 
-    public static String[] locateMsBuild(VersionNumber version = null) {
+    public static String[] locateMsBuild(String version = null) {
         def msbuilds = locateMsBuilds()
         String[] msbuild = null
         if(version == null) {
             msbuild = msbuilds.first()
         }
         else {
-            msbuild = msbuilds.find { (version == it[1]) }
+            msbuild = msbuilds.find { (version == it[1]?.toString()) }
         }
 
         return msbuild

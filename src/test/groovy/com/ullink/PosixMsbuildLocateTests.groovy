@@ -3,18 +3,18 @@ package com.ullink
 import org.gradle.api.Project
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.testfixtures.ProjectBuilder
-import org.gradle.util.VersionNumber
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 
+import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertNull
 
 class PosixMsbuildLocateTests {
     @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    public ExpectedException expectedException = ExpectedException.none()
 
     @Before
     public void beforeMethod() {
@@ -40,7 +40,7 @@ class PosixMsbuildLocateTests {
         p.msbuild {
             version = msbuildVersion
         }
-        msbuild = resolver.locateMsBuild(VersionNumber.parse(p.tasks.msbuild.version))
+        msbuild = resolver.locateMsBuild(p.tasks.msbuild.version)
         assertNotNull(msbuild)
     }
 
@@ -53,8 +53,15 @@ class PosixMsbuildLocateTests {
             version = 999.3
         }
 
-        def msbuild = resolver.locateMsBuild(VersionNumber.parse(p.tasks.msbuild.version))
+        def msbuild = resolver.locateMsBuild(p.tasks.msbuild.version)
         assertNull(msbuild)
+
+    }
+
+    @Test
+    public void givenInvalidMSBuildVersionInConstructor_returnsMsBuildNotFound() {
+        def resolver = new PosixMsbuildResolver("999.3")
+        assertFalse(resolver.msBuildFound())
 
     }
 }
