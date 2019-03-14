@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+# 3.3
+### Fixed
+* Failed to resolve msbuild in MacOS #113 (thanks @kkalisz)
+
 # 3.2
 ### Added
 * Support patching new VS2017 project file in AssemblyInfoVersionPatcher
