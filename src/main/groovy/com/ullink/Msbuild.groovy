@@ -144,8 +144,8 @@ class Msbuild extends ConventionTask {
     boolean resolveProject() {
         if (projectParsed == null && parseProject) {
             if (isSolutionBuild()) {
-                def rootProjectFile = getRootedProjectFile()
-                def result = parseProjectFile(rootProjectFile)
+                def rootSolutionFile = getRootedSolutionFile()
+                def result = parseProjectFile(rootSolutionFile)
                 allProjects = result.collectEntries { [it.key, new ProjectFileParser(msbuild: this, eval: it.value)] }
                 def projectName = getProjectName()
                 if (projectName == null || projectName.isEmpty()) {
