@@ -28,7 +28,7 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
                     if (it.properties.UsingMicrosoftNETSdk == 'true') {
                         it.properties.MSBuildProjectFullPath
                     } else {
-                        it?.getItems('Compile').find { Files.getNameWithoutExtension(it) == 'AssemblyInfo' }
+                        it?.getItems('Compile').find { Files.getNameWithoutExtension(it.name) == 'AssemblyInfo' }
                     }
                 }
         }))
@@ -63,22 +63,22 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
     Property<String> informationalVersion
 
     @Input
-    String title
+    String title = ''
 
     @Input
-    String company
+    String company = ''
 
     @Input
-    String product
+    String product = ''
 
     @Input
-    String copyright
+    String copyright = ''
 
     @Input
-    String trademark
+    String trademark = ''
 
     @Input
-    String assemblyDescription
+    String assemblyDescription = ''
 
     @Input
     def charset = 'UTF-8'

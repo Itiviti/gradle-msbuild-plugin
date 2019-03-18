@@ -3,6 +3,8 @@
 # 3.3
 ### Fixed
 * Failed to resolve msbuild in MacOS #113 (thanks @kkalisz)
+* Failed to run AssemblyInfoPatcher when attribute is not set or patching AssemblyInfo.cs
+* Improve warnings log when project not found
 
 # 3.2
 ### Added
