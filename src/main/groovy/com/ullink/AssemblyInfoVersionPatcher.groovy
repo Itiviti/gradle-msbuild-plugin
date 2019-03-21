@@ -10,8 +10,10 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.TaskAction
 
+import java.nio.file.Paths
+
 class AssemblyInfoVersionPatcher extends DefaultTask {
-    ListProperty<String> files
+    ListProperty<File> files
     ListProperty<String> projects
 
     AssemblyInfoVersionPatcher() {
@@ -20,17 +22,24 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
             project.tasks.msbuild.projects.collect { it.key }
         }))
 
-        files = project.getObjects().listProperty(String)
+        files = project.getObjects().listProperty(File)
         files.set(project.provider({
             projects.get()
                 .collect { project.tasks.msbuild.projects[it] }
                 .collect {
+                    def path
+
                     if (it.properties.UsingMicrosoftNETSdk == 'true') {
-                        it.properties.MSBuildProjectFullPath
+                        path = it.properties.MSBuildProjectFullPath
                     } else {
-                        it?.getItems('Compile').find { Files.getNameWithoutExtension(it.name) == 'AssemblyInfo' }
+                        path = it?.getItems('Compile').find { Files.getNameWithoutExtension(it.name) == 'AssemblyInfo' }
                     }
+                    project.logger.info("AssemblyInfoPatcher: found file ${path} (${path?.class}) for project ${it.projectName}")
+
+                    path
                 }
+                .findAll { it != null }
+                .unique()
         }))
 
         fileVersion = project.getObjects().property(String)
@@ -42,10 +51,11 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
             if (!version) return
             project.tasks.withType(Msbuild) { task ->
                 task.projects.each { proj ->
-                    if (proj.value.getItems('Compile')?.intersect(files.get())) {
+                    def parsedFiles = files.get()
+                    if (proj.value.getItems('Compile')?.intersect(parsedFiles)) {
                         task.dependsOn this
                     }
-                    if (files.get().contains(proj.properties.MSBuildProjectFullPath)) {
+                    if (parsedFiles.contains(proj.properties.MSBuildProjectFullPath)) {
                         task.dependsOn this
                     }
                 }
