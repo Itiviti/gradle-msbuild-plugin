@@ -22,7 +22,7 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
         }))
 
         files = project.getObjects().listProperty(File)
-        files.convention(project.provider({
+        files.set(project.provider({
             projects.get()
                 .collect { project.tasks.msbuild.projects[it] }
                 .collect {
