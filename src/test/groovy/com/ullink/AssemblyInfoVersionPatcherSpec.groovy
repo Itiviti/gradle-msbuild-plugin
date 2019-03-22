@@ -32,7 +32,7 @@ class AssemblyInfoVersionPatcherSpec extends Specification {
         def project = ProjectBuilder.builder().build()
         def task = project.tasks.register('assemblyPatcher', AssemblyInfoVersionPatcher).get()
         task.with {
-            files.set([ assemblyInfo.absolutePath ])
+            files.set([ project.file(assemblyInfo.absolutePath) ])
             fileVersion.set 'file version'
             version = 'version'
             assemblyDescription = 'description'
@@ -70,7 +70,7 @@ class AssemblyInfoVersionPatcherSpec extends Specification {
         def project = ProjectBuilder.builder().build()
         def task = project.tasks.register('assemblyPatcher', AssemblyInfoVersionPatcher).get()
         task.with {
-            files.set([ assemblyInfo.absolutePath ])
+            files.set([ project.file(assemblyInfo.absolutePath) ])
             fileVersion.set 'file version'
             version = 'version'
             assemblyDescription = 'description'
