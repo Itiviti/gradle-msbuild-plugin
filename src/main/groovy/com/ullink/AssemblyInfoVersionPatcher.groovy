@@ -2,7 +2,6 @@ package com.ullink
 
 import com.google.common.io.Files
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -11,7 +10,9 @@ import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.TaskAction
 
 class AssemblyInfoVersionPatcher extends DefaultTask {
-    ListProperty<String> files
+    @InputFiles
+    @OutputFiles
+    ListProperty<File> files
     ListProperty<String> projects
 
     AssemblyInfoVersionPatcher() {
@@ -20,16 +21,22 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
             project.tasks.msbuild.projects.collect { it.key }
         }))
 
-        files = project.getObjects().listProperty(String)
-        files.set(project.provider({
+        files = project.getObjects().listProperty(File)
+        files.convention(project.provider({
             projects.get()
                 .collect { project.tasks.msbuild.projects[it] }
                 .collect {
                     if (it.properties.UsingMicrosoftNETSdk == 'true') {
                         it.properties.MSBuildProjectFullPath
                     } else {
-                        it?.getItems('Compile').find { Files.getNameWithoutExtension(it.name) == 'AssemblyInfo' }
+                        it?.getItems('Compile')?.find { Files.getNameWithoutExtension(it.name) == 'AssemblyInfo' }
                     }
+                }
+                .findAll { it != null }
+                .unique()
+                .collect {
+                    project.logger.info("AssemblyInfoPatcher: found file ${it} (${it?.class})")
+                    project.file(it)
                 }
         }))
 
@@ -40,13 +47,20 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
 
         project.afterEvaluate {
             if (!version) return
-            project.tasks.withType(Msbuild) { task ->
-                task.projects.each { proj ->
-                    if (proj.value.getItems('Compile')?.intersect(files.get())) {
+            project.tasks.withType(Msbuild) { Msbuild task ->
+                for (def proj in task.projects.collect { e -> e.value }) {
+                    def parsedFiles = files.get()
+
+                    if (proj.getItems('Compile')?.intersect(parsedFiles)) {
+                        project.logger.info("Found matching AssemblyInfo file, Task[${task.name}] will depend on Task[${this.name}]")
                         task.dependsOn this
+                        return
                     }
-                    if (files.get().contains(proj.properties.MSBuildProjectFullPath)) {
+
+                    if (proj.properties.MSBuildProjectFullPath && parsedFiles.contains(project.file(proj.properties.MSBuildProjectFullPath))) {
+                        project.logger.info("Found matching project file, Task[${task.name}] will depend on Task[${this.name}]")
                         task.dependsOn this
+                        return
                     }
                 }
             }
@@ -83,15 +97,9 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
     @Input
     def charset = 'UTF-8'
 
-    @InputFiles
-    @OutputFiles
-    FileCollection getPatchedFiles() {
-        project.files(files.get())
-    }
-
     @TaskAction
     void run() {
-        getPatchedFiles().each {
+        files.get().each {
             logger.info("Replacing version attributes in $it")
             replace(it, 'AssemblyVersion', version)
             replace(it, 'AssemblyFileVersion', fileVersion.get())
