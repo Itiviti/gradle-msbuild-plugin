@@ -52,13 +52,13 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
                     def parsedFiles = files.get()
 
                     if (proj.getItems('Compile')?.intersect(parsedFiles)) {
-                        project.logger.info("Found matching AssemblyInfo file, Task[${task.name}] will depends on Task[${this.name}]")
+                        project.logger.info("Found matching AssemblyInfo file, Task[${task.name}] will depend on Task[${this.name}]")
                         task.dependsOn this
                         return
                     }
 
                     if (proj.properties.MSBuildProjectFullPath && parsedFiles.contains(project.file(proj.properties.MSBuildProjectFullPath))) {
-                        project.logger.info("Found matching project file, Task[${task.name}] will depends on Task[${this.name}]")
+                        project.logger.info("Found matching project file, Task[${task.name}] will depend on Task[${this.name}]")
                         task.dependsOn this
                         return
                     }
