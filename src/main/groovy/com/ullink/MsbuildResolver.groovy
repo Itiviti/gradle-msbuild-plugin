@@ -38,7 +38,7 @@ class MsbuildResolver implements IExecutableResolver {
             return
         }
         msbuild.logger.info("Found the following MSBuild (using vswhere) installation folder: ${msbuildDir}")
-        msbuildDir.eachDirMatch(~/\d+(\.\d+)*/) { dir ->
+        msbuildDir.eachDirMatch(~/(?i)(\d+(\.\d+)*|current)/) { dir ->
             msbuild.msbuildDir = new File(dir, 'Bin')
             return
         }
