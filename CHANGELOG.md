@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+# 3.6
+### Added
+* Support finding msbuild buildtools from VS2019 installation
+
 # 3.3
 ### Fixed
 * Failed to resolve msbuild in MacOS #113 (thanks @kkalisz)
