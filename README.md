@@ -1,4 +1,4 @@
-# Gradle MsBuild Plugin [![Build status](https://ci.appveyor.com/api/projects/status/dx29ov4txa120okx/branch/master?svg=true)](https://ci.appveyor.com/project/gluck/gradle-msbuild-plugin/branch/master) [![Build Status](https://travis-ci.org/Ullink/gradle-msbuild-plugin.svg?branch=master)](https://travis-ci.org/Ullink/gradle-msbuild-plugin)
+# Gradle MsBuild Plugin [![Build status](https://ci.appveyor.com/api/projects/status/dx29ov4txa120okx/branch/master?svg=true)](https://ci.appveyor.com/project/gluck/gradle-msbuild-plugin/branch/master) [![Build Status](https://travis-ci.org/Itiviti/gradle-msbuild-plugin.svg?branch=master)](https://travis-ci.org/Itiviti/gradle-msbuild-plugin)
 
 This plugin allows to compile an MsBuild project.
 It also supports project file parsing, and some basic up-to-date checks to skip the build.
@@ -24,7 +24,7 @@ To apply the plugin:
 ```groovy
 // Starting from gradle 2.1
 plugins {
-  id 'com.ullink.msbuild' version '3.1'
+  id 'com.ullink.msbuild' version '3.7'
 }
 ```
 
@@ -36,7 +36,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.ullink.gradle:gradle-msbuild-plugin:3.1'
+        classpath 'com.ullink.gradle:gradle-msbuild-plugin:3.7'
     }
 }
 apply plugin:'com.ullink.msbuild'

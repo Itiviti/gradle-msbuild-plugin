@@ -84,28 +84,24 @@ class Msbuild extends ConventionTask {
         if (!file.exists()) {
             throw new GradleException("Project/Solution file $file does not exist")
         }
-        File tempDir = Files.createTempDirectory('ProjectFileParser').toFile()
-        tempDir.deleteOnExit()
+        File tempDir = Files.createTempDirectory(temporaryDir.toPath(), 'ProjectFileParser').toFile()
 
-        def zipFileStream = this.class.getResourceAsStream("/META-INF/ProjectFileParser.zip")
-        ZipInputStream zis = new ZipInputStream(zipFileStream)
-        ZipEntry ze = zis.getNextEntry()
-        while (ze != null) {
-            String fileName = ze.getName()
-            if (ze.isDirectory()) {
-                File subFolder = new File(tempDir, fileName)
-                subFolder.mkdir()
-                subFolder.deleteOnExit()
+        this.class.getResourceAsStream('/META-INF/ProjectFileParser.zip').withCloseable  {
+            ZipInputStream zis = new ZipInputStream(it)
+            ZipEntry ze = zis.getNextEntry()
+            while (ze != null) {
+                String fileName = ze.getName()
+                if (ze.isDirectory()) {
+                    File subFolder = new File(tempDir, fileName)
+                    subFolder.mkdir()
+                    ze = zis.getNextEntry()
+                    continue
+                }
+                File target = new File(tempDir, fileName)
+                target.newOutputStream().leftShift(zis).close()
                 ze = zis.getNextEntry()
-                continue
             }
-            File target = new File(tempDir, fileName)
-            target.newOutputStream().leftShift(zis).close()
-            target.deleteOnExit()
-            ze = zis.getNextEntry()
         }
-        zis.closeEntry()
-        zis.close()
 
         def executable = new File(tempDir, 'ProjectFileParser.exe')
         def builder = resolver.executeDotNet(executable)
