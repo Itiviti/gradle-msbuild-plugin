@@ -1,9 +1,9 @@
 plugins {
-    id 'nu.studer.plugindev' version '1.0.9'
+    id 'nu.studer.plugindev' version '1.0.12'
     id 'com.jfrog.bintray' version '1.8.4'
-    id 'com.ullink.msbuild' version '3.1'
-    id 'com.ullink.nuget' version '2.15'
-    id 'com.ullink.nunit' version '1.13'
+    id 'com.ullink.msbuild' version '3.6'
+    id 'com.ullink.nuget' version '2.18'
+    id 'com.ullink.nunit' version '2.0'
     id 'net.researchgate.release' version '2.6.0'
     id 'de.undercouch.download' version '3.4.3'
 }
@@ -25,10 +25,6 @@ dependencies {
     compile 'com.google.guava:guava:27.0.1-jre'
 }
 
-nuget {
-    version = '4.4.0'
-}
-
 nugetRestore {
     solutionFile = file('ProjectFileParser.sln')
 }
@@ -41,10 +37,8 @@ msbuild {
 }
 
 nunit {
-    nunitVersion = '3.0.1'
     testAssemblies = [ msbuild.projects['ProjectFileParser_Tests'].properties.TargetPath ]
 }
-nunit.dependsOn msbuild
 
 task generateZip(dependsOn: nunit, type: Zip) {
     from (msbuild.mainProject.properties.TargetDir) {
@@ -57,7 +51,7 @@ task generateZip(dependsOn: nunit, type: Zip) {
 }
 
 task downloadVsWhere(type: de.undercouch.gradle.tasks.download.Download) {
-    src 'https://github.com/Microsoft/vswhere/releases/download/2.6.7/vswhere.exe'
+    src 'https://github.com/Microsoft/vswhere/releases/download/2.8.4/vswhere.exe'
     dest "$temporaryDir/vswhere.exe"
 }
 
@@ -76,11 +70,8 @@ sourceSets {
 }
 
 bintray {
-    // to remove when upgraded plugindev to 1.0.4
-    user project.properties.bintrayUser
-    key project.properties.bintrayApiKey
     pkg.repo = 'gradle-plugins'
-    pkg.userOrg = 'ullink'
+    pkg.userOrg = 'Itiviti'
     pkg.version.gpg.sign = true
 }
 
@@ -94,7 +85,7 @@ plugindev {
     authorId 'gluck'
     authorName 'Francois Valdy'
     authorEmail 'francois.valdy@gmail.com'
-    projectUrl "https://github.com/Ullink/${project.name}"
+    projectUrl "https://github.com/Itiviti/${project.name}"
     projectInceptionYear '2012'
     done()
 }

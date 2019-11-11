@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+# 3.7
+### Fixed
+* Unzip binaries into temporaryDir of the task
+
 # 3.6
 ### Added
 * Support finding msbuild buildtools from VS2019 installation
