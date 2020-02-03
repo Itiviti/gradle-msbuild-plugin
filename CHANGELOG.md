@@ -3,6 +3,7 @@
 # 3.7
 ### Fixed
 * Unzip binaries into temporaryDir of the task
+* Prevent using MSBuild paths that don't actually contain msbuild.exe
 
 # 3.6
 ### Added
