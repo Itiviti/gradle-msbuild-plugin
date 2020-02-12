@@ -71,7 +71,7 @@ sourceSets {
 
 bintray {
     pkg.repo = 'gradle-plugins'
-    pkg.userOrg = 'Ullink'
+    pkg.userOrg = 'ullink'
     pkg.version.gpg.sign = true
 }
 
