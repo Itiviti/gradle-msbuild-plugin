@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+#3.8
+### Fixed
+* MSBuildCustomLocator retrieves the latest msbuildtools version
+
 # 3.7
 ### Fixed
 * Unzip binaries into temporaryDir of the task
