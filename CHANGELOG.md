@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+# 3.8
+### Fixed
+* The greatest/latest installed Visual Studio version is used to parse the project & solutions (instead of the first it finds).
+
 # 3.7
 ### Fixed
 * Unzip binaries into temporaryDir of the task

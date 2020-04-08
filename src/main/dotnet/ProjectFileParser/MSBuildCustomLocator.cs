@@ -1,5 +1,6 @@
 ﻿using Microsoft.Build.Locator;
 using System;
+using System.Linq;
 
 namespace ProjectFileParser
 {
@@ -9,7 +10,9 @@ namespace ProjectFileParser
         {
             try
             {
-                MSBuildLocator.RegisterDefaults();
+                var latestVsVersion = MSBuildLocator.QueryVisualStudioInstances().OrderBy(vsInstance => vsInstance.Version).Last();
+                MSBuildLocator.RegisterInstance(latestVsVersion);
+                Console.Error.WriteLine($"Registered latest VS Instance: {latestVsVersion.Name} - {latestVsVersion.Version} - {latestVsVersion.MSBuildPath} - {latestVsVersion.DiscoveryType} - {latestVsVersion.VisualStudioRootPath}");
             }
             catch (Exception ex)
             {
