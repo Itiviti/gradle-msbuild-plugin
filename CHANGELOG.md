@@ -1,8 +1,8 @@
 # gradle-msbuild-plugin changelog
 
-#3.8
+# 3.8
 ### Fixed
-* MSBuildCustomLocator retrieves the latest msbuildtools version
+* MSBuildCustomLocator register the greatest/latest installed Visual Studio version (instead of the first it finds).
 
 # 3.7
 ### Fixed
