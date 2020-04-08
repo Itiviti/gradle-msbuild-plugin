@@ -2,7 +2,7 @@
 
 # 3.8
 ### Fixed
-* MSBuildCustomLocator register the greatest/latest installed Visual Studio version (instead of the first it finds).
+* The greatest/latest installed Visual Studio version is used to parse the project & solutions (instead of the first it finds).
 
 # 3.7
 ### Fixed
