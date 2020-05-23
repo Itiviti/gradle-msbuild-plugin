@@ -1,3 +1,6 @@
+### 📢 DEPRECATED
+[gradle-dotnet-plugin](https://github.com/Itiviti/gradle-dotnet-plugin) is now available for building projects via dotnet command line tool chains. The plugin supports running nunit, code coverage, nuget restore and push. 
+
 # Gradle MsBuild Plugin [![Build status](https://ci.appveyor.com/api/projects/status/dx29ov4txa120okx/branch/master?svg=true)](https://ci.appveyor.com/project/gluck/gradle-msbuild-plugin/branch/master) [![Build Status](https://travis-ci.org/Itiviti/gradle-msbuild-plugin.svg?branch=master)](https://travis-ci.org/Itiviti/gradle-msbuild-plugin)
 
 This plugin allows to compile an MsBuild project.
@@ -136,8 +139,6 @@ task versionPatchFoo(type: AssemblyInfoVersionPatcher) {
 ```
 
 # See also
-
-[Gradle PdbIndex plugin](https://github.com/Ullink/gradle-pdbindex-plugin) - Allows to source index generated PDB files.
 
 [Gradle NuGet plugin](https://github.com/Ullink/gradle-nuget-plugin) - Allows to restore NuGet packages prior to building the projects with this plugin, and to pack&push nuget packages.
 
