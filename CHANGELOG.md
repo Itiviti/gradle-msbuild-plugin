@@ -1,5 +1,7 @@
 # gradle-msbuild-plugin changelog
 
+# 3.10
+
 # 3.9
 ### Fixed
 * Support newer MSBuild versions (e.g., 16.7.0.37604)
