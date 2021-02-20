@@ -10,9 +10,10 @@ namespace ProjectFileParser
     {
         private static int Main(string[] args)
         {
+            MSBuildCustomLocator.Register();
+
             using (new MonoHack())
             {
-                MSBuildCustomLocator.Register();
                 try
                 {
                     var customPropertiesText = Console.In.ReadToEnd();
