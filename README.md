@@ -39,7 +39,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.ullink.gradle:gradle-msbuild-plugin:3.7'
+        classpath 'com.ullink.gradle:gradle-msbuild-plugin:3.9'
     }
 }
 apply plugin:'com.ullink.msbuild'
