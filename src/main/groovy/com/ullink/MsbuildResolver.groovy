@@ -20,7 +20,7 @@ class MsbuildResolver implements IExecutableResolver {
 
         def vswhere = new ProcessBuilder(vswhereFile.toString())
         if (msbuild.version) {
-            vswhere.command() << '-version' << msbuild.version
+            vswhere.command() << '-version' << msbuild.version << '-latest'
         } else {
             vswhere.command() << '-latest'
         }
