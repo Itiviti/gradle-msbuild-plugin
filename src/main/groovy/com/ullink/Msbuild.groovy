@@ -6,33 +6,60 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.os.OperatingSystem
 
+
 class Msbuild extends ConventionTask {
 
+    @Input @Optional
     String version
+    @Input @Optional
     String msbuildDir
+    @Input @Optional
     def solutionFile
+    @Input @Optional
     def projectFile
+    @Input @Optional
     String loggerAssembly
+    @Input @Optional
     Boolean optimize
+    @Input @Optional
     Boolean debugSymbols
+    @Input @Optional
     String debugType
+    @Input @Optional
     String platform
+    @Input @Optional
     def destinationDir
+    @Input @Optional
     def intermediateDir
+    @Input @Optional
     Boolean generateDoc
+    @Input @Optional
     String projectName
+    @Input @Optional
     String configuration
+    @Input @Optional
     List<String> defineConstants
+    @Input @Optional
     List<String> targets
+    @Input @Optional
     String verbosity
+    @Input @Optional
     Map<String, Object> parameters = [:]
+    @Input @Optional
     Map<String, ProjectFileParser> allProjects = [:]
+    @Input @Optional
     String executable
+    @Internal
     ProjectFileParser projectParsed
+    @Internal
     IExecutableResolver resolver
+    @Internal
     Boolean parseProject = true
 
     Msbuild() {
@@ -49,27 +76,33 @@ class Msbuild extends ConventionTask {
         conventionMapping.map "projectName", { project.name }
     }
 
+    @Internal
     boolean isSolutionBuild() {
         projectFile == null && getSolutionFile() != null
     }
 
+    @Internal
     boolean isProjectBuild() {
         solutionFile == null && getProjectFile() != null
     }
 
+    @Internal
     def getRootedProjectFile() {
         project.file(getProjectFile())
     }
 
+    @Internal
     def getRootedSolutionFile() {
         project.file(getSolutionFile())
     }
 
+    @Internal
     Map<String, ProjectFileParser> getProjects() {
         resolveProject()
         allProjects
     }
 
+    @Internal
     ProjectFileParser getMainProject() {
         if (resolveProject()) {
             projectParsed
@@ -178,6 +211,7 @@ class Msbuild extends ConventionTask {
         }
     }
 
+    @Internal
     def getCommandLineArgs() {
         resolver.setupExecutable(this)
 
@@ -231,6 +265,7 @@ class Msbuild extends ConventionTask {
         return 'minimal' // 'quiet'
     }
 
+    @Internal
     Map getInitProperties() {
         def cmdParameters = new HashMap<String, Object>()
         if (parameters != null) {
