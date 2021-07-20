@@ -1,6 +1,5 @@
 plugins {
-    id 'nu.studer.plugindev' version '1.0.12'
-    id 'com.jfrog.bintray' version '1.8.4'
+    id 'com.gradle.plugin-publish' version '0.15.0'
     id 'com.ullink.msbuild' version '3.9'
     id 'com.ullink.nuget' version '2.18'
     id 'com.ullink.nunit' version '2.0'
@@ -11,6 +10,7 @@ plugins {
 group = 'com.ullink.gradle'
 
 apply plugin: 'groovy'
+apply plugin: 'com.gradle.plugin-publish'
 
 description 'Gradle plugin for MSBuild project build.'
 
@@ -69,26 +69,26 @@ sourceSets {
     }
 }
 
-bintray {
-    pkg.repo = 'gradle-plugins'
-    pkg.userOrg = 'ullink'
-    pkg.version.gpg.sign = true
+pluginBundle {
+    website = 'https://github.com/Itiviti/gradle-msbuild-plugin'
+    vcsUrl = 'https://github.com/Itiviti/gradle-msbuild-plugin'
+    tags = ['msbuild', 'c#', '.net']
+
+    mavenCoordinates {
+        groupId = 'com.ullink.gradle'
+    }
 }
 
-plugindev {
-    pluginId 'com.ullink.msbuild'
-    pluginName 'com.ullink.gradle:gradle-msbuild-plugin'
-    pluginImplementationClass 'com.ullink.MsbuildPlugin'
-    pluginDescription project.description
-    pluginLicenses 'Apache-2.0'
-    pluginTags 'gradle', 'plugin', 'msbuild', 'c#', '.net'
-    authorId 'gluck'
-    authorName 'Francois Valdy'
-    authorEmail 'francois.valdy@gmail.com'
-    projectUrl "https://github.com/Itiviti/${project.name}"
-    projectInceptionYear '2012'
-    done()
+gradlePlugin {
+    plugins {
+        msbuildPlugin {
+            id = 'com.ullink.msbuild'
+            description = project.description
+            displayName = 'Gradle MSBuild Plugin'
+            implementationClass = 'com.ullink.MsbuildPlugin'
+        }
+    }
 }
 
 processResources.dependsOn downloadVsWhere
-afterReleaseBuild.dependsOn bintrayUpload
+afterReleaseBuild.dependsOn publishPlugins
