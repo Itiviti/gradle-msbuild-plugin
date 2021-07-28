@@ -1,6 +1,9 @@
 # gradle-msbuild-plugin changelog
 
-# 3.10
+# 3.12
+### Fixed
+* msbuild version range support to use latest
+* Gradle 7 support, thanks @PedroWitzel
 
 # 3.9
 ### Fixed
