@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+# 3.14
+### Fixed
+* built using JDK 8 for compatibility
+
 # 3.13
 ### Fixed
 * msbuild version range support to use latest
