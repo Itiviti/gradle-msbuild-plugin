@@ -11,9 +11,10 @@ import org.gradle.api.tasks.TaskAction
 
 class AssemblyInfoVersionPatcher extends DefaultTask {
     @InputFiles
-    @OutputFiles
     ListProperty<File> files
-    ListProperty<String> projects
+
+    @Input
+    final ListProperty<String> projects
 
     AssemblyInfoVersionPatcher() {
         projects = project.getObjects().listProperty(String)
@@ -71,10 +72,10 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
     String version
 
     @Input
-    Property<String> fileVersion
+    final Property<String> fileVersion
 
     @Input
-    Property<String> informationalVersion
+    final Property<String> informationalVersion
 
     @Input
     String title = ''
