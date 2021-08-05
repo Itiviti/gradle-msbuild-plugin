@@ -11,19 +11,19 @@
  ************************************************************************/
 package com.ullink
 
-
 import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
+
+import java.nio.file.Path
 
 class AssemblyInfoVersionPatcherSpec extends Specification {
-    @Rule
-    TemporaryFolder temporaryFolder
+    @TempDir
+    Path temporaryFolder
 
     def 'AssemblyInfo.cs can be patched'() {
         given:
-        def assemblyInfo = temporaryFolder.newFile('AssemblyInfo.cs')
+        def assemblyInfo = temporaryFolder.resolve('AssemblyInfo.cs')
         assemblyInfo.newWriter().withWriter {
             it << this.getClass().getResource('AssemblyInfo.cs').text
         }
@@ -32,7 +32,7 @@ class AssemblyInfoVersionPatcherSpec extends Specification {
         def project = ProjectBuilder.builder().build()
         def task = project.tasks.register('assemblyPatcher', AssemblyInfoVersionPatcher).get()
         task.with {
-            files.set([ project.file(assemblyInfo.absolutePath) ])
+            files.set([ project.file(assemblyInfo) ])
             fileVersion.set 'file version'
             version = 'version'
             assemblyDescription = 'description'
@@ -61,7 +61,7 @@ class AssemblyInfoVersionPatcherSpec extends Specification {
 
     def 'core.csproj will be replaced'() {
         given:
-        def assemblyInfo = temporaryFolder.newFile('core.csproj')
+        def assemblyInfo = temporaryFolder.resolve('core.csproj')
         assemblyInfo.newWriter().withWriter {
             it << this.getClass().getResource('core.csproj').text
         }
@@ -70,7 +70,7 @@ class AssemblyInfoVersionPatcherSpec extends Specification {
         def project = ProjectBuilder.builder().build()
         def task = project.tasks.register('assemblyPatcher', AssemblyInfoVersionPatcher).get()
         task.with {
-            files.set([ project.file(assemblyInfo.absolutePath) ])
+            files.set([ project.file(assemblyInfo) ])
             fileVersion.set 'file version'
             version = 'version'
             assemblyDescription = 'description'

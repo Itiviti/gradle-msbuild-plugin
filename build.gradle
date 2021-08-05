@@ -1,10 +1,10 @@
 plugins {
     id 'com.gradle.plugin-publish' version '0.15.0'
-    id 'com.ullink.msbuild' version '3.9'
-    id 'com.ullink.nuget' version '2.18'
-    id 'com.ullink.nunit' version '2.0'
+    id 'com.ullink.msbuild' version '3.14'
+    id 'com.ullink.nuget' version '2.23'
+    id 'com.ullink.nunit' version '2.3'
     id 'net.researchgate.release' version '2.6.0'
-    id 'de.undercouch.download' version '3.4.3'
+    id 'de.undercouch.download' version '4.1.2'
 }
 
 group = 'com.ullink.gradle'
@@ -12,18 +12,19 @@ group = 'com.ullink.gradle'
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'groovy'
 apply plugin: 'com.gradle.plugin-publish'
+apply plugin: 'maven-publish'
 
 description 'Gradle plugin for MSBuild project build.'
 
 ext.dotnetPath = file('src/main/dotnet')
 
 dependencies {
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.spockframework:spock-core:1.2-groovy-2.5'
-    compile gradleApi()
-    compile 'net.java.dev.jna:jna:4.2.2'
-    compile 'net.java.dev.jna:jna-platform:4.2.2'
-    compile 'com.google.guava:guava:27.0.1-jre'
+    testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
+    testImplementation 'junit:junit:4.12'
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.2.0"
+    implementation 'net.java.dev.jna:jna:4.2.2'
+    implementation 'net.java.dev.jna:jna-platform:4.2.2'
+    implementation 'com.google.guava:guava:27.0.1-jre'
 }
 
 nugetRestore {
@@ -68,6 +69,10 @@ sourceSets {
             srcDirs = [ downloadVsWhere.temporaryDir ]
         }
     }
+}
+
+test {
+    useJUnitPlatform()
 }
 
 pluginBundle {

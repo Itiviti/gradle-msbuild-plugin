@@ -1,5 +1,8 @@
 # gradle-msbuild-plugin changelog
 
+# 3.16
+* Gradle 7 support on AssemblyInfoVersionPatcher
+
 # 3.14
 ### Fixed
 * built using JDK 8 for compatibility
