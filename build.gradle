@@ -19,7 +19,7 @@ description 'Gradle plugin for MSBuild project build.'
 ext.dotnetPath = file('src/main/dotnet')
 
 dependencies {
-    testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
+    testImplementation 'org.spockframework:spock-core:2.0-groovy-2.5'
     testImplementation 'junit:junit:4.12'
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.2.0"
     implementation 'net.java.dev.jna:jna:4.2.2'
