@@ -1,6 +1,7 @@
 # gradle-msbuild-plugin changelog
 
-# 3.16
+# 3.15
+### Fixed
 * Gradle 7 support on AssemblyInfoVersionPatcher
 
 # 3.14
