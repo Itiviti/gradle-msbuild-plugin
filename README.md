@@ -27,7 +27,7 @@ To apply the plugin:
 ```groovy
 // Starting from gradle 2.1
 plugins {
-  id 'com.ullink.msbuild' version '3.9'
+  id 'com.ullink.msbuild' version '3.15'
 }
 ```
 
@@ -35,11 +35,11 @@ or
 ```groovy
 buildscript {
     repositories {
-      mavenCentral()
+        url "https://plugins.gradle.org/m2/"
     }
 
     dependencies {
-        classpath 'com.ullink.gradle:gradle-msbuild-plugin:3.9'
+        classpath 'com.ullink.gradle:gradle-msbuild-plugin:3.15'
     }
 }
 apply plugin:'com.ullink.msbuild'
