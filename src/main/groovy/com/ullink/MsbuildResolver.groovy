@@ -14,6 +14,7 @@ class MsbuildResolver implements IExecutableResolver {
     // Find msbuild >= 15.0 by vswhere
     static def findMsbuildByVsWhere(Msbuild msbuild) {
         File tempDir = Files.createTempDirectory(msbuild.temporaryDir.toPath(), 'vswhere').toFile()
+        tempDir.deleteOnExit()
 
         def vswhereFile = new File(tempDir, 'vwshere.exe')
         Resources.asByteSource(MsbuildResolver.getResource("/vswhere.exe")).copyTo(com.google.common.io.Files.asByteSink(vswhereFile))

@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+# 3.16
+### Fixed
+* Cleanup temporary folders an exit
+
 # 3.15
 ### Fixed
 * Gradle 7 support on AssemblyInfoVersionPatcher

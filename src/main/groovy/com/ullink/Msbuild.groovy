@@ -118,6 +118,7 @@ class Msbuild extends ConventionTask {
             throw new GradleException("Project/Solution file $file does not exist")
         }
         File tempDir = Files.createTempDirectory(temporaryDir.toPath(), 'ProjectFileParser').toFile()
+        tempDir.deleteOnExit()
 
         this.class.getResourceAsStream('/META-INF/ProjectFileParser.zip').withCloseable  {
             ZipInputStream zis = new ZipInputStream(it)
