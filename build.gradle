@@ -19,7 +19,7 @@ ext.dotnetPath = file('src/main/dotnet')
 dependencies {
     testImplementation(platform('org.junit:junit-bom:5.10.1'))
     testImplementation('org.junit.jupiter:junit-jupiter')
-    testImplementation 'org.spockframework:spock-core:2.3-groovy-3.0'
+    testImplementation 'org.spockframework:spock-core:2.3-groovy-2.5'
     implementation 'net.java.dev.jna:jna:4.2.2'
     implementation 'net.java.dev.jna:jna-platform:4.2.2'
     implementation 'com.google.guava:guava:32.0.0-jre'

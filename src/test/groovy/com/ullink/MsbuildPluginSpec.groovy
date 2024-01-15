@@ -4,25 +4,22 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import spock.lang.Specification
 
-import static org.junit.Assert.assertTrue
-
-class MsbuildPluginTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Test
-    public void msbuildPluginAddsMsbuildTaskToProject() {
+class MsbuildPluginSpec extends Specification {
+    def msbuildPluginAddsMsbuildTaskToProject() {
+        given:
         Project project = ProjectBuilder.builder().build()
+
+        when:
         project.apply plugin: MsbuildPlugin
-        assertTrue(project.tasks.msbuild instanceof Msbuild)
+
+        then:
+        project.tasks.msbuild instanceof Msbuild
     }
 
-    @Test
-    public void testExecution() {
+    def testExecution() {
+        given:
         def writer = new StringWriter()
         def xml = new MarkupBuilder(writer)
         xml.Project(ToolsVersion:"4.0", DefaultTargets:"Test", xmlns:"http://schemas.microsoft.com/developer/msbuild/2003") {
@@ -34,23 +31,32 @@ class MsbuildPluginTest {
             write writer.toString()
         }
 
+        when:
         Project p = ProjectBuilder.builder().build()
         p.apply plugin: MsbuildPlugin
         p.msbuild {
             projectFile = file
         }
         p.tasks.msbuild.build()
+
+        then:
+        noExceptionThrown()
     }
-    @Test
-    public void execution_nonExistentProjectFile_throwsGradleException() {
+
+    def execution_nonExistentProjectFile_throwsGradleException() {
+        given:
         Project p = ProjectBuilder.builder().build()
+
+        when:
         p.apply plugin: MsbuildPlugin
         p.msbuild {
             projectFile = OperatingSystem.current().isWindows() ? 'C:\\con' : '/con' // we can never create a file called `con` in root
         }
 
-        expectedException.expect(GradleException.class);
-
+        and:
         p.tasks.msbuild.build()
+
+        then:
+        thrown(GradleException)
     }
 }
