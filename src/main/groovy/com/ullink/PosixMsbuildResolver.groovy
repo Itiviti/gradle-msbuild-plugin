@@ -17,11 +17,6 @@ class PosixMsbuildResolver implements IExecutableResolver {
         return new ProcessBuilder('mono', exe.toString())
     }
 
-    @Override
-    ProcessBuilder executeDotNetApp(File exe) {
-        return new ProcessBuilder('dotnet', exe.toString())
-    }
-
     void setupExecutable(Msbuild msbuild) {
         msbuild.executable = 'MSBuild.dll'
         if (msbuild.msbuildDir == null) {

@@ -112,6 +112,10 @@ class Msbuild extends ConventionTask {
         }
     }
 
+    ProcessBuilder executeDotNetApp(File dll) {
+        return new ProcessBuilder('dotnet', dll.toString())
+    }
+
     def parseProjectFile(def file) {
         logger.info "Parsing file $file ..."
         if (!file.exists()) {
@@ -137,8 +141,8 @@ class Msbuild extends ConventionTask {
             }
         }
 
-        def executable = new File(tempDir, 'ProjectFileParser.exe')
-        def builder = resolver.executeDotNet(executable)
+        def parserDll = new File(tempDir, 'ProjectFileParser.dll')
+        def builder = executeDotNetApp(parserDll)
         builder.command().add(file.toString())
         def proc = builder.start()
 

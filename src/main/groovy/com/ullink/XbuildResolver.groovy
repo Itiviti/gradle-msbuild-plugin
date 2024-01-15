@@ -10,11 +10,6 @@ class XbuildResolver implements IExecutableResolver {
         return new ProcessBuilder('mono', exe.toString())
     }
 
-    @Override
-    ProcessBuilder executeDotNetApp(File exe) {
-        return new ProcessBuilder('dotnet', exe.toString())
-    }
-
     void setupExecutable(Msbuild msbuild) {
         def msBuildResolver = new PosixMsbuildResolver(msbuild.version)
         if(msBuildResolver.msBuildFound()) {

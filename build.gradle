@@ -16,6 +16,10 @@ description 'Gradle plugin for MSBuild project build.'
 
 ext.dotnetPath = file('src/main/dotnet')
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+}
+
 dependencies {
     testImplementation(platform('org.junit:junit-bom:5.10.1'))
     testImplementation('org.junit.jupiter:junit-jupiter')
