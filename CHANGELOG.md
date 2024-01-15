@@ -3,6 +3,7 @@
 # 4.0
 ### Changed
 * `ProjectFileParser` is migrated to `net6`
+* Cleanup temporary folders an exit
 
 ### Removed
 * `NugetDependencies` is removed in `ProjectFileParser`, please use PackageReference instead
