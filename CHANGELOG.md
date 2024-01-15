@@ -1,5 +1,12 @@
 # gradle-msbuild-plugin changelog
 
+# 4.0
+### Changed
+* `ProjectFileParser` is migrated to `net6`
+
+### Removed
+* `NugetDependencies` is removed in `ProjectFileParser`, please use PackageReference instead
+
 # 3.15
 ### Fixed
 * Gradle 7 support on AssemblyInfoVersionPatcher

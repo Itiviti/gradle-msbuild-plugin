@@ -7,7 +7,12 @@ class XbuildResolver implements IExecutableResolver {
 
     @Override
     ProcessBuilder executeDotNet(File exe) {
-        return new ProcessBuilder("mono", exe.toString())
+        return new ProcessBuilder('mono', exe.toString())
+    }
+
+    @Override
+    ProcessBuilder executeDotNetApp(File exe) {
+        return new ProcessBuilder('dotnet', exe.toString())
     }
 
     void setupExecutable(Msbuild msbuild) {

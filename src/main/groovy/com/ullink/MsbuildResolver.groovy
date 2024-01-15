@@ -84,6 +84,11 @@ class MsbuildResolver implements IExecutableResolver {
         return new ProcessBuilder(exe.toString())
     }
 
+    @Override
+    ProcessBuilder executeDotNetApp(File exe) {
+        return executeDotNet(exe)
+    }
+
     static List<String> getMsBuildVersionsFromRegistry(String key) {
         (Registry.getKeys(Registry.HKEY_LOCAL_MACHINE, key) ?: []).sort({ -parseFloat(it) }).collect({ key + it })
     }

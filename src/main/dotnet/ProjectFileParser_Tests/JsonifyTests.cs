@@ -1,22 +1,20 @@
 ﻿using Microsoft.Build.Construction;
-using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using ProjectFileParser;
-using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace ProjectFileParser_Tests
 {
-    [TestFixture]
     public class JsonifyTests
     {
         [SetUp]
-        public void Setup()
+        public void SetUp()
         {
-            var monoHack = new MonoHack();
+            MSBuildCustomLocator.Register();
         }
 
         private string GetResourcePath(string relativePath)
@@ -30,16 +28,16 @@ namespace ProjectFileParser_Tests
             yield return new TestCaseData("Resources/visualstudio14.csproj", 3, 2, "visualstudio14");
         }
 
-        [TestCaseSource("ProjectData")]
+        [TestCaseSource(nameof(ProjectData))]
         public void Project_ToJson_Success(string relativePath, int referenceCount, int compileCount, string projectName)
         {
             var path = GetResourcePath(relativePath);
             var project = ProjectHelpers.LoadProject(path, new Dictionary<string, string>());
-            var json = Jsonify.ToJson(project);
+            var json = Jsonify.ToProperties(project);
 
-            Assert.AreEqual(referenceCount, json[projectName]["Reference"].Count());
-            Assert.AreEqual(compileCount, json[projectName]["Compile"].Count());
-            Assert.AreEqual(projectName, json[projectName]["Properties"]["MSBuildProjectName"].Value<String>());
+            ClassicAssert.AreEqual(referenceCount, (json[projectName]["Reference"] as IList).Count);
+            ClassicAssert.AreEqual(compileCount, (json[projectName]["Compile"] as IList).Count);
+            ClassicAssert.AreEqual(projectName, (json[projectName]["Properties"] as Dictionary<string, object>)["MSBuildProjectName"]);
         }
 
         [TestCase]
@@ -49,34 +47,9 @@ namespace ProjectFileParser_Tests
             var args = new Dictionary<string, string>();
             args["Configuration"] = "Release";
             var project = ProjectHelpers.LoadProject(path, args);
-            var json = Jsonify.ToJson(project);
+            var json = Jsonify.ToProperties(project);
 
-            Assert.AreEqual("Release", json["dummy"]["Properties"]["Configuration"].Value<String>());
-        }
-
-        [TestCase]
-        public void Project_NugetDependencies_AreParsed()
-        {
-            var path = GetResourcePath("Resources/dummy.csproj");
-            var args = new Dictionary<string, string>();
-            args["Configuration"] = "Release";
-            var project = ProjectHelpers.LoadProject(path, args);
-            var json = Jsonify.ToJson(project);
-
-            var dependencies = ((JArray)json["dummy"]["NugetDependencies"]);
-            Assert.AreEqual(5, dependencies.Count);
-            AssertDependency(dependencies, 0, "Microsoft.Web.Xdt", "2.1.1");
-            AssertDependency(dependencies, 1, "MSBuild", "0.1.2");
-            AssertDependency(dependencies, 2, "Newtonsoft.Json", "8.0.2");
-            AssertDependency(dependencies, 3, "NuGet.Core", "2.14.0");
-            AssertDependency(dependencies, 4, "FooBar", "0.2.3.0-gerrit96533-SNAPSHOT", true);
-        }
-
-        private void AssertDependency(JArray dependencies, int index, string id, string version, bool isDevelopmentDependency = false)
-        {
-            Assert.AreEqual(id, dependencies[index]["Id"].Value<string>());
-            Assert.AreEqual(version, dependencies[index]["Version"].Value<string>());
-            Assert.AreEqual(isDevelopmentDependency, dependencies[index]["IsDevelopmentDependency"].Value<bool>());
+            ClassicAssert.AreEqual("Release", (json["dummy"]["Properties"] as Dictionary<string, object>)["Configuration"]);
         }
 
         [TestCase]
@@ -87,10 +60,11 @@ namespace ProjectFileParser_Tests
             args["Configuration"] = "Release";
             args["Platform"] = "x86";
             var projects = ProjectHelpers.GetProjects(SolutionFile.Parse(path), args);
-            var json = Jsonify.ToJson(projects);
+            var json = Jsonify.ToProperties(projects);
+            var properties = json["dummy"]["Properties"] as Dictionary<string, object>;
 
-            Assert.AreEqual("Release", json["dummy"]["Properties"]["Configuration"].Value<String>());
-            Assert.AreEqual("AnyCPU", json["dummy"]["Properties"]["Platform"].Value<String>());
+            ClassicAssert.AreEqual("Release", properties["Configuration"]);
+            ClassicAssert.AreEqual("AnyCPU", properties["Platform"]);
         }
 
         private static IEnumerable<TestCaseData> SolutionData()
@@ -101,17 +75,17 @@ namespace ProjectFileParser_Tests
             yield return new TestCaseData("Resources/POffice.sln", new string[] { "POffice", "POfficeExe" });
         }
 
-        [TestCaseSource("SolutionData")]
+        [TestCaseSource(nameof(SolutionData))]
         public void Solution_ToJson_Success(string relativePath, string[] projects)
         {
             var path = GetResourcePath(relativePath);
             SolutionFile solution = SolutionFile.Parse(path);
 
-            var json = Jsonify.ToJson(ProjectHelpers.GetProjects(solution, new Dictionary<string, string>()));
+            var json = Jsonify.ToProperties(ProjectHelpers.GetProjects(solution, new Dictionary<string, string>()));
             int i = 0;
             foreach (var project in json)
             {
-                Assert.AreEqual(projects[i++], project.Key);
+                ClassicAssert.AreEqual(projects[i++], project.Key);
             }
         }
     }

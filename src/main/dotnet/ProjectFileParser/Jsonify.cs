@@ -1,52 +1,52 @@
 ﻿using Microsoft.Build.Evaluation;
-using Newtonsoft.Json.Linq;
-using NuGet;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 
 namespace ProjectFileParser
 {
     public static class Jsonify
     {
-        public static JObject ToJson(params Project[] projects)
+        public static Dictionary<string, Dictionary<string, object>> ToProperties(params Project[] projects)
         {
-            JObject json = new JObject();
+            var projectProperties = new Dictionary<string, Dictionary<string, object>>();
             foreach (var project in projects)
             {
                 var projectJson = ProjectToJson(project);
-                json[Path.GetFileNameWithoutExtension(project.FullPath)] = projectJson;
+                projectProperties[Path.GetFileNameWithoutExtension(project.FullPath)] = projectJson;
             }
-            return json;
+            return projectProperties;
         }
 
-        private static JObject ProjectToJson(Project project)
+        public static string ToJson(params Project[] projects)
         {
-            JObject jsonProject = new JObject();
+            return JsonSerializer.Serialize(ToProperties(projects));
+        }
+
+        private static Dictionary<string, object> ProjectToJson(Project project)
+        {
+            var result = new Dictionary<string, object>();
             // Project items like resources, sources and references
             foreach (var item in project.ItemsIgnoringCondition)
             {
-                if (jsonProject[item.ItemType] == null)
+                if (!result.ContainsKey(item.ItemType))
                 {
-                    jsonProject[item.ItemType] = new JArray();
+                    result[item.ItemType] = new List<Dictionary<string, string>>();
                 }
-                JArray array = (JArray)jsonProject[item.ItemType];
+                var array = (List<Dictionary<string, string>>)result[item.ItemType];
 
-                var jsonItem = new JObject();
+                var jsonItem = new Dictionary<string, string>();
                 jsonItem["Include"] = item.EvaluatedInclude;
                 foreach (var metaData in item.Metadata)
                 {
                     jsonItem[metaData.Name] = metaData.EvaluatedValue;
                 }
                 array.Add(jsonItem);
-
-                if (item.EvaluatedInclude?.EndsWith("packages.config") ?? false)
-                {
-                    jsonProject["NugetDependencies"] = ParseNugetDependencies(Path.Combine(Path.GetDirectoryName(project.FullPath), item.EvaluatedInclude));
-                }
             }
             // Project properties
-            JObject jsonProperties = new JObject();
+            var projectProperties = new Dictionary<string, object>();
             foreach (var property in project.AllEvaluatedProperties)
             {
                 var value = project.ExpandString(property.EvaluatedValue);
@@ -57,53 +57,20 @@ namespace ProjectFileParser
                         .Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
                         .Where(v => !string.IsNullOrWhiteSpace(v))
                         .Select(v => v.Trim());
-                    JArray jsonValueArray = new JArray();
+                    var valueArray = new List<string>();
                     foreach (var v in values)
                     {
-                        jsonValueArray.Add(v);
+                        valueArray.Add(v);
                     }
-                    jsonProperties[property.Name] = jsonValueArray;
+                    projectProperties[property.Name] = valueArray;
                 }
                 else
                 {
-                    jsonProperties[property.Name] = value.Trim();
+                    projectProperties[property.Name] = value.Trim();
                 }
             }
-            jsonProject["Properties"] = jsonProperties;
-            return jsonProject;
-        }
-
-        private static JArray ParseNugetDependencies(string packagesConfigPath)
-        {
-            var nugetDependencies = new JArray();
-            if (!File.Exists(packagesConfigPath))
-            {
-                Console.Error.WriteLine($"Unable to find nuget dependencies file during project file parsing: {packagesConfigPath}");
-                return nugetDependencies;
-            }
-
-            var file = new PackageReferenceFile(packagesConfigPath);
-            foreach (PackageReference packageReference in file.GetPackageReferences())
-            {
-                var dependency = new JObject();
-                dependency["Id"] = packageReference.Id;
-                dependency["Version"] = packageReference.Version.ToString();
-                dependency["TargetFramework"] = packageReference.TargetFramework.ToString();
-                dependency["RequireReinstallation"] = packageReference.RequireReinstallation;
-                dependency["IsDevelopmentDependency"] = packageReference.IsDevelopmentDependency;
-                JObject versionConstraint = null;
-                if (packageReference.VersionConstraint != null)
-                {
-                    versionConstraint = new JObject();
-                    versionConstraint["MinVersion"] = packageReference.VersionConstraint.MinVersion.ToString();
-                    versionConstraint["MaxVersion"] = packageReference.VersionConstraint.MaxVersion.ToString();
-                    versionConstraint["IsMinInclusive"] = packageReference.VersionConstraint.IsMinInclusive;
-                    versionConstraint["IsMaxInclusive"] = packageReference.VersionConstraint.IsMaxInclusive;
-                }
-                dependency["VersionConstraint"] = versionConstraint;
-                nugetDependencies.Add(dependency);
-            }
-            return nugetDependencies;
+            result["Properties"] = projectProperties;
+            return result;
         }
     }
 }

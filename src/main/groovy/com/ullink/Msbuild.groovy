@@ -154,15 +154,15 @@ class Msbuild extends ConventionTask {
         }
         finally {
             def hasErrors = proc.waitFor() != 0
-            logger.debug "Output from ProjectFileParser: "
+            logger.info "Output from ProjectFileParser: "
             stdoutBuffer.eachLine { line ->
-                 logger.debug line
+                 logger.info line
             }
             stderrBuffer.eachLine { line ->
                 if (hasErrors)
                     logger.error line
                 else
-                    logger.debug line
+                    logger.info line
             }
             if (hasErrors) {
                 throw new GradleException('Project file parsing failed')

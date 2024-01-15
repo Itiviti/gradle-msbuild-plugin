@@ -1,8 +1,6 @@
 plugins {
     id 'com.gradle.plugin-publish' version '0.15.0'
-    id 'com.ullink.msbuild' version '3.14'
-    id 'com.ullink.nuget' version '2.23'
-    id 'com.ullink.nunit' version '2.4'
+    id 'com.itiviti.dotnet' version '2.0.1'
     id 'net.researchgate.release' version '2.6.0'
     id 'de.undercouch.download' version '4.1.2'
 }
@@ -19,40 +17,37 @@ description 'Gradle plugin for MSBuild project build.'
 ext.dotnetPath = file('src/main/dotnet')
 
 dependencies {
-    testImplementation 'org.spockframework:spock-core:2.0-groovy-2.5'
-    testImplementation 'junit:junit:4.12'
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.2.0"
+    testImplementation(platform('org.junit:junit-bom:5.10.1'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testImplementation 'org.spockframework:spock-core:2.3-groovy-3.0'
     implementation 'net.java.dev.jna:jna:4.2.2'
     implementation 'net.java.dev.jna:jna-platform:4.2.2'
-    implementation 'com.google.guava:guava:27.0.1-jre'
+    implementation 'com.google.guava:guava:32.0.0-jre'
 }
 
-nugetRestore {
-    solutionFile = file('ProjectFileParser.sln')
+test {
+    useJUnitPlatform()
 }
 
-msbuild.dependsOn nugetRestore
-msbuild {
-    solutionFile = file('ProjectFileParser.sln')
-    configuration = 'Release'
+dotnet {
+    solution = 'ProjectFileParser.sln'
     projectName = 'ProjectFileParser'
 }
 
-nunit {
-    testAssemblies = [ msbuild.projects['ProjectFileParser_Tests'].properties.TargetPath ]
-}
+tasks.test.dependsOn(tasks.named('dotnetTest'))
 
-task generateZip(dependsOn: nunit, type: Zip) {
-    from (msbuild.mainProject.properties.TargetDir) {
+tasks.register('generateZip', Zip) {
+    dependsOn tasks.named('dotnetBuild')
+    from { dotnet.mainProject.properties.TargetDir } {
         include '*.exe'
-        include '**/*.dll'
-        include '*.config'
+        include '*.json'
+        include '*.dll'
     }
     into '/'
     archiveFileName = 'ProjectFileParser.zip'
 }
 
-task downloadVsWhere(type: de.undercouch.gradle.tasks.download.Download) {
+tasks.register('downloadVsWhere', de.undercouch.gradle.tasks.download.Download) {
     src 'https://github.com/Microsoft/vswhere/releases/download/2.8.4/vswhere.exe'
     dest "$temporaryDir/vswhere.exe"
 }

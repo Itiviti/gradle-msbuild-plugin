@@ -4,8 +4,7 @@ class PosixMsbuildResolver implements IExecutableResolver {
 
     String[] msbuild
 
-    PosixMsbuildResolver(String version)
-    {
+    PosixMsbuildResolver(String version) {
         msbuild = locateMsBuild(version)
     }
 
@@ -15,7 +14,12 @@ class PosixMsbuildResolver implements IExecutableResolver {
 
     @Override
     ProcessBuilder executeDotNet(File exe) {
-        return new ProcessBuilder("mono", exe.toString())
+        return new ProcessBuilder('mono', exe.toString())
+    }
+
+    @Override
+    ProcessBuilder executeDotNetApp(File exe) {
+        return new ProcessBuilder('dotnet', exe.toString())
     }
 
     void setupExecutable(Msbuild msbuild) {
@@ -25,7 +29,7 @@ class PosixMsbuildResolver implements IExecutableResolver {
         }
     }
 
-    public static List<String[]> locateMsBuilds() {
+    static List<String[]> locateMsBuilds() {
 
         List<String> msbuildRoots = [XbuildResolver.getMonoBinaryRootDirectory()] + XbuildResolver.getOSXMonoRootDirectories()
 
@@ -41,9 +45,9 @@ class PosixMsbuildResolver implements IExecutableResolver {
         return existingMsBuilds
     }
 
-    public static String[] locateMsBuild(String version = null) {
+    static String[] locateMsBuild(String version = null) {
         def msbuilds = locateMsBuilds()
-        String[] msbuild = null
+        String[] msbuild
         if(version == null) {
             msbuild = msbuilds.first()
         }
@@ -54,7 +58,7 @@ class PosixMsbuildResolver implements IExecutableResolver {
         return msbuild
     }
 
-    public static String getMsBuildDir(String[] msbuild) {
+    static String getMsBuildDir(String[] msbuild) {
         return new File(msbuild.first()).getParent()
     }
 }
