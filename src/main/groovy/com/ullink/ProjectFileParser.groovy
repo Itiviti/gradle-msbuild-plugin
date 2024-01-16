@@ -52,7 +52,7 @@ class ProjectFileParser {
         renameExtension(target, OperatingSystem.current().windows ? '.pdb' : '.mdb')
     }
 
-     FileCollection getDotnetArtifacts() {
+    FileCollection getDotnetArtifacts() {
         project.files({
             def ret = [dotnetAssemblyFile]
             if (dotnetDebugFile?.exists()) ret += dotnetDebugFile

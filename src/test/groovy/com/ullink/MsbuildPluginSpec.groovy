@@ -25,7 +25,7 @@ class MsbuildPluginSpec extends Specification {
         xml.Project(ToolsVersion:"4.0", DefaultTargets:"Test", xmlns:"http://schemas.microsoft.com/developer/msbuild/2003") {
           Target(Name:'Test')
         }
-        File file = File.createTempFile("temp",".scrap");
+        File file = File.createTempFile("temp",".scrap")
         file.with {
             deleteOnExit()
             write writer.toString()

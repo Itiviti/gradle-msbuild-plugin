@@ -112,7 +112,7 @@ class Msbuild extends ConventionTask {
         }
     }
 
-    ProcessBuilder executeDotNetApp(File dll) {
+    static ProcessBuilder executeDotNetApp(File dll) {
         return new ProcessBuilder('dotnet', dll.toString())
     }
 
@@ -142,37 +142,20 @@ class Msbuild extends ConventionTask {
         }
 
         def parserDll = new File(tempDir, 'ProjectFileParser.dll')
-        def builder = executeDotNetApp(parserDll)
-        builder.command().add(file.toString())
-        def proc = builder.start()
-
-        def stderrBuffer = new StringBuffer()
-        proc.consumeProcessErrorStream(stderrBuffer)
-        def stdoutBuffer = new StringBuffer()
-        proc.consumeProcessErrorStream(stdoutBuffer)
-
-        try {
-            def initPropertiesJson = JsonOutput.toJson(getInitProperties())
-            logger.debug "Sending ${initPropertiesJson} to ProjectFileParser"
-            proc.out.leftShift(initPropertiesJson).close()
-            return new JsonSlurper().parseText(new FilterJson(proc.in).toString())
+        def parseOutputStream = new ByteArrayOutputStream()
+        def errorOutputStream = new ByteArrayOutputStream()
+        def parser = project.exec { exec ->
+            exec.commandLine('dotnet', parserDll)
+            exec.args(file.toString(), JsonOutput.toJson(getInitProperties()).replace('"', '\''))
+            exec.standardOutput = parseOutputStream
+            exec.errorOutput = errorOutputStream
         }
-        finally {
-            def hasErrors = proc.waitFor() != 0
-            logger.info "Output from ProjectFileParser: "
-            stdoutBuffer.eachLine { line ->
-                 logger.info line
-            }
-            stderrBuffer.eachLine { line ->
-                if (hasErrors)
-                    logger.error line
-                else
-                    logger.info line
-            }
-            if (hasErrors) {
-                throw new GradleException('Project file parsing failed')
-            }
+        if (parser.exitValue != 0) {
+            throw new GradleException("Failed to parse project, output: ${parseOutputStream}, error: ${errorOutputStream}")
         }
+
+        def processOutput = parseOutputStream.toString()
+        return new JsonSlurper().parseText(processOutput.substring(processOutput.indexOf('{')))
     }
 
     boolean resolveProject() {
