@@ -1,5 +1,17 @@
 # gradle-msbuild-plugin changelog
 
+# 4.3
+### Fixed
+* Errors stemming from MSBuild project files parsing are now properly shown in the log
+
+# 4.2
+### Fixed
+* Fix the MSBuild project files parsing
+
+# 4.1
+### Fixed
+* The plugin can be used on Linux again
+
 # 4.0
 ### Changed
 * `ProjectFileParser` is migrated to `net6`
