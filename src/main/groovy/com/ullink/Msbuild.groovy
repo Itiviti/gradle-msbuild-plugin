@@ -149,6 +149,8 @@ class Msbuild extends ConventionTask {
             exec.args(file.toString(), JsonOutput.toJson(getInitProperties()).replace('"', '\''))
             exec.standardOutput = parseOutputStream
             exec.errorOutput = errorOutputStream
+            // We want to be able to print the details of what actually failed, otherwise we won't have this info
+            exec.ignoreExitValue = true
         }
         if (parser.exitValue != 0) {
             throw new GradleException("Failed to parse project, output: ${parseOutputStream}, error: ${errorOutputStream}")
