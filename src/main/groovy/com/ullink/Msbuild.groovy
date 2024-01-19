@@ -112,10 +112,6 @@ class Msbuild extends ConventionTask {
         }
     }
 
-    static ProcessBuilder executeDotNetApp(File dll) {
-        return new ProcessBuilder('dotnet', dll.toString())
-    }
-
     def parseProjectFile(def file) {
         logger.info "Parsing file $file ..."
         if (!file.exists()) {
