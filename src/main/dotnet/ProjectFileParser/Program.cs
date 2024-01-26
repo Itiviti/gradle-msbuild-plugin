@@ -13,7 +13,6 @@ namespace ProjectFileParser
             MSBuildCustomLocator.Register();
             try
             {
-                var customPropertiesText = Console.In.ReadToEnd();
                 var parseArgs = JsonSerializer.Deserialize<Dictionary<string, string>>(args.Length >= 2 ? args[1].Replace('\'', '"') : "{}");
                 var result = Parse(args[0], parseArgs);
                 Console.WriteLine(result);

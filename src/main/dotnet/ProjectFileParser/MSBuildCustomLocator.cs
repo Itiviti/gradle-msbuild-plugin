@@ -1,7 +1,6 @@
 ﻿using Microsoft.Build.Locator;
 using System;
 using System.Linq;
-using System.Reflection;
 
 namespace ProjectFileParser
 {
@@ -18,7 +17,7 @@ namespace ProjectFileParser
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine("MSBuildLocator cannot detect VS location, falling back to GAC registered MSBuild dlls");
+                Console.Error.WriteLine("MSBuildLocator cannot detect VS location");
                 Console.Error.WriteLine("Error was: {0}", ex);
             }
         }

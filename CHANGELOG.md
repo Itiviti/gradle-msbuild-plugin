@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+# 4.4
+### Fixed
+* Enable to parse project file using dotnet SDK 7+ 
+
 # 4.3
 ### Fixed
 * Errors stemming from MSBuild project files parsing are now properly shown in the log
