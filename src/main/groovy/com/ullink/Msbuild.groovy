@@ -141,7 +141,7 @@ class Msbuild extends ConventionTask {
         def parseOutputStream = new ByteArrayOutputStream()
         def errorOutputStream = new ByteArrayOutputStream()
         def parser = project.exec { exec ->
-            exec.commandLine('dotnet', ' --roll-forward', 'Major', parserDll)
+            exec.commandLine('dotnet', '--roll-forward', 'Major', parserDll)
             exec.args(file.toString(), JsonOutput.toJson(getInitProperties()).replace('"', '\''))
             exec.standardOutput = parseOutputStream
             exec.errorOutput = errorOutputStream
