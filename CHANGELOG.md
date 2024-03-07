@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+# 4.6
+### Fixed
+* avoid having afterEvaluate in task AssemblyInfoPatcher
+
 # 4.4
 ### Fixed
 * Enable to parse project file using dotnet SDK 7+ 

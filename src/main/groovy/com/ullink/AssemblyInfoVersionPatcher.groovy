@@ -44,31 +44,19 @@ class AssemblyInfoVersionPatcher extends DefaultTask {
         informationalVersion = project.getObjects().property(String)
         fileVersion.set(project.provider ({ version }))
         informationalVersion.set(project.provider ({ version }))
-
-        project.afterEvaluate {
-            if (!version) return
-            project.tasks.withType(Msbuild) { Msbuild task ->
-                for (def proj in task.projects.collect { e -> e.value }) {
-                    def parsedFiles = files.get()
-
-                    if (proj.getItems('Compile')?.intersect(parsedFiles)) {
-                        project.logger.info("Found matching AssemblyInfo file, Task[${task.name}] will depend on Task[${this.name}]")
-                        task.dependsOn this
-                        return
-                    }
-
-                    if (proj.properties.MSBuildProjectFullPath && parsedFiles.contains(project.file(proj.properties.MSBuildProjectFullPath))) {
-                        project.logger.info("Found matching project file, Task[${task.name}] will depend on Task[${this.name}]")
-                        task.dependsOn this
-                        return
-                    }
-                }
-            }
-        }
+        enabled = false
     }
 
+    private String versionValue
     @Input
-    String version
+    String getVersion() {
+        return versionValue
+    }
+
+    void setVersion(String version) {
+        versionValue = version
+        enabled = version != null
+    }
 
     @Input
     final Property<String> fileVersion
