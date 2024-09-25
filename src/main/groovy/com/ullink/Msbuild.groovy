@@ -149,7 +149,7 @@ class Msbuild extends ConventionTask {
             exec.ignoreExitValue = true
         }
         if (parser.exitValue != 0) {
-            throw new GradleException("Failed to parse project, output: ${parseOutputStream}, error: ${errorOutputStream}")
+            throw new GradleException("Failed to parse project, exit code: ${parser.exitValue}, output: '${parseOutputStream},' error: '${errorOutputStream}'")
         }
 
         def processOutput = parseOutputStream.toString()
