@@ -1,5 +1,9 @@
 # gradle-msbuild-plugin changelog
 
+# 4.7
+### Improved
+* Print exit code when project parsing fails
+
 # 4.6
 ### Fixed
 * avoid having afterEvaluate in task AssemblyInfoPatcher
