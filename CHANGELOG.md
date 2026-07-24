@@ -1,7 +1,11 @@
 # gradle-msbuild-plugin changelog
 
+# 5.0
+### Added
+* Add support for building multi targeted projects
+
 # 4.7
-### Improved
+### Changed
 * Print exit code when project parsing fails
 
 # 4.6

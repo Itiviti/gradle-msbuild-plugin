@@ -44,24 +44,56 @@ class ProjectFileParser {
     }
 
     File getDotnetAssemblyFile() {
-        project.file(properties.TargetPath)
+        if (properties.TargetPath) project.file(properties.TargetPath) else null
     }
 
     File getDotnetDebugFile() {
-        File target = project.file(properties.TargetPath)
+        File target = getDotnetAssemblyFile()
+        if (target == null) return null
         renameExtension(target, OperatingSystem.current().windows ? '.pdb' : '.mdb')
     }
 
     FileCollection getDotnetArtifacts() {
         project.files({
-            def ret = [dotnetAssemblyFile]
-            if (dotnetDebugFile?.exists()) ret += dotnetDebugFile
-            File doc = getProjectPropertyPath('DocumentationFile')
-            if (doc?.exists()) ret += doc
-            ret
+            def assembly = dotnetAssemblyFile
+            if (assembly) {
+                // Single-TFM: TargetPath was set — use it directly.
+                def ret = [assembly]
+                if (dotnetDebugFile?.exists()) ret += dotnetDebugFile
+                File doc = getProjectPropertyPath('DocumentationFile')
+                if (doc?.exists()) ret += doc
+                return ret
+            }
+            // Multi-TFM outer build: TargetPath absent. Collect per-TFM outputs.
+            return dotnetArtifactsForAllTfms
         }) {
             builtBy msbuild
         }
+    }
+
+    /**
+     * For multi-targeted projects the outer MSBuild build has no single TargetPath.
+     * Fall back to the standard AppendTargetFrameworkToOutputPath=true layout:
+     *   {OutDir}/{tfm}/{AssemblyName}.dll (+ .pdb/.mdb)
+     * Returns empty when OutDir/AssemblyName cannot be determined (e.g. projects that
+     * use fully TFM-conditioned OutputPath blocks with no unconditional OutDir).
+     */
+    List<File> getDotnetArtifactsForAllTfms() {
+        def assemblyName    = properties.AssemblyName?.toString()
+        def targetFrameworks = properties.TargetFrameworks?.toString()
+        if (!assemblyName || !targetFrameworks) return []
+        def outDir = (properties.OutDir ?: properties.OutputPath)?.toString()
+        if (!outDir) return []
+        def debugExt = OperatingSystem.current().windows ? '.pdb' : '.mdb'
+        def ret = []
+        targetFrameworks.split(';').collect { it.trim() }.findAll { it }.each { tfm ->
+            def tfmDir = new File(findProjectFile(outDir), tfm)
+            def dll = new File(tfmDir, "${assemblyName}.dll")
+            def dbg = new File(tfmDir, "${assemblyName}${debugExt}")
+            if (dll.exists()) ret << dll
+            if (dbg.exists()) ret << dbg
+        }
+        ret
     }
 
     File findProjectFile(String str) {
